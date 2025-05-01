@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Projects Showcase</title>
+<style>
+  /* Reset and base styles */
+  body, html {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+  }
+  h1 {
+    text-align: center;
+    margin: 2rem 0 3rem 0;
+    font-weight: 700;
+    font-size: 3rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .projects-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto 4rem auto;
+    padding: 0 1rem;
+  }
+  .project-card {
+    background: #eee;
+    border: 2px solid #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.5s ease;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+  }
+  .project-card:hover {
+    transform: scale(1.05) rotateY(10deg);
+    box-shadow: 0 0 30px #000;
+  }
+  .project-image-container {
+    flex: 3;
+    overflow: hidden;
+  }
+  .project-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 0.5s ease;
+  }
+  .project-card:hover .project-image {
+    filter: grayscale(0%);
+  }
+  .project-info {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .project-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.05em;
+  }
+  /* Fade in animation for cards */
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes gradientAnimation {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  .project-card {
+    animation: fadeInUp 0.8s ease forwards;
+  }
+  /* Stagger animation delay for each card */
+  .project-card:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .project-card:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  .project-card:nth-child(3) {
+    animation-delay: 0.5s;
+  }
+  .project-card:nth-child(4) {
+    animation-delay: 0.7s;
+  }
+  .project-card:nth-child(5) {
+    animation-delay: 0.9s;
+  }
+  .projects-container > a:first-child {
+    text-decoration: none;
+  }
+  .projects-container > a:nth-child(2) {
+    text-decoration: none;
+  }
+  /* Animated projects header */
+  .animated-projects-header {
+    text-align: center;
+    font-size: 2.5rem;
+    margin: 2rem 0 1rem 0;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: linear-gradient(270deg, #6a11cb, #2575fc, #4dabf7, #7ec8f7, #a6d8ff);
+    background-size: 1000% 1000%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientAnimation 8s ease infinite, slideInFade 1.5s ease forwards;
+  }
+  /* Animated more projects text */
+  .animated-more-projects {
+    text-align: center;
+    font-size: 1.8rem;
+    margin: 2rem 0 2rem 0;
+    font-weight: 600;
+    color: #555;
+    opacity: 0;
+    animation: slideUpFadeIn 2s ease forwards 0.5s;
+  }
+  @keyframes slideInFade {
+    0% {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes slideUpFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+</head>
+<body>
+  
+  <header class="hero-section">
+    <h1 class="big-header">Welcome to ARANAG</h1>
+    <p class="hero-description">Discover a curated showcase of innovative projects blending creativity and technology. Dive in to explore, learn, and get inspired!</p>
+    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Creative workspace" class="hero-image" />
+  </header>
+  <h2 class="animated-projects-header">projects</h2>
+  <section class="projects-container">
+    <a href="nct.html"><div class="project-card">
+      <div class="project-image-container">
+        <img src="nct.png" alt="Project 1" class="project-image" />
+      </div>
+      <div class="project-info">
+        <h2 class="project-title">Project One : NCT</h2>
+        <p class="project-description">A number convirsion app built using html</p>
+      </div>
+    </div></a>
+    <a href="oneall.html"><div class="project-card">
+      <div class="project-image-container">
+        <img src="one all.png" alt="Project 2" class="project-image" />
+      </div>
+      <div class="project-info">
+        <h2 class="project-title">Project Two : One ALL</h2>
+        <p class="project-description">A python project to practice all</p>
+      </div>
+    </div></a>
+  </section>
+  <h2 class="animated-more-projects">More projects coming soon.</h2>
+  <script>
+    (function() {
+      const menuButton = document.getElementById('menu-button');
+      const sideMenu = document.getElementById('side-menu');
+
+      function toggleMenu() {
+        const isOpen = sideMenu.classList.toggle('open');
+        menuButton.setAttribute('aria-expanded', isOpen);
+        menuButton.classList.toggle('open', isOpen);
+        if (isOpen) {
+          menuButton.setAttribute('aria-label', 'Close menu');
+        } else {
+          menuButton.setAttribute('aria-label', 'Open menu');
+        }
+      }
+
+      function closeMenu() {
+        if (sideMenu.classList.contains('open')) {
+          sideMenu.classList.remove('open');
+          menuButton.setAttribute('aria-expanded', false);
+          menuButton.classList.remove('open');
+        }
+      }
+
+      menuButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!sideMenu.contains(e.target) && e.target !== menuButton) {
+          closeMenu();
+        }
+      });
+
+      // Optional: Close menu on focus loss (tabbing away)
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          // Delay to allow focus to change
+          setTimeout(() => {
+            if (!sideMenu.contains(document.activeElement) && document.activeElement !== menuButton) {
+              closeMenu();
+            }
+          }, 10);
+        }
+      });
+    })();
+  </script>
+  <style>
+    .hero-section {
+      max-width: 900px;
+      margin: 2rem auto 4rem auto;
+      padding: 1rem;
+      text-align: center;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(101, 41, 255, 0.4);
+      animation: fadeInDown 1s ease forwards;
+    }
+    .hero-description {
+      font-size: 1.2rem;
+      margin: 1rem 0 2rem 0;
+      line-height: 1.5;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 1.2s ease forwards;
+    }
+    .hero-image {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(101, 41, 255, 0.4);
+      animation: fadeInUp 1.4s ease forwards;
+    }
+    .project-description {
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      color: #333;
+      animation: fadeInUp 1.6s ease forwards;
+    }
+  /* Project cards base style */
+  .project-card {
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+  .project-card:hover {
+    box-shadow: none;
+    background: linear-gradient(270deg, #6a11cb, #2575fc, #4dabf7, #7ec8f7, #a6d8ff);
+    background-size: 1000% 1000%;
+    animation: gradientAnimation 8s ease infinite;
+    color: #000;
+    transform: scale(1.05) rotateY(10deg);
+    transition: background 0.5s ease, transform 0.5s ease;
+  }
+  .project-image-container {
+    flex: 3;
+    overflow: hidden;
+    position: relative;
+  }
+  .project-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease, filter 0.4s ease;
+    filter: brightness(100%);
+  }
+  .project-card:hover .project-image {
+    transform: scale(1.05);
+    filter: brightness(90%);
+  }
+  .project-info {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: color 0.3s ease;
+  }
+  .project-card:hover .project-info {
+    color: #000;
+  }
+  .project-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.05em;
+  }
+  .project-description {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    color: #555;
+  }
+  /* Fade in animation for cards */
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .project-card {
+    animation: fadeInUp 0.8s ease forwards;
+  }
+  /* Stagger animation delay for each card */
+  .project-card:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .project-card:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  .project-card:nth-child(3) {
+    animation-delay: 0.5s;
+  }
+  .project-card:nth-child(4) {
+    animation-delay: 0.7s;
+  }
+  .project-card:nth-child(5) {
+    animation-delay: 0.9s;
+  }
+    /* Responsive for mobile */
+    @media (max-width: 600px) {
+      .projects-container {
+        grid-template-columns: 1fr !important;
+        padding: 0 0.5rem;
+      }
+      .project-card {
+        height: auto;
+        flex-direction: row;
+        max-height: 180px;
+      }
+      .project-image-container {
+        flex: 1;
+        max-width: 40%;
+      }
+      .project-image {
+        height: 100%;
+      }
+      .project-info {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        text-align: left;
+        justify-content: center;
+      }
+      #menu-button {
+        width: 45px;
+        height: 35px;
+      }
+      #side-menu {
+        width: 200px;
+        padding: 1rem;
+      }
+    }
+    /* Animations */
+    @keyframes fadeInDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+  </style>
+</body>
+</html>
