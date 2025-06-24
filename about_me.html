@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NCT - Number Converter Tool</title>
+    <title>About Me</title>
     <style>
         /* Reset some default styles */
         * {
@@ -36,12 +36,13 @@
             animation: fadeInDown 1s ease forwards;
         }
 
-        header img {
+        header img.profile-pic {
             width: 150px;
-            height: auto;
-            border-radius: 15px;
+            height: 150px;
+            border-radius: 50%;
             box-shadow: 0 0 15px rgba(255,255,255,0.6);
             animation: float 3s ease-in-out infinite;
+            object-fit: cover;
         }
 
         h1 {
@@ -60,6 +61,7 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             animation: fadeInUp 1s ease forwards;
+            text-align: center;
         }
 
         main p {
@@ -69,39 +71,22 @@
             color: #e0e0e0;
         }
 
-        main a {
-            display: inline-block;
-            background: #ff6f61;
+        .social-icons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .social-icons a {
             color: white;
-            padding: 12px 25px;
-            border-radius: 30px;
             text-decoration: none;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(255, 111, 97, 0.6);
-            transition: background 0.3s ease, box-shadow 0.3s ease;
+            font-size: 2rem;
+            transition: color 0.3s ease;
         }
 
-        main a:hover {
-            background: #ff3b2e;
-            box-shadow: 0 6px 20px rgba(255, 59, 46, 0.8);
-        }
-
-        .download-section {
-            text-align: center;
-            margin-top: 30px;
-            animation: fadeIn 2s ease forwards;
-        }
-
-        .download-section img {
-            width: 120px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(255,255,255,0.6);
-        }
-
-        .download-section img:hover {
-            transform: scale(1.1) rotate(5deg);
+        .social-icons a:hover {
+            color: #ff6f61;
         }
 
         /* Animations */
@@ -136,23 +121,15 @@
             }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
         /* Responsive for mobile */
         @media (max-width: 600px) {
             body {
                 padding: 15px 10px;
             }
 
-            header img {
+            header img.profile-pic {
                 width: 120px;
+                height: 120px;
             }
 
             h1 {
@@ -168,24 +145,36 @@
                 font-size: 1rem;
             }
 
-            .download-section img {
-                width: 100px;
+            .social-icons a {
+                font-size: 1.5rem;
             }
         }
+        .social-icons a:nth-child(4) {
+            margin-right: 6px;
+        }
     </style>
+    <!-- Font Awesome CDN for social icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
     <header>
-        <img src="https://i.ibb.co/SwszYJTD/one-all.png" alt="NCT Logo" />
-        <h1>One ALL</h1>
+        <img class="profile-pic" src="https://i.ibb.co/FbHLBk0P/Whats-App-Image-2025-05-02-at-8-33-16-PM.jpg" alt="My Picture" />
+        <h1>About Me</h1>
     </header>
     <main>
-        <p>This is a python program with some beginner level code.</p>
-        <center><a href="https://github.com/notamitgamer/oneall/releases/download/All_ONE_1/allone1.py" target="_blank" rel="noopener noreferrer">Check out the code here</a></center>
-        <div class="download-section">
-            <p>Or Download for Windows</p>
-            <a href="https://github.com/notamitgamer/oneall/releases/download/All_ONE_1/One.ALL.exe" target="_blank" rel="noopener noreferrer">
-                <img src="https://i.ibb.co/27N9yv0b/dowlo.png" alt="Download NCT APK" />
+        <p>Hello there, This is Amit <br>
+        I am a student of <strong>New Barrackpore Colony Boys High School</strong><br>You want to know <strong>MORE</strong> ???<br><strong>Contact me :</strong></p>
+        <div class="social-icons">
+            <a href="tel:+917278779512" target="_blank" aria-label="Phone"><i class="fa-solid fa-phone"></i></a>
+            <a href="mailto:amitdutta4255@gmail.com" target="_blank" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
+            <a href="https://github.com/notamitgamer" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://www.instagram.com/notamitgamerz/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/917278779512?text=url" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/notamitgamer/" target="_blank" aria-label="X"><i class="fab fa-facebook"></i></a>
+            <a href="https://x.com/notamitgamer" target="_blank" aria-label="Twitter">
+                <svg width="27" height="23" viewBox="0 0 300 300" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M178.57 127.15 290.27 0h-26.46l-97.03 110.38L89.34 0H0l117.13 166.93L0 300.25h26.46l102.4-116.59 81.8 116.59h89.34M36.01 19.54H76.66l187.13 262.13h-40.66" fill="white"/>
+                </svg>
             </a>
         </div>
     </main>

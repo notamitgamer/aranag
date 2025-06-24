@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NCT - Number Converter Tool</title>
+    <title>Support - NCT</title>
     <style>
         /* Reset some default styles */
         * {
@@ -60,48 +60,33 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             animation: fadeInUp 1s ease forwards;
+            text-align: center;
         }
 
         main p {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             color: #e0e0e0;
         }
 
-        main a {
+        main a.button {
             display: inline-block;
             background: #ff6f61;
             color: white;
-            padding: 12px 25px;
+            padding: 15px 35px;
+            margin: 10px 15px;
             border-radius: 30px;
             text-decoration: none;
             font-weight: 600;
             box-shadow: 0 4px 15px rgba(255, 111, 97, 0.6);
             transition: background 0.3s ease, box-shadow 0.3s ease;
+            font-size: 1.1rem;
         }
 
-        main a:hover {
+        main a.button:hover {
             background: #ff3b2e;
             box-shadow: 0 6px 20px rgba(255, 59, 46, 0.8);
-        }
-
-        .download-section {
-            text-align: center;
-            margin-top: 30px;
-            animation: fadeIn 2s ease forwards;
-        }
-
-        .download-section img {
-            width: 120px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(255,255,255,0.6);
-        }
-
-        .download-section img:hover {
-            transform: scale(1.1) rotate(5deg);
         }
 
         /* Animations */
@@ -136,15 +121,6 @@
             }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
         /* Responsive for mobile */
         @media (max-width: 600px) {
             body {
@@ -168,26 +144,23 @@
                 font-size: 1rem;
             }
 
-            .download-section img {
-                width: 100px;
+            main a.button {
+                padding: 12px 25px;
+                font-size: 1rem;
+                margin: 10px 10px;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <img src="https://i.ibb.co/SwszYJTD/one-all.png" alt="NCT Logo" />
-        <h1>One ALL</h1>
+        <img src="https://i.ibb.co/WvyXjVMm/logo-ar.png" alt="NCT Logo" />
+        <h1>Support ARANAG</h1>
     </header>
     <main>
-        <p>This is a python program with some beginner level code.</p>
-        <center><a href="https://github.com/notamitgamer/oneall/releases/download/All_ONE_1/allone1.py" target="_blank" rel="noopener noreferrer">Check out the code here</a></center>
-        <div class="download-section">
-            <p>Or Download for Windows</p>
-            <a href="https://github.com/notamitgamer/oneall/releases/download/All_ONE_1/One.ALL.exe" target="_blank" rel="noopener noreferrer">
-                <img src="https://i.ibb.co/27N9yv0b/dowlo.png" alt="Download NCT APK" />
-            </a>
-        </div>
+        <p>Your support helps us keep improving and maintaining this site. If you find it useful, please consider contributing a small amount. Thank you!</p>
+        <a class="button" href="upi://pay?pn=Mr%20Amit%20Dutta&am=10&mode=01&pa=amit.9512-10@waicici" target="_blank" rel="noopener noreferrer">Pay via UPI App</a>
+        <a class="button" href="https://rzp.io/rzp/BEGgK4J" target="_blank" rel="noopener noreferrer">Pay via Web</a>
     </main>
 </body>
 </html>

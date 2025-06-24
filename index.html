@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>My Projects Showcase</title>
+<title>ARANAG</title>
 <style>
   /* Reset and base styles */
   body, html {
@@ -170,8 +170,24 @@
 </style>
 </head>
 <body>
-  
+  <!-- Hamburger Menu Button -->
+  <button id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="side-menu" style="position: fixed; top: 1rem; right: 1rem; z-index: 1001; background: transparent; border: none; cursor: pointer; user-select: none; width: 30px; height: 24px; display: flex; flex-direction: column; justify-content: space-between; padding: 0;">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </button>
+
+  <!-- Side Menu -->
+  <nav id="side-menu" aria-hidden="true" class="side-menu">
+    <a href="about_me.html" class="menu-item">About Me</a>
+    <a href="support.html" class="menu-item">Support</a>
+  </nav>
+
+  <!-- Overlay -->
+  <div id="menu-overlay" class="menu-overlay"></div>
+
   <header class="hero-section">
+    <img src="https://i.ibb.co/WvyXjVMm/logo-ar.png" alt="logo-ar" border="0">
     <h1 class="big-header">Welcome to ARANAG</h1>
     <p class="hero-description">Discover a curated showcase of innovative projects blending creativity and technology. Dive in to explore, learn, and get inspired!</p>
     <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Creative workspace" class="hero-image" />
@@ -180,7 +196,7 @@
   <section class="projects-container">
     <a href="nct.html"><div class="project-card">
       <div class="project-image-container">
-        <img src="nct.png" alt="Project 1" class="project-image" />
+        <img src="https://i.ibb.co/0pJZt0PW/nct.png" alt="Project 1" class="project-image" />
       </div>
       <div class="project-info">
         <h2 class="project-title">Project One : NCT</h2>
@@ -189,7 +205,7 @@
     </div></a>
     <a href="oneall.html"><div class="project-card">
       <div class="project-image-container">
-        <img src="one all.png" alt="Project 2" class="project-image" />
+        <img src="https://i.ibb.co/SwszYJTD/one-all.png" alt="Project 2" class="project-image" />
       </div>
       <div class="project-info">
         <h2 class="project-title">Project Two : One ALL</h2>
@@ -202,29 +218,40 @@
     (function() {
       const menuButton = document.getElementById('menu-button');
       const sideMenu = document.getElementById('side-menu');
+      const menuOverlay = document.getElementById('menu-overlay');
 
       function toggleMenu() {
         const isOpen = sideMenu.classList.toggle('open');
+        menuOverlay.classList.toggle('open', isOpen);
         menuButton.setAttribute('aria-expanded', isOpen);
         menuButton.classList.toggle('open', isOpen);
         if (isOpen) {
           menuButton.setAttribute('aria-label', 'Close menu');
+          sideMenu.setAttribute('aria-hidden', 'false');
         } else {
           menuButton.setAttribute('aria-label', 'Open menu');
+          sideMenu.setAttribute('aria-hidden', 'true');
         }
       }
 
       function closeMenu() {
         if (sideMenu.classList.contains('open')) {
           sideMenu.classList.remove('open');
+          menuOverlay.classList.remove('open');
           menuButton.setAttribute('aria-expanded', false);
           menuButton.classList.remove('open');
+          menuButton.setAttribute('aria-label', 'Open menu');
+          sideMenu.setAttribute('aria-hidden', 'true');
         }
       }
 
       menuButton.addEventListener('click', function(e) {
         e.stopPropagation();
         toggleMenu();
+      });
+
+      menuOverlay.addEventListener('click', function() {
+        closeMenu();
       });
 
       // Close menu when clicking outside
@@ -437,6 +464,89 @@
         background-position: 0% 50%;
       }
     }
+  /* Side menu styles */
+  .side-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 250px;
+    background: white;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .side-menu.open {
+    transform: translateX(0);
+  }
+  .menu-item {
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #000;
+  }
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+  }
+  .menu-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Hamburger bars */
+  #menu-button .bar {
+    display: block;
+    width: 30px;
+    height: 4px;
+    background-color: #000;
+    border-radius: 2px;
+    transition: all 0.4s ease;
+    transform-origin: 4px 2px;
+  }
+  #menu-button .bar:not(:last-child) {
+    margin-bottom: 6px;
+  }
+  /* Animate to cross when open */
+  #menu-button.open .bar:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+    background-color: #6a11cb;
+  }
+  #menu-button.open .bar:nth-child(2) {
+    opacity: 0;
+  }
+  #menu-button.open .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+    background-color: #6a11cb;
+  }
+  /* Colorful code theme for side menu */
+  .side-menu {
+    background: linear-gradient(135deg, #282c34, #3c4048);
+    color: #abb2bf;
+    font-family: 'Fira Code', monospace, monospace;
+  }
+  .side-menu.open {
+    box-shadow: -4px 0 12px rgba(106, 17, 203, 0.7);
+  }
+  .menu-item {
+    color: #61dafb;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .menu-item:hover {
+    background-color: #61dafb;
+    color: #282c34;
+  }
   </style>
-</body>
-</html>
