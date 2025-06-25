@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href="https://aranag.site/support" />
+    <title>Support - NCT</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            animation: backgroundShift 15s ease infinite;
+        }
+
+        @keyframes backgroundShift {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease forwards;
+        }
+
+        header img {
+            width: 150px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.6);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-top: 15px;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        }
+
+        main {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            animation: fadeInUp 1s ease forwards;
+            text-align: center;
+        }
+
+        main p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #e0e0e0;
+        }
+
+        main a.button {
+            display: inline-block;
+            background: #ff6f61;
+            color: white;
+            padding: 15px 35px;
+            margin: 10px 15px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 111, 97, 0.6);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        main a.button:hover {
+            background: #ff3b2e;
+            box-shadow: 0 6px 20px rgba(255, 59, 46, 0.8);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive for mobile */
+        @media (max-width: 600px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            header img {
+                width: 120px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            main {
+                padding: 15px 20px;
+                max-width: 100%;
+            }
+
+            main p {
+                font-size: 1rem;
+            }
+
+            main a.button {
+                padding: 12px 25px;
+                font-size: 1rem;
+                margin: 10px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://aranag.site/log_fullre.png" alt="NCT Logo" />
+        <h1>Support ARANAG</h1>
+    </header>
+    <main>
+        <p>Your support helps us keep improving and maintaining this site. If you find it useful, please consider contributing a small amount. Thank you!</p>
+        <a class="button" href="upi://pay?pn=Mr%20Amit%20Dutta&am=10&mode=01&pa=amit.9512-10@waicici" target="_blank" rel="noopener noreferrer">Pay via UPI App</a>
+        <a class="button" href="https://rzp.io/rzp/BEGgK4J" target="_blank" rel="noopener noreferrer">Pay via Web</a>
+    </main>
+</body>
+</html>
