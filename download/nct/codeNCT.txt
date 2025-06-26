@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversion Tool</title>
+    <style>
+        /* Full-screen popup overlay styling */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup-box {
+            text-align: center;
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-box h2 {
+            margin-bottom: 15px;
+        }
+
+        .popup-box button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .popup-box button:hover {
+            background-color: #0056b3;
+        }
+/* Global reset for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(45deg, #FF416C, #FF4B2B, #4285F4, #34A853, #FBBC05, #FF416C, #FF416C, #FF4B2B, #4285F4, #34A853, #FBBC05, #FF416C);
+    background-size: 300% 300%; /* Larger background to enable smooth transition */
+    animation: gradientAnimation 15s infinite;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    flex-direction: column;
+    padding: 10px;
+}
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+/* Main container */
+.container {
+    background: #fff;
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Header styling */
+h1 {
+    font-size: 2.5em;
+    color: #34495e;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Swiping menu */
+.menu {
+    margin-bottom: 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.menu ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    gap: 10px;
+}
+
+.menu li {
+    font-size: 1.2em;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.menu li:hover {
+    background: linear-gradient(135deg, #1abc9c, #16a085);
+    transform: scale(1.05);
+}
+
+/* Input section */
+.input-section {
+    margin-bottom: 20px;
+}
+
+.input-section label {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    display: block;
+    color: #34495e;
+}
+
+.input-section input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.2em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    transition: box-shadow 0.3s ease;
+}
+
+.input-section input:focus {
+    outline: none;
+    border-color: #1abc9c;
+    box-shadow: 0 4px 8px rgba(26, 188, 156, 0.4);
+}
+
+/* Buttons */
+.actions button {
+    padding: 12px 20px;
+    font-size: 1.2em;
+    background: linear-gradient(135deg, #1abc9c, #16a085);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.actions button:hover {
+    background: linear-gradient(135deg, #16a085, #1abc9c);
+    transform: scale(1.05);
+}
+.support button {
+    padding: 12px 20px;
+    font-size: 1.2em;
+    background: linear-gradient(135deg, #1abc9c, #16a100);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.support button:hover {
+    background: linear-gradient(135deg, #16a100, #1abc9c);
+    transform: scale(1.05);
+}
+
+/* Output sections */
+.output {
+    margin-top: 30px;
+    text-align: left;
+}
+
+.output h3 {
+    font-size: 1.3em;
+    color: #34495e;
+    margin-bottom: 10px;
+}
+
+#stepsOutput {
+    background: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #7f8c8d;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#resultOutput {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #34495e;
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .menu li {
+        padding: 10px;
+        font-size: 1em;
+    }
+
+    .input-section input {
+        padding: 10px;
+    }
+
+    .actions button {
+        padding: 10px 15px;
+        font-size: 1em;
+    }
+
+    .output {
+        font-size: 0.9em;
+    }
+}
+.logo {
+  font-size: 3em;
+font-family: 'Roboto';
+  color: #fff;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.4);
+  margin-bottom: 10px;
+  animation: logoColorChange 3s ease infinite; /* Smooth logo color change */
+}
+
+@keyframes logoColorChange {
+  0% {
+    color: #FF416C;
+  }
+  33% {
+    color: #4285F4;
+  }
+  66% {
+    color: #34A853;
+  }
+  100% {
+    color: #FF416C;
+  }
+}
+#otp-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+}
+#otp-modal div {
+  margin: 10% auto;
+  padding: 20px;
+  background: white;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+
+
+    </style>
+</head>
+<body>
+    <!-- Popup -->
+    <div class="popup-overlay" id="paymentPopup">
+        <div class="popup-box">
+            <h2>Support Us</h2>
+            <p>This app is free to use. Consider supporting us to help improve and maintain it.</p>
+            <button id="payNowButton">Pay Now</button>
+            <button id="loginButton">Continue Without Paying</button>
+	<button id="closePopup">Logged in</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="logo"><u>Number Conversion Tool</u></h1>
+        
+        <div class="menu">
+            <ul id="conversionList">
+                <li data-type="binary-to-decimal">Binary to Decimal</li>
+                <li data-type="decimal-to-binary">Decimal to Binary</li>
+                <li data-type="binary-to-octal">Binary to Octal</li>
+                <li data-type="octal-to-binary">Octal to Binary</li>
+                <li data-type="binary-to-hex">Binary to Hex</li>
+                <li data-type="hex-to-binary">Hex to Binary</li>
+                <li data-type="decimal-to-octal">Decimal to Octal</li>
+                <li data-type="octal-to-decimal">Octal to Decimal</li>
+                <li data-type="decimal-to-hex">Decimal to Hex</li>
+                <li data-type="hex-to-decimal">Hex to Decimal</li>
+                <li data-type="octal-to-hex">Octal to Hex</li>
+                <li data-type="hex-to-octal">Hex to Octal</li>
+            </ul>
+        </div>
+        
+        <div class="input-section">
+            <label for="inputNumber">Enter Number:</label>
+            <input type="text" id="inputNumber" placeholder="Enter number">
+        </div>
+
+        <div class="actions">
+            <button id="convertButton">Convert</button>
+        </div>
+	
+        <div class="output">
+            <h3>Steps:</h3>
+            <pre id="stepsOutput"></pre>
+            <h3>Result:</h3>
+            <p id="resultOutput"></p>
+        </div>
+    </div>
+<br><div class="container" align="center">
+            <p><u>Made by Amit Dutta, NBCBHS (HS : 2024-25)</u></p><br>
+	<div class="support">
+  <button id="payNowButton">Support</button>
+  <span style="margin: 0 5px;">&nbsp;</span> 
+  <a href="https://forms.gle/Y2AWZhQFNVvApxq67"><button>Give Feedback</button></a>
+</div>
+</div>
+
+    <script>
+        // Razorpay payment link
+        const razorpayLink = "https://rzp.io/rzp/MffwgmY";
+	const loginurl="https://script.google.com/macros/s/AKfycbx1vT5unWxdbf_XY7ba7vcWn8T4-U9VPYtw33Vvl2OtH7VkVe1xpuBzRxzHdI_FWnw/exec"; 
+
+        // Get popup elements
+        const paymentPopup = document.getElementById("paymentPopup");
+        const payNowButton = document.getElementById("payNowButton");
+        const closePopup = document.getElementById("closePopup");
+	const loginButton = document.getElementById("loginButton");
+
+        // Redirect to Razorpay payment link
+        payNowButton.addEventListener("click", () => {
+            window.open(razorpayLink, "_blank");
+        });
+
+        // Close the popup
+        closePopup.addEventListener("click", () => {
+            paymentPopup.style.display = "none";
+        });
+	loginButton.addEventListener("click", () => {
+	    window.open(loginurl, "_blank");
+	});
+
+        // Show popup on page load
+        window.onload = () => {
+            paymentPopup.style.display = "flex";
+        };
+    </script>
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    const conversionList = document.getElementById('conversionList');
+    const convertButton = document.getElementById('convertButton');
+    const inputNumber = document.getElementById('inputNumber');
+    const stepsOutput = document.getElementById('stepsOutput');
+    const resultOutput = document.getElementById('resultOutput');
+
+    let selectedConversion = 'binary-to-decimal';
+
+    conversionList.addEventListener('click', (event) => {
+        if (event.target.tagName === 'LI') {
+            selectedConversion = event.target.dataset.type;
+            clearOutput();
+        }
+    });
+
+    convertButton.addEventListener('click', () => {
+        const number = inputNumber.value.trim();
+        if (!number) {
+            alert('Please enter a number!');
+            return;
+        }
+        performConversion(number, selectedConversion);
+    });
+
+    function performConversion(number, conversionType) {
+        stepsOutput.textContent = '';
+        resultOutput.textContent = '';
+
+        try {
+            let result, steps;
+            switch (conversionType) {
+                case 'binary-to-decimal':
+                    ({ result, steps } = binaryToDecimal(number));
+                    break;
+                case 'decimal-to-binary':
+                    ({ result, steps } = decimalToBinary(number));
+                    break;
+                case 'binary-to-octal':
+                    ({ result, steps } = binaryToOctal(number));
+                    break;
+                case 'octal-to-binary':
+                    ({ result, steps } = octalToBinary(number));
+                    break;
+                case 'binary-to-hex':
+                    ({ result, steps } = binaryToHex(number));
+                    break;
+                case 'hex-to-binary':
+                    ({ result, steps } = hexToBinary(number));
+                    break;
+                case 'decimal-to-octal':
+                    ({ result, steps } = decimalToOctal(number));
+                    break;
+                case 'octal-to-decimal':
+                    ({ result, steps } = octalToDecimal(number));
+                    break;
+                case 'decimal-to-hex':
+                    ({ result, steps } = decimalToHex(number));
+                    break;
+                case 'hex-to-decimal':
+                    ({ result, steps } = hexToDecimal(number));
+                    break;
+                case 'octal-to-hex':
+                    ({ result, steps } = octalToHex(number));
+                    break;
+                case 'hex-to-octal':
+                    ({ result, steps } = hexToOctal(number));
+                    break;
+                default:
+                    throw new Error('Conversion type not supported.');
+            }
+
+            stepsOutput.textContent = steps;
+            resultOutput.textContent = `Result: ${result}`;
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    // Utility Functions
+    function binaryToDecimal(binary) {
+        const [integerPart, fractionalPart] = binary.split('.');
+        let result = 0;
+        let steps = [];
+
+        if (integerPart) {
+            integerPart.split('').reverse().forEach((digit, index) => {
+                const value = parseInt(digit, 10) * Math.pow(2, index);
+                steps.push(`${digit} * 2^${index} = ${value}`);
+                result += value;
+            });
+        }
+
+        if (fractionalPart) {
+            fractionalPart.split('').forEach((digit, index) => {
+                const value = parseInt(digit, 10) * Math.pow(2, -(index + 1));
+                steps.push(`${digit} * 2^-${index + 1} = ${value}`);
+                result += value;
+            });
+        }
+
+        return { result: result.toString(), steps: steps.join('\n') };
+    }
+
+    function decimalToBinary(decimal) {
+        const [integerPart, fractionalPart] = decimal.split('.');
+        let integerResult = '';
+        let steps = [];
+        let num = parseInt(integerPart, 10);
+
+        while (num > 0) {
+            const remainder = num % 2;
+            integerResult = remainder + integerResult;
+            steps.push(`${num} / 2 = ${Math.floor(num / 2)}, remainder ${remainder}`);
+            num = Math.floor(num / 2);
+        }
+
+        let fractionalResult = '';
+        if (fractionalPart) {
+            let fracPart = parseFloat('0.' + fractionalPart);
+            for (let i = 0; i < 4 && fracPart !== 0; i++) {
+                fracPart *= 2;
+                const bit = Math.floor(fracPart);
+                fractionalResult += bit.toString();
+                fracPart -= bit;
+                steps.push(`0.${fracPart.toFixed(4)} * 2 -> ${bit}`);
+            }
+        }
+
+        return { result: integerResult + (fractionalResult ? '.' + fractionalResult : ''), steps: steps.join('\n') };
+    }
+
+    function binaryToOctal(binary) {
+        const decimal = binaryToDecimal(binary).result;
+        return decimalToOctal(decimal);
+    }
+
+    function octalToBinary(octal) {
+        const decimal = octalToDecimal(octal).result;
+        return decimalToBinary(decimal);
+    }
+
+    function binaryToHex(binary) {
+        const decimal = binaryToDecimal(binary).result;
+        return decimalToHex(decimal);
+    }
+
+    function hexToBinary(hex) {
+        const decimal = hexToDecimal(hex).result;
+        return decimalToBinary(decimal);
+    }
+
+    function decimalToOctal(decimal) {
+        const [integerPart, fractionalPart] = decimal.split('.');
+        let integerResult = '';
+        let steps = [];
+        let num = parseInt(integerPart, 10);
+
+        while (num > 0) {
+            const remainder = num % 8;
+            integerResult = remainder + integerResult;
+            steps.push(`${num} / 8 = ${Math.floor(num / 8)}, remainder ${remainder}`);
+            num = Math.floor(num / 8);
+        }
+
+        let fractionalResult = '';
+        if (fractionalPart) {
+            let fracPart = parseFloat('0.' + fractionalPart);
+            for (let i = 0; i < 4 && fracPart !== 0; i++) {
+                fracPart *= 8;
+                const digit = Math.floor(fracPart);
+                fractionalResult += digit.toString();
+                fracPart -= digit;
+                steps.push(`0.${fracPart.toFixed(4)} * 8 -> ${digit}`);
+            }
+        }
+
+        return { result: integerResult + (fractionalResult ? '.' + fractionalResult : ''), steps: steps.join('\n') };
+    }
+
+    function octalToDecimal(octal) {
+        const [integerPart, fractionalPart] = octal.split('.');
+        let result = 0;
+        let steps = [];
+
+        if (integerPart) {
+            integerPart.split('').reverse().forEach((digit, index) => {
+                const value = parseInt(digit, 10) * Math.pow(8, index);
+                steps.push(`${digit} * 8^${index} = ${value}`);
+                result += value;
+            });
+        }
+
+        if (fractionalPart) {
+            fractionalPart.split('').forEach((digit, index) => {
+                const value = parseInt(digit, 10) * Math.pow(8, -(index + 1));
+                steps.push(`${digit} * 8^-${index + 1} = ${value}`);
+                result += value;
+            });
+        }
+
+        return { result: result.toString(), steps: steps.join('\n') };
+    }
+
+    function decimalToHex(decimal) {
+        const [integerPart, fractionalPart] = decimal.split('.');
+        let integerResult = '';
+        let steps = [];
+        let num = parseInt(integerPart, 10);
+
+        while (num > 0) {
+            const remainder = num % 16;
+            const hexChar = remainder < 10 ? remainder : String.fromCharCode(remainder + 87);
+            integerResult = hexChar + integerResult;
+            steps.push(`${num} / 16 = ${Math.floor(num / 16)}, remainder ${hexChar}`);
+            num = Math.floor(num / 16);
+        }
+
+        let fractionalResult = '';
+        if (fractionalPart) {
+            let fracPart = parseFloat('0.' + fractionalPart);
+            for (let i = 0; i < 4 && fracPart !== 0; i++) {
+                fracPart *= 16;
+                const digit = Math.floor(fracPart);
+                const hexChar = digit < 10 ? digit : String.fromCharCode(digit + 87);
+                fractionalResult += hexChar;
+                fracPart -= digit;
+                steps.push(`0.${fracPart.toFixed(4)} * 16 -> ${hexChar}`);
+            }
+        }
+
+        return { result: integerResult + (fractionalResult ? '.' + fractionalResult : ''), steps: steps.join('\n') };
+    }
+
+    function hexToDecimal(hex) {
+        const [integerPart, fractionalPart] = hex.split('.');
+        let result = 0;
+        let steps = [];
+
+        if (integerPart) {
+            integerPart.split('').reverse().forEach((digit, index) => {
+                const value = parseInt(digit, 16) * Math.pow(16, index);
+                steps.push(`${digit} * 16^${index} = ${value}`);
+                result += value;
+            });
+        }
+
+        if (fractionalPart) {
+            fractionalPart.split('').forEach((digit, index) => {
+                const value = parseInt(digit, 16) * Math.pow(16, -(index + 1));
+                steps.push(`${digit} * 16^-${index + 1} = ${value}`);
+                result += value;
+            });
+        }
+
+        return { result: result.toString(), steps: steps.join('\n') };
+    }
+
+    function octalToHex(octal) {
+        const decimal = octalToDecimal(octal).result;
+        return decimalToHex(decimal);
+    }
+
+    function hexToOctal(hex) {
+        const decimal = hexToDecimal(hex).result;
+        return decimalToOctal(decimal);
+    }
+
+    function clearOutput() {
+        stepsOutput.textContent = '';
+        resultOutput.textContent = '';
+        inputNumber.value = '';
+    }
+});
+
+</script>
+</body>
+</html>
+
