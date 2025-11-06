@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C Compiler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/x-icon" href="https://compiler.aranag.site/logo.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0f16;
+            color: #c9d1d9;
+            background: radial-gradient(at 50% 120%, rgba(20, 30, 40, 0.5), transparent), #0c0f16;
+        }
+
+        /* Custom Scrollbar Styles for Webkit browsers */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c; /* Dark gray for the track */
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #4a5568; /* A lighter gray for the thumb */
+            border-radius: 10px;
+            border: 3px solid #1a202c; /* Spacing around the thumb */
+        }
+        
+        /* Apply to specific elements for Firefox compatibility */
+        #editor, #output, #input-box {
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 #1a202c;
+        }
+
+        .compiler-container {
+            min-height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 2rem 1rem;
+        }
+
+        .code-editor, .output-container, .input-container {
+            background: rgba(30, 41, 59, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .editor-header, .output-header, .input-header {
+            background-color: rgba(30, 41, 59, 0.6);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #editor {
+            width: 100%;
+            height: 400px;
+            background-color: transparent;
+            color: #c9d1d9;
+            font-family: monospace;
+            padding: 1rem;
+            outline: none;
+            resize: vertical;
+            min-height: 200px;
+        }
+        
+        #output, #input-box {
+            width: 100%;
+            min-height: 150px;
+            background-color: transparent;
+            color: #fff;
+            padding: 1rem;
+            font-family: monospace;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            outline: none;
+            resize: vertical;
+        }
+
+        .action-buttons button {
+            transition: all 0.3s ease;
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+        
+        .action-buttons button:hover {
+            background-color: #2d3748;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-buttons button:active {
+            transform: translateY(0);
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 2rem;
+            color: #fff;
+            z-index: 100;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+        .message-content {
+            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        #ai-response-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Terminal-like output styling */
+        .terminal-output {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 1rem;
+            border-radius: 8px;
+            min-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            position: relative;
+        }
+        .terminal-output.error {
+            color: #ff6347; /* Tomato red for errors */
+        }
+        .terminal-prompt {
+            color: #3cb371; /* Medium sea green */
+            font-weight: bold;
+        }
+        .blinking-cursor {
+            animation: blink-caret .75s step-end infinite;
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: currentColor; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="compiler-container max-w-7xl mx-auto">
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4 sm:mb-0">C Compiler</h1>
+            <nav>
+                <a href="./index.html" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors">
+                    Back to Compilers
+                </a>
+            </nav>
+        </header>
+
+        <!-- Disclaimer Note -->
+        <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 text-yellow-200 text-sm p-4 rounded-xl mb-6">
+            <strong class="font-bold">Important Note:</strong> This compiler uses an AI model, not a traditional C++ compiler. It provides an educated guess of the output. For definitive results, please use a dedicated online compiler like <a href="https://www.programiz.com/cpp-programming/online-compiler/" target="_blank" class="underline hover:text-white transition-colors">Programiz</a>.
+        </div>
+
+        <!-- Code Editor Section -->
+        <div class="code-editor flex-1 flex flex-col">
+            <div class="editor-header">
+                <h2 class="text-lg font-bold">C Code</h2>
+                <div class="action-buttons space-x-2">
+                    <button id="run-btn" class="py-2 px-4 rounded-full">
+                        <i class="fas fa-play mr-2"></i>Run
+                    </button>
+                    <button id="ai-btn" class="py-2 px-4 rounded-full">
+                        <i class="fas fa-magic mr-2"></i>Ask AI
+                    </button>
+                </div>
+            </div>
+            <textarea id="editor" placeholder="Type your C code here..."></textarea>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-container flex-1 flex flex-col mt-4">
+            <div class="input-header">
+                <h2 class="text-lg font-bold">Input</h2>
+            </div>
+            <textarea id="input-box" placeholder="Enter input for your program here..."></textarea>
+        </div>
+
+        <!-- Output Section -->
+        <div class="output-container flex-1 flex flex-col mt-4">
+            <div class="output-header">
+                <h2 class="text-lg font-bold">Output</h2>
+            </div>
+            <pre id="output" class="terminal-output"></pre>
+        </div>
+
+        <!-- AI Assistant Modal -->
+        <div id="ai-modal" class="message-box hidden">
+            <div class="message-content">
+                <h3 class="text-xl font-bold mb-4">AI Code Assistant</h3>
+                <textarea id="ai-prompt" class="w-full h-28 bg-gray-800 text-gray-200 p-4 rounded-xl border border-gray-700 focus:outline-none resize-none" placeholder="Ask a question about your C code..."></textarea>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button id="ai-cancel-btn" class="bg-gray-500 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded-full">Cancel</button>
+                    <button id="ai-submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                        <span id="ai-submit-text">Submit</span>
+                        <div id="ai-loading" class="loading-spinner hidden"></div>
+                    </button>
+                </div>
+                <div id="ai-response-container" class="mt-4 w-full text-left bg-gray-900 p-4 rounded-xl border border-gray-700 hidden">
+                    <pre id="ai-response" class="whitespace-pre-wrap text-sm text-gray-300"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const editor = document.getElementById('editor');
+            const runBtn = document.getElementById('run-btn');
+            const outputEl = document.getElementById('output');
+            const inputEl = document.getElementById('input-box');
+            const aiBtn = document.getElementById('ai-btn');
+            const aiModal = document.getElementById('ai-modal');
+            const aiPrompt = document.getElementById('ai-prompt');
+            const aiSubmitBtn = document.getElementById('ai-submit-btn');
+            const aiCancelBtn = document.getElementById('ai-cancel-btn');
+            const aiSubmitText = document.getElementById('ai-submit-text');
+            const aiLoading = document.getElementById('ai-loading');
+            const aiResponseContainer = document.getElementById('ai-response-container');
+            const aiResponseEl = document.getElementById('ai-response');
+
+            const defaultCode = `#include <stdio.h>
+
+int main() {
+    int number;
+    printf("Enter a number: ");
+    scanf("%d", &number);
+    printf("You entered: %d\\n", number);
+    return 0;
+}`;
+
+            editor.value = defaultCode;
+
+            function showMessage(message, type = 'info') {
+                const messageBox = document.createElement('div');
+                messageBox.className = `message-box ${type} text-white`;
+                messageBox.innerHTML = `
+                    <div class="message-content">
+                        <p class="mb-4">${message}</p>
+                        <button onclick="this.closest('.message-box').remove()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(messageBox);
+            }
+
+            // AI Integration for both compiler and code assistant
+            const apiKey = "AIzaSyAi1FdeIJ4PzihkCrOGztdVHIyJ7xIoVQ0";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const runCode = async () => {
+                const code = editor.value;
+                const input = inputEl.value;
+
+                outputEl.textContent = 'Compiling and running...';
+                outputEl.classList.remove('error');
+                runBtn.disabled = true;
+
+                const runPrompt = `
+You are a C code compiler and executor. I will provide you with a C code snippet and user input. Your task is to simulate the execution of the code and provide the exact output that a real C compiler would produce.
+
+Follow these rules strictly:
+1.  Simulate the code's behavior, including loops, conditionals, and function calls.
+2.  Use the provided input for any 'scanf' operations. Each line of input corresponds to a single scanf call.
+3.  The output must be identical to what a command-line terminal would show.
+4.  If there is an error (e.g., a syntax error or a logic error), provide a clear and concise error message.
+5.  Do not include any extra commentary, explanations, or code. ONLY provide the final output.
+6.  The output should start with '> ./a.out' to simulate execution.
+7.  If the program has no output, just print the command prompt.
+
+Example:
+Code:
+\`\`\`c
+#include <stdio.h>
+int main() {
+    int x;
+    printf("Enter a number: ");
+    scanf("%d", &x);
+    printf("You entered: %d", x);
+    return 0;
+}
+\`\`\`
+Input:
+123
+Output:
+> ./a.out
+Enter a number: 123
+You entered: 123
+
+Now, here is the code and input you need to process:
+Code:
+\`\`\`c
+${code}
+\`\`\`
+Input:
+${input}
+`;
+
+                let retryCount = 0;
+                const maxRetries = 3;
+
+                const callApiWithRetry = async (prompt) => {
+                    try {
+                        const payload = {
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: `You are a C compiler and executor that strictly follows the instructions given.`}] },
+                        };
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        return result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response. Please try again.';
+                    } catch (error) {
+                        console.error('Error during API call:', error);
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            const delay = Math.pow(2, retryCount) * 1000;
+                            await new Promise(res => setTimeout(res, delay));
+                            return callApiWithRetry(prompt);
+                        } else {
+                            return `An error occurred. Please try again later.`;
+                        }
+                    }
+                };
+                
+                const output = await callApiWithRetry(runPrompt);
+                outputEl.textContent = output;
+                runBtn.disabled = false;
+            };
+
+            runBtn.addEventListener('click', runCode);
+            
+            // AI Assistant Modal logic
+            aiBtn.addEventListener('click', () => {
+                aiModal.classList.remove('hidden');
+            });
+
+            aiCancelBtn.addEventListener('click', () => {
+                aiModal.classList.add('hidden');
+                aiPrompt.value = '';
+                aiResponseContainer.classList.add('hidden');
+                aiResponseEl.textContent = '';
+            });
+
+            aiSubmitBtn.addEventListener('click', async () => {
+                const prompt = aiPrompt.value.trim();
+                const code = editor.value;
+
+                if (!prompt) {
+                    showMessage('Please enter a question for the AI.');
+                    return;
+                }
+                
+                aiSubmitBtn.disabled = true;
+                aiSubmitText.classList.add('hidden');
+                aiLoading.classList.remove('hidden');
+                aiResponseContainer.classList.remove('hidden');
+                aiResponseEl.textContent = 'Thinking...';
+
+                const systemPrompt = `You are a helpful and expert C programming assistant. The user wants to understand or get help with their C code. The user's current C code is:
+                \`\`\`c
+                ${code}
+                \`\`\`
+                
+                Based on the user's prompt, provide a clear and concise response. Provide well-commented code snippets and clear, concise explanations. Use markdown for code formatting. If the request is not about code, politely state that you can only assist with code-related queries.`;
+
+                let retryCount = 0;
+                const maxRetries = 3;
+
+                const callApiWithRetry = async () => {
+                    try {
+                        const payload = {
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] },
+                        };
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        const candidate = result?.candidates?.[0];
+                        if (candidate && candidate.content?.parts?.[0]?.text) {
+                            aiResponseEl.textContent = candidate.content.parts[0].text;
+                        } else {
+                            aiResponseEl.textContent = 'Sorry, I could not generate a response. Please try again.';
+                        }
+                    } catch (error) {
+                        console.error('Error during API call:', error);
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            const delay = Math.pow(2, retryCount) * 1000;
+                            await new Promise(res => setTimeout(res, delay));
+                            await callApiWithRetry();
+                        } else {
+                            aiResponseEl.textContent = 'An error occurred. Please try again later.';
+                        }
+                    } finally {
+                        aiSubmitBtn.disabled = false;
+                        aiSubmitText.classList.remove('hidden');
+                        aiLoading.classList.add('hidden');
+                    }
+                };
+
+                await callApiWithRetry();
+            });
+        });
+    </script>
+</body>
+</html>

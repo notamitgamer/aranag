@@ -1,0 +1,2666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ada Aranag</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="https://ada.aranag.site/favicon-32x32.png" >
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Ada Aranag - Your intelligent assistant for quick answers and engaging conversations.">
+    <meta name="keywords" content="Ada Aranag, Ada, AI, chatbot, assistant, intelligent, conversation, Ada AI, image generation">
+    <meta name="author" content="Amit Dutta">
+    
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:title" content="Ada Aranag">
+    <meta property="og:description" content="Your intelligent assistant for quick answers and engaging conversations.">
+    <meta property="og:image" content="https://ada.aranag.site/logo.png">
+    <meta property="og:url" content="https://ada.aranag.site/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ada Aranag"> <!-- Updated site_name -->
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ada Aranag">
+    <meta name="twitter:description" content="Your intelligent assistant for quick answers and engaging conversations.">
+    <meta name="twitter:image" content="https://ada.aranag.site/logo.png">
+
+    <!-- Schema.org JSON-LD for Website -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Website",
+        "name": "Ada Aranag",
+        "alternateName":["Ada Aranag","Ada AI Chatbot","AI Assistant","Intelligent Chatbot","Ada"],
+        "url": "https://ada.aranag.site"
+      }
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <style>
+        /* Ensure html and body take full height */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling on html/body */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light background */
+            color: #333333; /* Dark text color */
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            width: 100vw; /* Full viewport width */
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode {
+            background-color: #000426; /* Changed other color to #000426 */
+            color: #e2e8f0; /* Dark mode text color */
+        }
+
+        .container {
+            background-color: #ffffff; /* White background for container */
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height of parent (body) */
+            max-width: 600px; /* Max width for larger screens */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent container scroll, chat-messages handles it */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative; /* Needed for absolute positioning of keyword modal */
+        }
+        body.dark-mode .container {
+            background-color: #000426; /* Changed other color to #000426 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Adjust container for mobile to use full width with some padding */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%; /* Take full width on mobile */
+                border-radius: 0; /* No border-radius on full screen mobile */
+                box-shadow: none; /* No shadow on full screen mobile */
+            }
+        }
+
+        .chat-header {
+            background-color: #e94560; /* Accent color for header */
+            padding: 1rem;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff; /* White text for header */
+            font-weight: 600;
+            font-size: 1.25rem;
+            position: relative; /* Needed for absolute positioning of profile modal */
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode .chat-header {
+            background-color: #16417C; /* Changed red to #16417C */
+        }
+        /* Adjust header border-radius for mobile full screen */
+        @media (max-width: 768px) {
+            .chat-header {
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Space between logo and text */
+        }
+
+        .chat-header-logo {
+            width: 32px; /* Adjust size as needed */
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: #ffffff; /* White background for placeholder */
+            padding: 2px; /* Small padding inside border */
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            scroll-behavior: smooth;
+        }
+        .message-wrapper {
+            display: flex;
+            align-items: flex-start; /* Align avatar and message to top */
+            gap: 0.5rem;
+            max-width: 80%; /* Max width for the wrapper */
+        }
+        .message-wrapper.user {
+            align-self: flex-end;
+            flex-direction: row-reverse; /* Reverse order for user messages (avatar on right) */
+        }
+        .message-wrapper.ai {
+            align-self: flex-start;
+            flex-direction: row; /* Normal order for AI messages (avatar on left) */
+        }
+        .message-avatar {
+            width: 32px; /* Avatar size */
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0; /* Prevent avatar from shrinking */
+        }
+        .message-content-bubble {
+            display: flex;
+            flex-direction: column;
+            max-width: calc(100% - 32px - 0.5rem); /* Adjust max-width for avatar and gap */
+        }
+        .message-bubble { /* Renamed from .message */
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            word-wrap: break-word;
+            color: #333333; /* Dark text for messages */
+            position: relative; /* For timestamp positioning */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .message-bubble {
+            color: #e2e8f0;
+        }
+        .message-wrapper.user .message-bubble { /* Specific styling for user bubble */
+            background-color: #add8e6; /* Light blue for user */
+            border-bottom-right-radius: 0.25rem;
+        }
+        body.dark-mode .message-wrapper.user .message-bubble {
+            background-color: #4a7a8d; /* Darker blue for user in dark mode */
+        }
+        .message-wrapper.ai .message-bubble { /* Specific styling for AI bubble */
+            background-color: #e0e0e0; /* Light gray for AI */
+            border-bottom-left-radius: 0.25rem;
+        }
+        body.dark-mode .message-wrapper.ai .message-bubble {
+            background-color: #4a5568; /* Darker gray for AI in dark mode */
+        }
+        .message-timestamp {
+            font-size: 0.7rem;
+            color: #666666;
+            margin-top: 0.25rem;
+            text-align: right; /* User timestamp on right */
+            padding-right: 0.25rem;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .message-timestamp {
+            color: #a0aec0;
+        }
+        .message-wrapper.ai .message-timestamp { /* AI timestamp on left */
+            text-align: left;
+            padding-left: 0.25rem;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #cccccc; /* Lighter border */
+            display: flex;
+            gap: 0.5rem;
+            align-items: center; /* Align items to center for single line input */
+            transition: border-color 0.3s ease;
+            position: relative; /* Needed for positioning keyword selector */
+            overflow: visible; /* Ensure pop-up is not clipped */
+            z-index: 10; /* Ensure chat-input is above the modal */
+        }
+        body.dark-mode .chat-input {
+            border-top-color: #4a5568;
+        }
+        /* New wrapper for input and keyword button */
+        .input-and-keyword-wrapper {
+            flex-grow: 1;
+            position: relative;
+            display: flex; /* To contain the input and button */
+            align-items: center;
+            overflow: visible; /* Ensure button inside is not clipped */
+        }
+        .chat-input input { /* Changed back to input */
+            flex-grow: 1;
+            background-color: #f9f9f9; /* Very light background */
+            border: 1px solid #dddddd; /* Lighter border */
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            padding-right: 3rem; /* Space for the new keyword button */
+            color: #333333; /* Dark text */
+            outline: none;
+            height: 40px; /* Fixed height for single line input */
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .chat-input input {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .chat-input .send-button { /* Renamed to avoid conflict with keyword button */
+            background-color: #e94560;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+            display: flex; /* To center SVG */
+            justify-content: center;
+            align-items: center;
+            height: 40px; /* Match height of input */
+        }
+        body.dark-mode .chat-input .send-button {
+            background-color: #16417C; /* Changed red to #16417C */
+        }
+        .chat-input .send-button:hover:not(:disabled) { /* Only hover if not disabled */
+            background-color: #c0392b;
+        }
+        body.dark-mode .chat-input .send-button:hover:not(:disabled) {
+            background-color: #123366; /* Darker shade of #16417C */
+        }
+        .chat-input .send-button:disabled { /* Styling for disabled button */
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        body.dark-mode .chat-input .send-button:disabled {
+            background-color: #666666;
+        }
+        .chat-input .send-button svg { /* Styling for SVG icon */
+            width: 24px; /* Adjust size as needed */
+            height: 24px;
+            fill: currentColor; /* Use button's text color for SVG */
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #ffffff; /* White text for header profile */
+            cursor: pointer; /* Indicate it's clickable */
+            padding: 0.25rem 0.5rem; /* Add some padding for easier click */
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .user-profile:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Slight hover effect */
+        }
+        .user-profile img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #ffffff; /* White border for header photo */
+        }
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Slightly lighter overlay */
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .login-modal.active {
+            opacity: 1;
+            visibility: visible;
+            display: flex; /* Show when active */
+        }
+        .login-content {
+            background-color: #ffffff; /* White background */
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Lighter shadow */
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            color: #333333; /* Dark text */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .login-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .login-content h2 {
+            font-size: 1.75rem;
+            color: #e94560;
+            margin-bottom: 1.5rem;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .login-content h2 {
+            color: #fc8181;
+        }
+        .login-content input {
+            width: calc(100% - 2rem);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            background-color: #f9f9f9; /* Very light background */
+            border: 1px solid #dddddd; /* Lighter border */
+            border-radius: 0.75rem;
+            color: #333333; /* Dark text */
+            outline: none;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .login-content input {
+            background-color: #1a202c;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .login-content button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+        }
+        .login-content .btn-google {
+            background-color: #4285f4; /* Google Blue */
+            color: white;
+        }
+        .login-content .btn-google:hover {
+            background-color: #357ae8;
+        }
+        .login-content .btn-email {
+            background-color: #e94560;
+            color: white;
+        }
+        .login-content .btn-email:hover {
+            background-color: #c0392b;
+        }
+        .login-content .btn-guest {
+            background-color: #9e9e9e; /* Muted light color for guest */
+            color: white;
+        }
+        .login-content .btn-guest:hover {
+            background-color: #888888;
+        }
+        .login-content .toggle-auth-mode {
+            color: #666666; /* Darker gray */
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 0.5rem;
+            display: inline-block;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .login-content .toggle-auth-mode {
+            color: #a0aec0;
+        }
+        .terms-message {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666666; /* Darker gray */
+            padding: 0.5rem 1rem;
+            background-color: #e0e0e0; /* Light background */
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            max-width: 90%; /* Lower the width */
+            margin-left: auto; /* Center the box */
+            margin-right: auto; /* Center the box */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .terms-message {
+            background-color: #4a5568;
+            color: #a0aec0;
+        }
+        .terms-message a {
+            color: #e94560;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .terms-message a {
+            color: #fc8181;
+        }
+        .loading-indicator {
+            margin-top: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background-color: #e0e0e0; /* Light gray */
+            color: #333333; /* Dark text */
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .loading-indicator {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .loading-indicator .message-avatar {
+            /* Inherit avatar styling */
+        }
+        .loading-dots {
+            display: inline-block;
+            width: 20px; /* Adjust as needed */
+            text-align: left;
+        }
+        .loading-dots span {
+            opacity: 0;
+            animation: blink 1.4s infinite;
+        }
+        .loading-dots span:nth-child(1) { animation-delay: 0s; }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Styles for generated images */
+        .generated-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer; /* Indicate clickable */
+        }
+
+
+        /* User Profile Modal (the initial pop-up with Account/Settings/Help buttons) */
+        .user-profile-modal {
+            position: absolute;
+            top: 100%; /* Position below the header */
+            right: 1rem; /* Align to the right */
+            background-color: #ffffff; /* White background */
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 999; /* Below main login modal, above chat content */
+            width: 200px; /* Fixed width for the popover */
+            color: #333333; /* Dark text */
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+        body.dark-mode .user-profile-modal {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+        .user-profile-modal.active {
+            display: flex;
+        }
+        .user-profile-modal img {
+            width: 80px; /* Larger photo */
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #16417C; /* Changed profile picture border in main popup */
+            margin-bottom: 0.5rem; /* Space between image and buttons */
+        }
+        .user-profile-modal button {
+            background-color: #e94560;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+            width: 100%; /* Full width button */
+            margin-bottom: 0.5rem; /* Space between buttons */
+        }
+        body.dark-mode .user-profile-modal button {
+            background-color: #16417C; /* Changed red to #16417C */
+        }
+        .user-profile-modal button:hover {
+            background-color: #c0392b;
+        }
+        body.dark-mode .user-profile-modal button:hover {
+            background-color: #123366; /* Darker shade of #16417C */
+        }
+        .user-profile-modal button:last-child {
+            margin-bottom: 0; /* No margin for the last button */
+        }
+
+
+        /* Custom Message Box Styles */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1200; /* Increased z-index to be above custom-popup-overlay */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .message-box-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            display: flex; /* Show when active */
+        }
+        .message-box-content {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            color: #333333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode .message-box-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .message-box-content p {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+        .message-box-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .message-box-content button {
+            background-color: #e94560;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+        }
+        body.dark-mode .message-box-content button {
+            background-color: #16417C; /* Changed red to #16417C */
+        }
+        .message-box-content button.cancel {
+            background-color: #6c757d; /* Gray for cancel */
+        }
+        body.dark-mode .message-box-content button.cancel {
+            background-color: #5a6268;
+        }
+        .message-box-content button:hover {
+            background-color: #c0392b;
+        }
+        body.dark-mode .message-box-content button:hover {
+            background-color: #123366; /* Darker shade of #16417C */
+        }
+        .message-box-content button.cancel:hover {
+            background-color: #5a6268;
+        }
+        body.dark-mode .message-box-content button.cancel:hover {
+            background-color: #4a5568;
+        }
+
+        /* Dark mode toggle switch styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #16417C; /* Changed toggle switch color to #16417C */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #16417C; /* Changed toggle switch focus shadow */
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /* Common styles for Account, Settings, Help modals (new custom popups) */
+        .custom-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1100; /* Higher than login modal and user-profile-modal */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .custom-popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            display: flex; /* Show when active */
+        }
+        .custom-popup {
+            background-color: #fff;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh; /* Max height for scrollable content */
+            display: flex;
+            flex-direction: column;
+            position: relative; /* For positioning close button */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden; /* Hide overflow for the entire modal, content div handles scroll */
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+        body.dark-mode .custom-popup {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .custom-popup-header {
+            display: flex;
+            justify-content: flex-end; /* Push close button to the right */
+            padding: 0.5rem 1rem;
+            background-color: #e94560;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            flex-shrink: 0; /* Prevent header from shrinking */
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode .custom-popup-header {
+            background-color: #16417C; /* Changed red to #16417C */
+        }
+        .custom-popup-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1; /* Align 'x' vertically */
+            padding: 0.2rem; /* Make clickable area larger */
+            transition: color 0.2s;
+        }
+        .custom-popup-close:hover {
+            color: #f0f0f0;
+        }
+        .custom-popup-content {
+            padding: 1rem 1.5rem;
+            overflow-y: auto; /* Enable scrolling for content */
+            flex-grow: 1; /* Allow content to take available space */
+        }
+        .custom-popup-profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #16417C; /* Changed pink border to #16417C */
+            margin: 0 auto 1rem auto; /* Center horizontally, add bottom margin */
+            display: block; /* Essential for margin:auto to work */
+        }
+        .custom-popup-email {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            word-break: break-word; /* Break long emails */
+            color: #333333;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .custom-popup-email {
+            color: #e2e8f0;
+        }
+        .custom-popup-button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: background-color 0.2s;
+        }
+        body.dark-mode .custom-popup-button {
+            background-color: #16417C; /* Changed red to #16417C */
+        }
+        .custom-popup-button:hover {
+            background-color: #c0392b;
+        }
+        body.dark-mode .custom-popup-button:hover {
+            background-color: #123366; /* Darker shade of #16417C */
+        }
+        .dark-mode-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode .dark-mode-toggle-container {
+            background-color: #4a5568;
+        }
+        .dark-mode-toggle-container span {
+            font-weight: 500;
+            color: #333333;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .dark-mode-toggle-container span {
+            color: #e2e8f0;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #16417C;
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px #16417C;
+        }
+        input:checked + .slider:before {
+            -webkit-transform: translateX(20px);
+            -ms-transform: translateX(20px);
+            transform: translateX(20px);
+        }
+        .help-text-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333333;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .help-text-content {
+            color: #e2e8f0;
+        }
+
+        /* Full-screen Image Modal Styles */
+        .fullscreen-image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .fullscreen-image-modal.active {
+            opacity: 1;
+            visibility: visible;
+            display: flex;
+        }
+        .fullscreen-image-content {
+            max-width: 90%;
+            max-height: 80%;
+            object-fit: contain;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .fullscreen-image-header {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .fullscreen-image-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .fullscreen-image-header button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .fullscreen-image-footer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .fullscreen-image-footer button {
+            background-color: #e94560;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .fullscreen-image-footer button:hover {
+            background-color: #c0392b;
+        }
+        .fullscreen-image-footer button svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Keyword Selector Modal Styles (NEW) */
+        .keyword-selector-modal {
+            position: absolute;
+            bottom: 0; /* Position at the bottom of the container */
+            left: 0;
+            right: 0;
+            width: 100%; /* Take full width of the container */
+            background-color: #ffffff;
+            border-radius: 1rem 1rem 0 0; /* Rounded top corners, flat bottom */
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2); /* Shadow on top */
+            padding: 1rem;
+            display: flex; /* Always flex so transform works, but control visibility with opacity/visibility */
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 5; /* Lower z-index to appear behind the chat-input */
+            max-height: 50%; /* Limit height to half of the container for better UX */
+            overflow-y: auto; /* Enable scroll if content overflows */
+            /* Add transform to transition for smooth slide effect */
+            transition: transform 0.3s ease-out, opacity 0.3s ease, visibility 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            transform: translateY(100%); /* Start off-screen at the bottom */
+            visibility: hidden; /* Hidden by default */
+            opacity: 0; /* Hidden by default */
+        }
+        body.dark-mode .keyword-selector-modal {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+        }
+        .keyword-selector-modal.active {
+            opacity: 1;
+            visibility: visible;
+            /* Slide up by the exact height of the chat-input div */
+            /* chat-input height = 1rem (padding-top) + 40px (input/button height) + 1rem (padding-bottom) = 2rem + 40px */
+            transform: translateY(calc(-40px - 2rem)); 
+        }
+        .keyword-item {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between; /* Align keyword and description */
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        body.dark-mode .keyword-item {
+            background-color: #4a5568;
+        }
+        .keyword-item:hover {
+            background-color: #e0e0e0;
+        }
+        body.dark-mode .keyword-item:hover {
+            background-color: #667085;
+        }
+        .keyword-item strong {
+            font-weight: 600;
+            color: #e94560; /* Accent color for keywords */
+            flex-shrink: 0; /* Prevent keyword from shrinking */
+        }
+        body.dark-mode .keyword-item strong {
+            color: #fc8181;
+        }
+        .keyword-item span {
+            font-size: 0.85rem;
+            color: #666666;
+            flex-grow: 1; /* Allow description to take remaining space */
+            text-align: right; /* Align description to the right */
+            padding-left: 0.5rem; /* Space between keyword and description */
+        }
+        body.dark-mode .keyword-item span {
+            color: #a0aec0;
+        }
+
+        /* Style for the keyword button inside the input */
+        .keyword-input-button {
+            position: absolute;
+            right: 0.5rem; /* Adjust as needed for spacing from right edge of input */
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0; /* Remove default button padding */
+            line-height: 1;
+            color: #e94560; /* Changed to accent color for visibility */
+            transition: color 0.2s;
+            z-index: 1; /* Ensure it's above the input text */
+        }
+        body.dark-mode .keyword-input-button {
+            color: #ffffff; /* White color for dark mode */
+        }
+        .keyword-input-button:hover {
+            color: #c0392b; /* Darker accent color on hover */
+        }
+        body.dark-mode .keyword-input-button:hover {
+            color: #e2e8f0;
+        }
+        .keyword-input-button svg {
+            width: 24px;
+            height: 24px;
+            display: block; /* Remove extra space below SVG */
+        }
+
+        /* Full-screen loading spinner styles */
+        .full-screen-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* Transparent light grey */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000; /* Higher than all other modals */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .full-screen-loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3); /* Light grey border for spinner track */
+            border-top: 4px solid #ffffff; /* White color for the spinning part */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Conversation Mode Styles (NEW) */
+        .conversation-mode-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000; /* Black background as per image */
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1500; /* Above regular modals, below full-screen loading */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            color: white; /* Default text color for this mode */
+        }
+        .conversation-mode-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            display: flex;
+        }
+
+        .conversation-header {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .conversation-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .conversation-close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .conversation-display-area {
+            flex-grow: 1; /* Take up available space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .conversation-circle {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #007bff, #0056b3); /* Blue gradient as in image */
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); /* Blue glow */
+            /* Animation for touch feedback */
+            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+        }
+        /* Optional: Add pulsing animation to the circle */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 123, 255, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
+        }
+        .conversation-circle.listening {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        .conversation-circle.pressed { /* New class for touch feedback */
+            transform: scale(0.95);
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+        }
+
+
+        .conversation-text-feedback {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-style: italic;
+            min-height: 1.5rem; /* Reserve space to prevent layout shift */
+        }
+
+        .conversation-controls {
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Stack controls vertically */
+            align-items: center;
+            gap: 1rem; /* Space between elements */
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .conversation-mic-btn, .conversation-cancel-btn {
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white */
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s, border-color 0.2s;
+        }
+        .conversation-mic-btn:hover, .conversation-cancel-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        .conversation-mic-btn.active { /* Style when listening */
+            background-color: #007bff; /* Blue when active */
+            border-color: #007bff;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.7);
+        }
+
+        .conversation-mic-btn svg, .conversation-cancel-btn svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        /* Style for the language select dropdown */
+        .conversation-language-select {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid white;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            appearance: none; /* Remove default dropdown arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Custom arrow */
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1.2em;
+            width: 200px; /* Fixed width for consistency */
+            text-align: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .conversation-language-select:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .conversation-language-select option {
+            background-color: #000; /* Dark background for options */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Full-screen loading overlay -->
+    <!-- Removed full-screen loading overlay as per request -->
+    <!-- <div id="full-screen-loading-overlay" class="full-screen-loading-overlay">
+        <div class="spinner"></div>
+    </div> -->
+
+    <!-- Conversation Mode Overlay (NEW) -->
+    <div id="conversation-mode-overlay" class="conversation-mode-overlay">
+        <div class="conversation-header">
+            <button id="conversation-close-btn" class="conversation-close-btn">&times;</button>
+        </div>
+        <div class="conversation-display-area">
+            <div id="conversation-circle" class="conversation-circle">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="48px" height="48px">
+                    <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.2-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </div>
+            <div id="conversation-text-feedback" class="conversation-text-feedback">Tap the microphone to start talking.</div>
+        </div>
+        <div class="conversation-controls">
+            <select id="conversation-language-select" class="conversation-language-select">
+                <option value="en-US">English</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="bn-IN">Bengali</option>
+            </select>
+            <button id="conversation-mic-btn" class="conversation-mic-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="24px" height="24px">
+                    <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.2-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </button>
+            <button id="conversation-cancel-btn" class="conversation-cancel-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="24px" height="24px">
+                    <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <img src="https://ada.aranag.site/logo.png" alt="Ada AI Logo" class="chat-header-logo">
+                <span>Ada Aranag</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="open-conversation-mode-btn" class="user-profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px">
+                        <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.2-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                </button>
+                <div id="user-info" class="user-profile hidden">
+                    <img id="user-photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666666'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="User Photo"> <!-- Updated default for guest -->
+                </div>
+            </div>
+        </div>
+
+        <div class="terms-message">
+            By continuing, you agree to the <a href="https://terms-ada.aranag.site" style="color: #5466FF; text-decoration: underline;" target="_blank">Terms & Conditions</a>.
+        </div>
+
+        <div id="chat-messages" class="chat-messages">
+            <!-- Initial AI message will be added by JS -->
+        </div>
+
+        <div class="chat-input">
+            <div class="input-and-keyword-wrapper">
+                <input type="text" id="user-input" placeholder="Type your message...">
+                <button id="keyword-selector-btn" class="keyword-input-button">
+                    <!-- Information Icon (letter 'i' inside a circle) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                </button>
+            </div>
+            <button id="send-button" class="send-button">
+                <!-- Send Icon (Paper Plane) -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Keyword Selector Modal (NEW) - Moved inside .container -->
+        <div id="keyword-selector-modal" class="keyword-selector-modal">
+            <div class="keyword-item" data-keyword="image ">
+                <strong>Image</strong>
+                <span>Generate an image from a description.</span>
+            </div>
+            <div class="keyword-item" data-keyword="search ">
+                <strong>Search</strong>
+                <span>Perform a web search for information.</span>
+            </div>
+            <div class="keyword-item" data-keyword="youtube ">
+                <strong>YouTube</strong>
+                <span>Find YouTube videos.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login/Signup Modal -->
+    <div id="login-modal" class="login-modal">
+        <div class="login-content">
+            <h2 id="auth-title">Sign In</h2>
+            <input type="email" id="email-input" placeholder="Email">
+            <input type="password" id="password-input" placeholder="Password">
+            <button id="email-auth-button" class="btn-email">Sign In with Email</button>
+            <p class="my-3 text-gray-400">OR</p>
+            <p class="toggle-auth-mode" id="toggle-auth-mode">Don't have an account? Sign Up</p>
+            <div class="my-4 text-gray-400">OR</div>
+            <button id="google-sign-in-button" class="btn-google">Sign In with Google</button>
+            <div class="my-4 text-gray-400">OR</div>
+            <button id="guest-button" class="btn-guest">Continue as Guest</button>
+        </div>
+    </div>
+
+    <!-- User Profile Options Pop-up (initial click on profile picture) -->
+    <div id="user-profile-options-modal" class="user-profile-modal">
+        <img  id="options-modal-user-photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666666'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="User Photo">
+        <button id="profile-account-btn">Account</button>
+        <button id="profile-settings-btn">Settings</button>
+        <button id="profile-help-btn">Help</button>
+    </div>
+
+    <!-- Custom Message Box (retained) -->
+    <div id="message-box-overlay" class="message-box-overlay">
+        <div class="message-box-content">
+            <p id="message-box-text"></p>
+            <div class="message-box-buttons">
+                <button id="message-box-confirm-button">OK</button>
+                <button id="message-box-cancel-button" class="cancel hidden">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full-screen Image Viewer Modal (NEW) -->
+    <div id="fullscreen-image-modal" class="fullscreen-image-modal">
+        <div class="fullscreen-image-header">
+            <button id="fullscreen-close-btn">&times;</button>
+        </div>
+        <img id="fullscreen-image-display" class="fullscreen-image-content" src="" alt="Full Screen Image">
+        <div class="fullscreen-image-footer">
+            <button id="download-image-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                Download Image
+            </button>
+        </div>
+    </div>
+
+    <script>
+        console.log('Script execution started.');
+
+        // Firebase Configuration (Provided by user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhyoNYUSXWIxdBiTxwSDcU7HkhhLEVlOc",
+            authDomain: "ada-ai-aranag.firebaseapp.com",
+            projectId: "ada-ai-aranag",
+            storageBucket: "ada-ai-aranag.firebasestorage.app",
+            messagingSenderId: "865895114061",
+            appId: "1:865895114061:web:5fd4493b0e388727e6c304"
+        };
+        console.log('Firebase config loaded.');
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('Firebase initialized successfully.');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+        }
+        const auth = firebase.auth();
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+        console.log('Firebase auth providers initialized.');
+
+        // DOM Elements
+        const loginModal = document.getElementById('login-modal');
+        const authTitle = document.getElementById('auth-title');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const emailAuthButton = document.getElementById('email-auth-button');
+        const toggleAuthMode = document.getElementById('toggle-auth-mode');
+        const googleSignInButton = document.getElementById('google-sign-in-button');
+        const guestButton = document.getElementById('guest-button');
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button'); // Renamed class, but ID remains
+        const userInfo = document.getElementById('user-info'); // This is the clickable header profile
+        const userPhoto = document.getElementById('user-photo'); // Small photo in header
+
+        // User Profile Options Pop-up Elements
+        const userProfileOptionsModal = document.getElementById('user-profile-options-modal');
+        const optionsModalUserPhoto = document.getElementById('options-modal-user-photo');
+        const profileAccountBtn = document.getElementById('profile-account-btn');
+        const profileSettingsBtn = document.getElementById('profile-settings-btn');
+        const profileHelpBtn = document.getElementById('profile-help-btn');
+
+        // Dynamically created modals (Account, Settings, Help) and their elements
+        let accountModalOverlay, accountProfilePic, accountEmail, accountLogoutBtn, accountCloseBtn;
+        let settingsModalOverlay, darkModeSwitch, settingsClearHistoryBtn, settingsCloseBtn;
+        let helpModalOverlay, helpCloseBtn;
+
+        // Custom Message Box Elements (retained)
+        const messageBoxOverlay = document.getElementById('message-box-overlay');
+        const messageBoxText = document.getElementById('message-box-text');
+        const messageBoxConfirmButton = document.getElementById('message-box-confirm-button');
+        const messageBoxCancelButton = document.getElementById('message-box-cancel-button');
+
+        // Full-screen Image Modal Elements (NEW)
+        const fullscreenImageModal = document.getElementById('fullscreen-image-modal');
+        const fullscreenImageDisplay = document.getElementById('fullscreen-image-display');
+        const fullscreenCloseBtn = document.getElementById('fullscreen-close-btn');
+        const downloadImageBtn = document.getElementById('download-image-btn');
+
+        // Keyword Selector Elements (NEW)
+        const keywordSelectorBtn = document.getElementById('keyword-selector-btn');
+        const keywordSelectorModal = document.getElementById('keyword-selector-modal');
+        const keywordItems = document.querySelectorAll('.keyword-item');
+        console.log('All DOM elements referenced.');
+
+        // Full-screen Loading Spinner Elements (NEW)
+        const fullScreenLoadingOverlay = document.getElementById('full-screen-loading-overlay');
+
+        // Conversation Mode Elements (NEW)
+        const openConversationModeBtn = document.getElementById('open-conversation-mode-btn');
+        const conversationModeOverlay = document.getElementById('conversation-mode-overlay');
+        const conversationCloseBtn = document.getElementById('conversation-close-btn');
+        const conversationMicBtn = document.getElementById('conversation-mic-btn');
+        const conversationCancelBtn = document.getElementById('conversation-cancel-btn');
+        const conversationCircle = document.getElementById('conversation-circle');
+        const conversationTextFeedback = document.getElementById('conversation-text-feedback');
+        const conversationLanguageSelect = document.getElementById('conversation-language-select');
+
+
+        let currentLoadingIndicator = null;
+        let messageBoxConfirmCallback = null;
+        let messageBoxCancelCallback = null;
+
+        const API_ENDPOINT = 'https://ada-web.onrender.com/chat';
+
+        let isSignUpMode = false;
+        let currentUser = null;
+        let guestUserId = null;
+
+        // Speech Recognition and Synthesis setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechSynthesis = window.speechSynthesis;
+        let recognition = null;
+        let isListening = false;
+
+        // Language-specific "Ada is thinking..." messages
+        const thinkingMessages = {
+            'en-US': 'Ada is thinking...',
+            'hi-IN': 'एडीए सोच रहा है...', // Ada is thinking...
+            'bn-IN': 'আদা চিন্তা করছে...', // Ada is thinking...
+        };
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // Listen for a single utterance
+            recognition.interimResults = false; // Only return final results
+            // Default language, will be updated by dropdown
+            recognition.lang = 'en-US'; 
+
+            recognition.onstart = () => {
+                isListening = true;
+                conversationMicBtn.classList.add('active');
+                conversationCircle.classList.add('listening');
+                conversationTextFeedback.textContent = 'Listening... Speak now.';
+                // Add pressed class for visual feedback on tap
+                conversationCircle.classList.add('pressed'); 
+                conversationMicBtn.classList.add('pressed');
+                console.log('Speech recognition started.');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                console.log('Speech recognized:', transcript);
+                conversationTextFeedback.textContent = `You said: "${transcript}"`;
+                sendVoiceMessage(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                conversationTextFeedback.textContent = `Error: ${event.error}. Please try again.`;
+                isListening = false;
+                conversationMicBtn.classList.remove('active', 'pressed'); // Remove pressed on error
+                conversationCircle.classList.remove('listening', 'pressed'); // Remove pressed on error
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                conversationMicBtn.classList.remove('active', 'pressed'); // Ensure pressed is removed
+                conversationCircle.classList.remove('listening', 'pressed'); // Ensure pressed is removed
+                console.log('Speech recognition ended.');
+            };
+        } else {
+            console.warn('Speech Recognition API not supported in this browser.');
+            if (openConversationModeBtn) {
+                openConversationModeBtn.style.display = 'none';
+            }
+        }
+
+        // --- Avatar Data URIs ---
+        const genericPersonSvgDataUri = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666666'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+        const aiAvatarUrl = "https://ada.aranag.site/logo.png";
+
+        // --- Utility Functions ---
+
+        // Function to convert basic Markdown to HTML
+        function convertMarkdownToHtml(text) {
+            let html = text;
+
+            // Convert bold: **text** or __text__ to <strong>text</strong>
+            html = html.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
+
+            // Convert underline: ++text++ to <u>text</u> (custom markdown)
+            html = html.replace(/(\+\+)(.*?)\1/g, '<u>$2</u>');
+
+            // Convert italic: *text* or _text_ to <em>text</em>
+            html = html.replace(/(\*|_)(.*?)\1/g, '<em>$2</em>');
+
+            // Convert ordered lists: 1. Item 1\n2. Item 2 to <ol><li>Item 1</li><li>Item 2</li></ol>
+            const listRegex = /(\d+\.\s.*(?:\n\d+\.\s.*)*)/g;
+            html = html.replace(listRegex, (match) => {
+                const listItems = match.split('\n').filter(line => line.trim() !== '');
+                let ol = '<ol>';
+                listItems.forEach(item => {
+                    ol += `<li>${item.replace(/^\d+\.\s/, '')}</li>`;
+                });
+                ol += '</ol>';
+                return ol;
+            });
+
+            // Convert URLs to clickable links (existing functionality)
+            // Corrected regex: [a-zA-Z] instead of [a-Z]
+            const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}(?:\/[^\s]*)*)/g;
+            html = html.replace(urlRegex, (url) => {
+                let fullUrl = url;
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    fullUrl = 'http://' + url;
+                }
+            return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" style="color: #5466FF; text-decoration: underline;">${url}</a>`;
+            });
+
+            // Handle newlines for paragraphs
+            html = html.replace(/\n/g, '<br>');
+
+            return html;
+        }
+
+        function displayMessage(message, sender, timestamp = new Date(), saveToStorage = true) {
+            console.log(`Displaying message from ${sender}:`, message);
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper', sender);
+
+            const avatarImg = document.createElement('img');
+            avatarImg.classList.add('message-avatar');
+            avatarImg.alt = sender === 'user' ? 'User Avatar' : 'AI Avatar';
+            avatarImg.src = sender === 'user' ? (currentUser && currentUser.photoURL ? currentUser.photoURL : genericPersonSvgDataUri) : aiAvatarUrl;
+
+            const messageContentBubble = document.createElement('div');
+            messageContentBubble.classList.add('message-content-bubble');
+
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('message-bubble');
+
+            // Check if the message is a base64 encoded image
+            const IMAGE_PREFIX = "[IMAGE_BASE64]:";
+            if (sender === 'ai' && message.startsWith(IMAGE_PREFIX)) {
+                const base64Image = message.substring(IMAGE_PREFIX.length);
+                const imgElement = document.createElement('img');
+                imgElement.src = `data:image/jpeg;base64,${base64Image}`; // Assuming JPEG, adjust if other formats are possible
+                imgElement.alt = "Generated Image";
+                imgElement.classList.add('generated-image'); // Add a class for styling
+                
+                // Add click listener to open full screen
+                imgElement.addEventListener('click', () => {
+                    console.log('Image clicked, attempting fullscreen:', imgElement.src); // Debugging log
+                    fullscreenImageDisplay.src = imgElement.src;
+                    fullscreenImageModal.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Disable background scroll
+                });
+
+                messageBubble.appendChild(imgElement);
+            } else {
+                messageBubble.innerHTML = convertMarkdownToHtml(message);
+            }
+
+            const timestampElement = document.createElement('div');
+            timestampElement.classList.add('message-timestamp');
+            const date = new Date(timestamp);
+            timestampElement.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageContentBubble.appendChild(messageBubble);
+            messageContentBubble.appendChild(timestampElement);
+
+            if (sender === 'user') {
+                messageWrapper.appendChild(messageContentBubble);
+                messageWrapper.appendChild(avatarImg);
+            } else {
+                messageWrapper.appendChild(avatarImg);
+                messageContentBubble.appendChild(messageBubble); // Place bubble before timestamp for AI messages
+                messageContentBubble.appendChild(timestampElement);
+                messageWrapper.appendChild(messageContentBubble);
+            }
+            
+            chatMessages.appendChild(messageWrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            if (saveToStorage) {
+                const currentActiveUserId = currentUser ? currentUser.uid : guestUserId;
+                if (currentActiveUserId) {
+                    saveMessageToLocalStorage(currentActiveUserId, message, sender, timestamp.toISOString());
+                } else {
+                    console.warn("No active user ID found to save message to local storage.");
+                }
+            }
+        }
+
+        function showMessageBox(message, onConfirm = null, onCancel = null) {
+            console.log('Showing message box:', message);
+            messageBoxText.textContent = message;
+            messageBoxConfirmCallback = onConfirm;
+            messageBoxCancelCallback = onCancel;
+
+            if (onConfirm && onCancel) {
+                messageBoxConfirmButton.textContent = 'Yes';
+                messageBoxCancelButton.classList.remove('hidden');
+            } else {
+                messageBoxConfirmButton.textContent = 'OK';
+                messageBoxCancelButton.classList.add('hidden');
+            }
+            messageBoxOverlay.classList.add('active');
+        }
+
+        function hideMessageBox() {
+            console.log('Hiding message box.');
+            messageBoxOverlay.classList.remove('active');
+            messageBoxConfirmCallback = null;
+            messageBoxCancelCallback = null;
+        }
+
+        // --- Chat History Persistence Functions ---
+        function getChatHistoryKey(userId) {
+            return `chatHistory_${userId}`;
+        }
+
+        function saveMessageToLocalStorage(userId, message, sender, timestamp) {
+            if (!userId) {
+                console.warn('Cannot save message: userId is null.');
+                return;
+            }
+            const key = getChatHistoryKey(userId);
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.push({ message, sender, timestamp });
+            localStorage.setItem(key, JSON.stringify(history));
+            console.log(`Saved message for ${userId}:`, { message, sender, timestamp });
+        }
+
+        function loadChatHistoryFromLocalStorage(userId) {
+            console.log('Attempting to load chat history for userId:', userId);
+            // Spinner is now managed by updateAuthUI for initial load
+            if (!userId) {
+                console.warn('Cannot load history: userId is null.');
+                return;
+            }
+            const key = getChatHistoryKey(userId);
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            console.log(`Loaded history for ${userId}:`, history);
+
+            chatMessages.innerHTML = ''; // Clear existing messages
+
+            // Always add the initial AI greeting
+            displayMessage("Hello! I'm Ada, your *AI* assistant. How can I help you today?", 'ai', new Date(), false);
+            
+            history.forEach(entry => {
+                displayMessage(entry.message, entry.sender, new Date(entry.timestamp), false);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+
+        function showLoading(message = 'Ada is typing') {
+            console.log('Showing loading indicator:', message);
+            if (!currentLoadingIndicator) {
+                currentLoadingIndicator = document.createElement('div');
+                currentLoadingIndicator.classList.add('loading-indicator', 'message-wrapper', 'ai');
+                
+                const avatarImg = document.createElement('img');
+                avatarImg.classList.add('message-avatar');
+                avatarImg.alt = 'AI Avatar';
+                avatarImg.src = aiAvatarUrl;
+
+                const contentBubble = document.createElement('div');
+                contentBubble.classList.add('message-content-bubble');
+
+                const messageBubble = document.createElement('div');
+                messageBubble.classList.add('message-bubble');
+                messageBubble.textContent = message; // Set initial message
+                
+                const loadingDots = document.createElement('span');
+                loadingDots.classList.add('loading-dots');
+                loadingDots.innerHTML = '<span>.</span><span>.</span><span>.</span>';
+
+                messageBubble.appendChild(loadingDots);
+                contentBubble.appendChild(messageBubble);
+
+                currentLoadingIndicator.appendChild(avatarImg);
+                currentLoadingIndicator.appendChild(contentBubble);
+            } else {
+                // Update message if loading indicator already exists
+                currentLoadingIndicator.querySelector('.message-bubble').textContent = message;
+                currentLoadingIndicator.querySelector('.message-bubble').appendChild(currentLoadingIndicator.querySelector('.loading-dots'));
+            }
+            chatMessages.appendChild(currentLoadingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            userInput.disabled = true;
+            sendButton.disabled = true;
+        }
+
+        function hideLoading() {
+            console.log('Hiding loading indicator.');
+            if (currentLoadingIndicator && currentLoadingIndicator.parentNode) {
+                currentLoadingIndicator.parentNode.removeChild(currentLoadingIndicator);
+                currentLoadingIndicator = null;
+            }
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            userInput.focus();
+        }
+
+        // --- Full-screen Loading Spinner Functions (NEW) ---
+        // Removed showFullScreenLoading and hideFullScreenLoading functions as per request
+        /*
+        function showFullScreenLoading() {
+            console.log('Showing full-screen loading spinner.');
+            fullScreenLoadingOverlay.classList.add('active');
+        }
+
+        function hideFullScreenLoading() {
+            console.log('Hiding full-screen loading spinner.');
+            fullScreenLoadingOverlay.classList.remove('active');
+        }
+        */
+
+        // --- Dark Mode Functionality ---
+        function applyDarkModePreference() {
+            console.log('Applying dark mode preference.');
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            if (darkModeSwitch) { // Ensure element exists before accessing
+                darkModeSwitch.checked = isDarkMode;
+            }
+        }
+
+        function toggleDarkMode() {
+            console.log('Toggling dark mode.');
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        // --- Authentication Functions ---
+
+        function updateAuthUI(user) {
+            console.log('updateAuthUI called with user:', user);
+            // Spinner is now shown at the very start of the auth state change process
+            // and hidden at the very end of this function.
+            
+            if (user) {
+                currentUser = user;
+                userInfo.classList.remove('hidden');
+                userPhoto.src = user.photoURL || genericPersonSvgDataUri;
+                optionsModalUserPhoto.src = user.photoURL || genericPersonSvgDataUri; // Update photo in options modal
+                console.log('User is logged in:', currentUser.uid);
+
+                if (loginModal) { 
+                    loginModal.classList.remove('active');
+                    loginModal.classList.add('hidden');
+                }
+
+                localStorage.removeItem('guestUserId');
+                guestUserId = null;
+                loadChatHistoryFromLocalStorage(currentUser.uid);
+            } else {
+                currentUser = null;
+                userInfo.classList.add('hidden');
+                userPhoto.src = genericPersonSvgDataUri;
+                optionsModalUserPhoto.src = genericPersonSvgDataUri; // Update photo in options modal
+                console.log('User is not logged in.');
+
+                const storedGuestId = localStorage.getItem('guestUserId');
+                if (storedGuestId) {
+                    guestUserId = storedGuestId;
+                    userInfo.classList.remove('hidden');
+                    if (loginModal) { 
+                        loginModal.classList.remove('active');
+                        loginModal.classList.add('hidden');
+                    }
+                    console.log('Continuing as guest:', guestUserId);
+                    loadChatHistoryFromLocalStorage(guestUserId);
+                } else {
+                    console.log('No guest ID, showing login modal.');
+                    if (loginModal) { 
+                        loginModal.classList.remove('hidden');
+                        loginModal.classList.add('active');
+                    }
+
+                    chatMessages.innerHTML = '';
+                    displayMessage("Hello! I'm **Ada**, your *AI* assistant. How can I ++help you++ today?", 'ai', new Date(), false);
+                }
+            }
+            userProfileOptionsModal.classList.remove('active'); // Ensure profile options modal is closed on auth state change
+            console.log('updateAuthUI finished.'); // Hide spinner after all UI updates are done
+        }
+
+        function toggleAuthModeUI() {
+            console.log('Toggling auth mode UI.');
+            isSignUpMode = !isSignUpMode;
+            authTitle.textContent = isSignUpMode ? 'Sign Up' : 'Sign In';
+            emailAuthButton.textContent = isSignUpMode ? 'Sign Up with Email' : 'Sign In with Email';
+            toggleAuthMode.textContent = isSignUpMode ? 'Already have an account? Sign In' : 'Don\'t have an account? Sign Up';
+        }
+
+        async function handleEmailAuth() {
+            console.log('Handling email authentication.');
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessageBox('Please enter both email and password.');
+                return;
+            }
+
+            try {
+                //showFullScreenLoading(); // Show spinner for email auth
+                if (isSignUpMode) {
+                    await auth.createUserWithEmailAndPassword(email, password);
+                    showMessageBox('Account created successfully! You are now signed in.');
+                } else {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    showMessageBox('Signed in successfully!');
+                }
+            } catch (error) {
+                console.error('Email Auth Error:', error.code, error.message);
+                let userFriendlyMessage = `Authentication failed. Please check your email and password, or try signing up if you don't have an account.`;
+
+                switch (error.code) {
+                    case 'auth/weak-password':
+                        userFriendlyMessage = 'Password is too weak. Please choose a password with at least 6 characters.';
+                        break;
+                    case 'auth/email-already-in-use':
+                        userFriendlyMessage = 'This email address is already in use. Please sign in or use a different email.';
+                        break;
+                    case 'auth/invalid-email':
+                        userFriendlyMessage = 'The email address is not valid. Please enter a correct email format.';
+                        break;
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        userFriendlyMessage = 'Invalid email or password. Please try again.';
+                        break;
+                    case 'auth/network-request-failed':
+                        userFriendlyMessage = 'Network error. Please check your internet connection and try again.';
+                        break;
+                    default:
+                        userFriendlyMessage = `An unexpected error occurred during authentication. Please try again.`;
+                        break;
+                }
+                showMessageBox(userFriendlyMessage);
+            } finally {
+                //hideFullScreenLoading(); // Hide spinner after email auth attempt
+            }
+        }
+
+        async function handleGoogleSignIn() {
+            console.log('Handling Google Sign-in.');
+            try {
+                //showFullScreenLoading(); // Show spinner for Google Sign-in
+                await auth.signInWithPopup(googleProvider);
+                showMessageBox('Signed in with Google successfully!');
+            } catch (error) {
+                console.error('Google Sign-in Error:', error.message);
+                if (error.code === 'auth/popup-closed-by-user') {
+                    showMessageBox(`Google Sign-in was interrupted. Please ensure popups are allowed for this site and try again. If the issue persists, check your browser's security settings or try another browser.`);
+                } else {
+                    showMessageBox(`Google Sign-in failed: ${error.message}. Please try again.`);
+                }
+            } finally {
+                //hideFullScreenLoading(); // Hide spinner after Google Sign-in attempt
+            }
+        }
+
+        function handleGuestMode() {
+            console.log('Handling guest mode.');
+            //showFullScreenLoading(); // Show spinner for guest mode
+            guestUserId = localStorage.getItem('guestUserId');
+            if (!guestUserId) {
+                guestUserId = `guest_${uuidv4()}`;
+                localStorage.setItem('guestUserId', guestUserId);
+            }
+            userInfo.classList.remove('hidden');
+            if (loginModal) { 
+                loginModal.classList.remove('active');
+                loginModal.classList.add('hidden');
+            }
+            loadChatHistoryFromLocalStorage(guestUserId);
+            // hideFullScreenLoading() is called by updateAuthUI, which is called by onAuthStateChanged after this.
+            // Or directly by loadChatHistoryFromLocalStorage if not triggered by auth state change.
+        }
+
+        async function handleLogout() {
+            console.log('Handling logout.');
+            try {
+                // Removed showFullScreenLoading call as it is no longer defined
+                if (currentUser) {
+                    await auth.signOut();
+                    console.log('Firebase user signed out.');
+                } else if (guestUserId) {
+                    localStorage.removeItem('guestUserId');
+                    guestUserId = null;
+                    console.log('Guest user data cleared.');
+                }
+                showMessageBox('You have been logged out successfully.');
+                updateAuthUI(null); // This will re-show the login modal if no guest ID
+                closeAllModals(); // Close all custom modals
+            } catch (error) {
+                console.error('Logout Error:', error.message);
+                showMessageBox(`Logout failed: ${error.message}`);
+            } finally {
+                // Removed hideFullScreenLoading call as it is no longer defined
+            }
+        }
+
+        function handleClearHistory() {
+            console.log('Handling clear history.');
+            showMessageBox(
+                'Are you sure you want to clear your chat history? This action cannot be undone.',
+                () => {
+                    const currentActiveUserId = currentUser ? currentUser.uid : guestUserId;
+                    if (currentActiveUserId) {
+                        localStorage.removeItem(getChatHistoryKey(currentActiveUserId));
+                        chatMessages.innerHTML = '';
+                        displayMessage("Hello! I'm Ada, your AI assistant. How can I help you today?", 'ai', new Date(), false);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                        showMessageBox('Chat history cleared successfully!');
+                    } else {
+                        showMessageBox('No chat history to clear.');
+                    }
+                    closeAllModals(); // Close settings modal after clearing
+                },
+                () => {
+                    hideMessageBox();
+                }
+            );
+        }
+
+        // --- Original sendMessage function (for text input) ---
+        async function sendMessage() {
+            console.log('Attempting to send message.');
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            displayMessage(message, 'user', new Date());
+            userInput.value = '';
+
+            // Determine loading message based on user input
+            let loadingMessage = 'Ada is typing';
+            const lowerCaseMessage = message.toLowerCase();
+
+            if (lowerCaseMessage.startsWith('image ')) {
+                loadingMessage = 'Generating image';
+            } else if (lowerCaseMessage.startsWith('search ')) {
+                loadingMessage = 'Searching';
+            } else if (lowerCaseMessage.includes('youtube')) {
+                loadingMessage = 'Fetching YouTube video';
+            }
+            showLoading(loadingMessage);
+
+            let userIdToSend;
+            if (currentUser) {
+                userIdToSend = currentUser.uid;
+            } else if (guestUserId) {
+                userIdToSend = guestUserId;
+            } else {
+                handleGuestMode();
+                userIdToSend = guestUserId;
+            }
+            console.log('User ID for API:', userIdToSend);
+
+            const payload = { message: message, user_id: userIdToSend };
+            console.log('Sending request to API:', API_ENDPOINT, 'with payload:', payload);
+
+            let fullResponse = ''; // To accumulate the full response for display and storage
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let done, value;
+
+                while (true) {
+                    ({ value, done } = await reader.read());
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    console.log('Received chunk:', chunk);
+
+                    // Check if the chunk is a JSON error or image response
+                    try {
+                        const parsedChunk = JSON.parse(chunk);
+                        if (parsedChunk.response && parsedChunk.response.startsWith("[IMAGE_BASE64]:")) {
+                            // This is an image response, handle it as a single chunk
+                            fullResponse = parsedChunk.response;
+                            console.log("Received image data, stopping text streaming.");
+                            break; // Exit the streaming loop
+                        } else if (parsedChunk.response) {
+                            // This might be a non-streaming text response wrapped in JSON (e.g., search/youtube)
+                            fullResponse = parsedChunk.response;
+                            console.log("Received full text response in JSON, stopping text streaming.");
+                            break; // Exit the streaming loop
+                        }
+                    } catch (e) {
+                        // Not a JSON chunk, assume it's streaming text
+                    }
+
+                    fullResponse += chunk;
+                    // Update the last message bubble with streaming text
+                    if (currentLoadingIndicator) {
+                        const messageBubble = currentLoadingIndicator.querySelector('.message-bubble');
+                        if (messageBubble) {
+                            messageBubble.innerHTML = convertMarkdownToHtml(fullResponse);
+                            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+                        }
+                    }
+                }
+
+                hideLoading(); // Hide the loading indicator
+                displayMessage(fullResponse, 'ai', new Date()); // Display the final message and save it
+
+                if (!guestUserId && payload.user_id) { // Use payload.user_id as it's the one sent
+                    guestUserId = payload.user_id;
+                    localStorage.setItem('guestUserId', guestUserId);
+                    console.log('New guestUserId set from API request payload:', guestUserId);
+                }
+
+            } catch (error) {
+                hideLoading();
+                console.error('Error sending message:', error);
+                showMessageBox("Oops! I'm having trouble connecting right now. Please check your internet connection or try again later.");
+                // Ensure error message is displayed and saved if an error occurs during streaming
+                displayMessage(`Error: ${error.message}`, 'ai', new Date());
+            }
+        }
+
+        // --- NEW: sendVoiceMessage function for streaming responses ---
+        async function sendVoiceMessage(message) {
+            console.log('Attempting to send voice message:', message);
+            displayMessage(message, 'user', new Date()); // Display user's spoken message
+
+            const selectedLangCode = conversationLanguageSelect.value;
+            const currentThinkingMessage = thinkingMessages[selectedLangCode] || thinkingMessages['en-US'];
+            conversationTextFeedback.textContent = currentThinkingMessage; // Show thinking message in conversation mode
+
+            let userIdToSend;
+            if (currentUser) {
+                userIdToSend = currentUser.uid;
+            } else if (guestUserId) {
+                userIdToSend = guestUserId;
+            } else {
+                handleGuestMode();
+                userIdToSend = guestUserId;
+            }
+
+            const payload = { message: message, user_id: userIdToSend };
+            console.log('Sending voice request to API (streaming):', API_ENDPOINT, 'with payload:', payload);
+
+            let fullResponse = ''; // To accumulate the full response for display and storage
+            let sentenceBuffer = ''; // To buffer text for speech synthesis
+            let lastSpokenIndex = 0; // Track how much of the full response has been spoken
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let done, value;
+
+                // Create a temporary element to display streaming text in conversation mode
+                const aiResponseDisplay = document.createElement('span');
+                aiResponseDisplay.textContent = ''; // Start empty
+                conversationTextFeedback.textContent = ''; // Clear "You said" or "Thinking"
+                conversationTextFeedback.appendChild(aiResponseDisplay); // Add the span for streaming text
+
+                while (true) {
+                    ({ value, done } = await reader.read());
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    console.log('Received chunk:', chunk);
+
+                    // Check if the chunk is a JSON error or image response
+                    try {
+                        const parsedChunk = JSON.parse(chunk);
+                        if (parsedChunk.response && parsedChunk.response.startsWith("[IMAGE_BASE64]:")) {
+                            // This is an image response, handle it as a single chunk
+                            fullResponse = parsedChunk.response;
+                            console.log("Received image data, stopping text streaming.");
+                            break; // Exit the streaming loop
+                        } else if (parsedChunk.response) {
+                            // This might be a non-streaming text response wrapped in JSON (e.g., search/youtube)
+                            fullResponse = parsedChunk.response;
+                            aiResponseDisplay.textContent = fullResponse; // Display full text
+                            speakText(fullResponse, selectedLangCode); // Speak full text
+                            console.log("Received full text response in JSON, stopping text streaming.");
+                            break; // Exit the streaming loop
+                        }
+                    } catch (e) {
+                        // Not a JSON chunk, assume it's streaming text
+                    }
+
+                    fullResponse += chunk;
+                    aiResponseDisplay.textContent = fullResponse; // Update display with new chunk
+                    conversationTextFeedback.scrollTop = conversationTextFeedback.scrollHeight; // Scroll to bottom
+
+                    sentenceBuffer += chunk;
+
+                    // Speak sentences as they complete (look for punctuation)
+                    const sentences = sentenceBuffer.match(/[^.!?]+[.!?]+/g);
+                    if (sentences) {
+                        for (const sentence of sentences) {
+                            speakText(sentence.trim(), selectedLangCode);
+                            sentenceBuffer = sentenceBuffer.replace(sentence, ''); // Remove spoken sentence from buffer
+                        }
+                    }
+                }
+
+                // Speak any remaining text in the buffer after the stream ends
+                if (sentenceBuffer.trim().length > 0) {
+                    speakText(sentenceBuffer.trim(), selectedLangCode);
+                }
+
+                // If it was an image, display it in the main chat
+                const IMAGE_PREFIX = "[IMAGE_BASE64]:";
+                if (fullResponse.startsWith(IMAGE_PREFIX)) {
+                    displayMessage(fullResponse, 'ai', new Date());
+                    conversationTextFeedback.textContent = 'Image generated!'; // Clear streaming text feedback
+                } else {
+                    // For text responses, update the main chat display and save
+                    displayMessage(fullResponse, 'ai', new Date());
+                    conversationTextFeedback.textContent = 'Response complete.'; // Final feedback
+                }
+
+            } catch (error) {
+                console.error('Error during voice message streaming:', error);
+                const errorMessage = "Oops! I'm having trouble processing your voice right now. Please try again or type your message.";
+                conversationTextFeedback.textContent = errorMessage; // Display error in conversation mode
+                speakText(errorMessage, selectedLangCode); // Speak error in current language
+                // If an error occurs, ensure the fullResponse is set to the error message for saving
+                fullResponse = errorMessage;
+            } finally {
+                hideLoading(); // Hide the chat loading indicator
+                // No need to hide conversation overlay here, user can close it manually
+            }
+        }
+
+        // --- Speak Text Function (UPDATED for streaming) ---
+        function speakText(text, lang = 'en-US') {
+            if (SpeechSynthesis && text.trim().length > 0) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang;
+                utterance.pitch = 1;
+                utterance.rate = 1;
+                SpeechSynthesis.speak(utterance);
+
+                utterance.onend = () => {
+                    console.log('Speech synthesis ended for:', text);
+                };
+
+                utterance.onerror = (event) => {
+                    console.error('Speech synthesis error:', event.error, 'for text:', text);
+                };
+            } else {
+                console.warn('Speech Synthesis API not supported or empty text provided.');
+            }
+        }
+
+        // --- UUID Generator (for guest mode) ---
+        function uuidv4() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // --- Modal Management Functions ---
+        function initializeCustomModals() {
+            console.log('Initializing custom modals.');
+            // Account Modal setup
+            accountModalOverlay = document.createElement('div');
+            accountModalOverlay.classList.add('custom-popup-overlay');
+            accountModalOverlay.innerHTML = `
+                <div class="custom-popup">
+                    <div class="custom-popup-header">
+                        <button class="custom-popup-close" id="account-close-btn">&times;</button>
+                    </div>
+                    <div class="custom-popup-content">
+                        <img id="account-profile-pic" class="custom-popup-profile-pic" src="" alt="Profile Picture">
+                        <div id="account-email" class="custom-popup-email"></div>
+                        <button id="account-logout-btn" class="custom-popup-button">Logout</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(accountModalOverlay);
+            accountProfilePic = document.getElementById('account-profile-pic');
+            accountEmail = document.getElementById('account-email');
+            accountLogoutBtn = document.getElementById('account-logout-btn');
+            accountCloseBtn = document.getElementById('account-close-btn');
+
+            // Settings Modal setup
+            settingsModalOverlay = document.createElement('div');
+            settingsModalOverlay.classList.add('custom-popup-overlay');
+            settingsModalOverlay.innerHTML = `
+                <div class="custom-popup">
+                    <div class="custom-popup-header">
+                        <button class="custom-popup-close" id="settings-close-btn">&times;</button>
+                    </div>
+                    <div class="custom-popup-content">
+                        <div class="dark-mode-toggle-container">
+                            <span>Dark Mode</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="dark-mode-switch">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <button id="settings-clear-history-btn" class="custom-popup-button">Clear History</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(settingsModalOverlay);
+            darkModeSwitch = document.getElementById('dark-mode-switch');
+            settingsClearHistoryBtn = document.getElementById('settings-clear-history-btn');
+            settingsCloseBtn = document.getElementById('settings-close-btn');
+
+            // Help Modal setup
+            helpModalOverlay = document.createElement('div');
+            helpModalOverlay.classList.add('custom-popup-overlay');
+            helpModalOverlay.innerHTML = `
+                <div class="custom-popup">
+                    <div class="custom-popup-header">
+                        <button class="custom-popup-close" id="help-close-btn">&times;</button>
+                    </div>
+                    <div class="custom-popup-content">
+                        <p class="help-text-content">
+                            Ada Aranag is your intelligent assistant designed to provide quick answers and engaging conversations. Whether you need help with information, want to explore new ideas, or just have a friendly chat, Ada is here to assist you. Our chatbot leverages advanced AI technology to understand your queries and respond thoughtfully. Feel free to ask questions, seek advice, or simply enjoy a conversation. Your privacy and data security are important to us, and we strive to offer a seamless and helpful experience. Explore the features, customize your settings, and make the most out of your interaction with Ada Aranag.
+                            <br><br>
+                            <strong>New Feature: Image Generation!</strong>
+                            <br>
+                            You can now ask Ada to generate images. Simply start your message with "image" followed by a description of what you want to see. For example:
+                            <ul>
+                                <li><code>image monkey sitting on eiffel tower</code></li>
+                                <li><code>image chicken going to KFC</code></li>
+                                <li><code>image a futuristic city at sunset</code></li>
+                            </ul>
+                            Please note that image generation may take a few moments.
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(helpModalOverlay);
+            helpCloseBtn = document.getElementById('help-close-btn');
+
+            // Add event listeners for the dynamically created elements
+            if (accountCloseBtn) accountCloseBtn.addEventListener('click', () => { accountModalOverlay.classList.remove('active'); document.body.style.overflow = ''; console.log('Account modal closed.'); });
+            if (accountLogoutBtn) accountLogoutBtn.addEventListener('click', handleLogout);
+            if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', () => { settingsModalOverlay.classList.remove('active'); document.body.style.overflow = ''; console.log('Settings modal closed.'); });
+            if (darkModeSwitch) darkModeSwitch.addEventListener('change', toggleDarkMode);
+            if (settingsClearHistoryBtn) settingsClearHistoryBtn.addEventListener('click', handleClearHistory);
+            if (helpCloseBtn) helpCloseBtn.addEventListener('click', () => { helpModalOverlay.classList.remove('active'); document.body.style.overflow = ''; console.log('Help modal closed.'); });
+
+            // Close modals when clicking on the overlay itself
+            if (accountModalOverlay) accountModalOverlay.addEventListener('click', (event) => { if (event.target === accountModalOverlay) { accountModalOverlay.classList.remove('active'); document.body.style.overflow = ''; console.log('Account modal overlay clicked, closed.'); } });
+            if (settingsModalOverlay) settingsModalOverlay.addEventListener('click', (event) => { if (event.target === settingsModalOverlay) { settingsModalOverlay.classList.remove('active'); document.body.style.overflow = ''; console.log('Settings modal overlay clicked, closed.'); } });
+            if (helpModalOverlay) helpModalOverlay.addEventListener('click', (event) => { if (event.target === helpModalOverlay) { helpModalOverlay.classList.remove('active'); document.body.style.overflow = ''; console.log('Help modal overlay clicked, closed.'); } });
+            console.log('Custom modal event listeners attached.');
+        }
+
+
+        function closeAllModals() {
+            console.log('Closing all modals.');
+            userProfileOptionsModal.classList.remove('active');
+            if (accountModalOverlay) accountModalOverlay.classList.remove('active');
+            if (settingsModalOverlay) settingsModalOverlay.classList.remove('active');
+            if (helpModalOverlay) helpModalOverlay.classList.remove('active');
+            if (fullscreenImageModal) fullscreenImageModal.classList.remove('active'); // Close fullscreen image modal
+            if (keywordSelectorModal) keywordSelectorModal.classList.remove('active'); // Close keyword selector modal
+            if (conversationModeOverlay) {
+                conversationModeOverlay.classList.remove('active'); // Close conversation mode
+                if (isListening && recognition) {
+                    recognition.stop(); // Stop listening if active
+                }
+                if (SpeechSynthesis.speaking) {
+                    SpeechSynthesis.cancel(); // Stop speaking if active
+                }
+            }
+            document.body.style.overflow = ''; // Enable background scroll
+        }
+
+        // --- Event Listeners ---
+
+        if (sendButton) sendButton.addEventListener('click', sendMessage);
+        if (userInput) userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        console.log('Send button and user input event listeners attached.');
+
+        if (emailAuthButton) emailAuthButton.addEventListener('click', handleEmailAuth);
+        if (googleSignInButton) googleSignInButton.addEventListener('click', handleGoogleSignIn);
+        if (guestButton) guestButton.addEventListener('click', handleGuestMode);
+        if (toggleAuthMode) toggleAuthMode.addEventListener('click', toggleAuthModeUI);
+        console.log('Auth buttons event listeners attached.');
+
+        // Toggle User Profile Options Modal (the first pop-up)
+        if (userInfo) userInfo.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from closing immediately
+            console.log('User info clicked.');
+            closeAllModals(); // Close any other open modals first
+            userProfileOptionsModal.classList.toggle('active');
+            
+            // Position the options modal dynamically below the user-info element
+            const rect = userInfo.getBoundingClientRect();
+            userProfileOptionsModal.style.top = `${rect.bottom + window.scrollY + 5}px`; // 5px buffer
+            userProfileOptionsModal.style.right = `${window.innerWidth - rect.right}px`;
+        });
+        console.log('User info event listener attached.');
+
+        // Click listeners for buttons inside userProfileOptionsModal
+        if (profileAccountBtn) profileAccountBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from closing
+            console.log('Profile Account button clicked.');
+            closeAllModals(); // Close options modal
+            if (currentUser) {
+                accountProfilePic.src = currentUser.photoURL || genericPersonSvgDataUri;
+                accountEmail.textContent = currentUser.email ? `Email: ${currentUser.email}` : 'Signed in with Google';
+            } else if (guestUserId) {
+                accountProfilePic.src = genericPersonSvgDataUri;
+                accountEmail.textContent = 'Guest Account';
+            }
+            accountModalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Disable background scroll
+        });
+
+        if (profileSettingsBtn) profileSettingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Profile Settings button clicked.');
+            closeAllModals();
+            darkModeSwitch.checked = document.body.classList.contains('dark-mode'); // Set initial state
+            settingsModalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Disable background scroll
+        });
+
+        if (profileHelpBtn) profileHelpBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Profile Help button clicked.');
+            closeAllModals();
+            helpModalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Disable background scroll
+        });
+        console.log('Profile option buttons event listeners attached.');
+
+        // Close any open modal if clicked outside
+        document.addEventListener('click', (event) => {
+            // Check if the click target is NOT the keyword selector button itself
+            // and NOT the keyword selector modal, and NOT other modals/elements that manage their own closing
+            if (event.target !== keywordSelectorBtn && !keywordSelectorModal.contains(event.target) &&
+                !messageBoxOverlay.contains(event.target) && !fullscreenImageModal.contains(event.target) &&
+                !openConversationModeBtn.contains(event.target) && !conversationModeOverlay.contains(event.target) && // NEW: Exclude conversation mode elements
+                (accountModalOverlay && !accountModalOverlay.contains(event.target)) &&
+                (settingsModalOverlay && !settingsModalOverlay.contains(event.target)) &&
+                (helpModalOverlay && !helpModalOverlay.contains(event.target))) {
+                
+                // Close user profile options modal if open and click outside userInfo and modal
+                if (userProfileOptionsModal.classList.contains('active') &&
+                    !userProfileOptionsModal.contains(event.target) &&
+                    !userInfo.contains(event.target)) {
+                    userProfileOptionsModal.classList.remove('active');
+                    console.log('User profile options modal closed by outside click.');
+                }
+
+                // Only close the keyword selector modal if it's currently active
+                if (keywordSelectorModal.classList.contains('active')) {
+                    keywordSelectorModal.classList.remove('active');
+                    console.log('Keyword selector modal closed by outside click.');
+                }
+                // Other modals are handled by their own overlay click listeners or specific closeAllModals calls
+                // No need to call closeAllModals here, as it would close everything including the one just opened
+            }
+        });
+        console.log('Global document click listener attached.');
+
+        // Handle clicks on message box buttons
+        if (messageBoxConfirmButton) messageBoxConfirmButton.addEventListener('click', () => {
+            console.log('Message box confirm clicked.');
+            if (messageBoxConfirmCallback) {
+                messageBoxConfirmCallback();
+            }
+            hideMessageBox();
+        });
+
+        if (messageBoxCancelButton) messageBoxCancelButton.addEventListener('click', () => {
+            console.log('Message box cancel clicked.');
+            if (messageBoxCancelCallback) {
+                messageBoxCancelCallback();
+            }
+            hideMessageBox();
+        });
+
+        if (messageBoxOverlay) messageBoxOverlay.addEventListener('click', (event) => {
+            if (event.target === messageBoxOverlay) {
+                hideMessageBox();
+                console.log('Message box overlay clicked, closed.');
+            }
+        });
+        console.log('Message box event listeners attached.');
+
+        // Full-screen image modal event listeners (NEW)
+        if (fullscreenCloseBtn) fullscreenCloseBtn.addEventListener('click', () => {
+            console.log('Fullscreen close button clicked.');
+            fullscreenImageModal.classList.remove('active');
+            document.body.style.overflow = ''; // Re-enable background scroll
+        });
+
+        if (downloadImageBtn) downloadImageBtn.addEventListener('click', () => {
+            console.log('Download image button clicked.');
+            const imageUrl = fullscreenImageDisplay.src;
+            if (imageUrl) {
+                const a = document.createElement('a');
+                a.href = imageUrl;
+                a.download = 'generated_image.jpg'; // You can make this more dynamic later
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                console.log('Image download initiated.');
+            }
+        });
+
+        if (fullscreenImageModal) fullscreenImageModal.addEventListener('click', (event) => {
+            if (event.target === fullscreenImageModal) {
+                fullscreenImageModal.classList.remove('active');
+                document.body.style.overflow = '';
+                console.log('Fullscreen image modal overlay clicked, closed.');
+            }
+        });
+        console.log('Fullscreen image modal event listeners attached.');
+
+        // Keyword Selector Button and Modal Listeners (NEW)
+        if (keywordSelectorBtn) keywordSelectorBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from closing immediately
+            console.log('Keyword selector button clicked!'); // Debugging log
+            
+            // Close all other modals, but ensure this one isn't immediately closed by the document listener
+            // The document listener has been updated to be more selective.
+            userProfileOptionsModal.classList.remove('active');
+            if (accountModalOverlay) accountModalOverlay.classList.remove('active');
+            if (settingsModalOverlay) settingsModalOverlay.classList.remove('active');
+            if (helpModalOverlay) helpModalOverlay.classList.remove('active');
+            if (fullscreenImageModal) fullscreenImageModal.classList.remove('active');
+            if (conversationModeOverlay) conversationModeOverlay.classList.remove('active'); // Close conversation mode
+
+            keywordSelectorModal.classList.toggle('active');
+            console.log('Keyword selector modal toggled active state to:', keywordSelectorModal.classList.contains('active'));
+        });
+
+        if (keywordItems) keywordItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const keyword = item.dataset.keyword;
+                userInput.value = keyword;
+                keywordSelectorModal.classList.remove('active');
+                userInput.focus(); // Focus the input field after inserting keyword
+                console.log('Keyword selected:', keyword);
+            });
+        });
+        console.log('Keyword selector event listeners attached.');
+
+        // Conversation Mode Event Listeners (NEW)
+        if (openConversationModeBtn) openConversationModeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Open Conversation Mode button clicked.');
+            closeAllModals(); // Close other modals
+            conversationModeOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Disable background scroll
+            conversationTextFeedback.textContent = 'Tap the microphone to start talking.';
+            
+            // Set default language for recognition and synthesis when opening conversation mode
+            const defaultLang = 'en-US'; // You can change this default
+            if (recognition) recognition.lang = defaultLang;
+            if (conversationLanguageSelect) conversationLanguageSelect.value = defaultLang;
+            // No need to call speakText here, as it's just opening the mode
+        });
+
+        if (conversationCloseBtn) conversationCloseBtn.addEventListener('click', () => {
+            console.log('Conversation mode close button clicked.');
+            closeAllModals(); // This will close the conversation mode overlay
+            // Stopping recognition and synthesis is now handled within closeAllModals
+        });
+
+        if (conversationCancelBtn) conversationCancelBtn.addEventListener('click', () => {
+            console.log('Conversation mode cancel button clicked.');
+            if (isListening && recognition) {
+                recognition.stop(); // Stop listening if active
+            }
+            if (SpeechSynthesis.speaking) {
+                SpeechSynthesis.cancel(); // Stop speaking if active
+            }
+            conversationTextFeedback.textContent = 'Conversation cancelled. Tap the microphone to start talking.';
+            conversationMicBtn.classList.remove('active', 'pressed'); // Ensure pressed is removed
+            conversationCircle.classList.remove('listening', 'pressed'); // Ensure pressed is removed
+        });
+
+        if (conversationMicBtn) {
+            // Add touchstart/touchend for immediate visual feedback
+            conversationMicBtn.addEventListener('touchstart', () => {
+                conversationMicBtn.classList.add('pressed');
+                conversationCircle.classList.add('pressed');
+            });
+            conversationMicBtn.addEventListener('touchend', () => {
+                conversationMicBtn.classList.remove('pressed');
+                conversationCircle.classList.remove('pressed');
+            });
+
+            conversationMicBtn.addEventListener('click', () => {
+                console.log('Conversation mic button clicked. isListening:', isListening);
+                if (isListening) {
+                    recognition.stop(); // Stop listening
+                } else {
+                    // Ensure previous speech is cancelled before starting new recognition
+                    if (SpeechSynthesis.speaking) {
+                        SpeechSynthesis.cancel();
+                    }
+                    recognition.start(); // Start listening
+                }
+            });
+        }
+
+        // Event listener for language selection dropdown (NEW)
+        if (conversationLanguageSelect) {
+            conversationLanguageSelect.addEventListener('change', (event) => {
+                const selectedLang = event.target.value;
+                console.log('Conversation language changed to:', selectedLang);
+                if (recognition) {
+                    recognition.lang = selectedLang;
+                    // If currently listening, stop and restart to apply new language
+                    if (isListening) {
+                        recognition.stop();
+                        // A small delay before restarting can help some browsers
+                        setTimeout(() => recognition.start(), 100); 
+                    }
+                }
+            });
+        }
+        console.log('Conversation mode event listeners attached.');
+
+        // Firebase Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            console.log('Firebase auth state changed.');
+            // Removed showFullScreenLoading call as per request
+            updateAuthUI(user); // updateAuthUI will now hide the spinner at its end
+        });
+        console.log('Firebase auth state listener attached.');
+
+        // Initial DOMContentLoaded logic
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded event fired.');
+            initializeCustomModals(); // Initialize new modals and their event listeners
+            applyDarkModePreference(); // Apply dark mode preference on initial load
+            // Removed comment about full-screen spinner for initial load as it is removed now
+        });
+        console.log('Script execution finished.');
+    </script>
+</body>
+</html>

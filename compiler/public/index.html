@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Compiler</title>
+    <link rel="icon" type="image/x-icon" href="https://compiler.aranag.site/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0f16;
+            color: #c9d1d9;
+            background: radial-gradient(at 50% 120%, rgba(20, 30, 40, 0.5), transparent), #0c0f16;
+            overflow-x: hidden;
+        }
+        .compiler-card {
+            transition: transform 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: rgba(30, 41, 59, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: pulse-border 3s infinite;
+        }
+        .compiler-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -2px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(74, 144, 226, 0.2), rgba(144, 19, 254, 0.2));
+            transition: opacity 0.4s ease;
+            opacity: 0;
+        }
+        .compiler-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: none;
+        }
+        .compiler-card:hover::before {
+            opacity: 1;
+        }
+        .icon-container {
+            transition: all 0.4s ease-in-out;
+        }
+        .compiler-card:hover .icon-container {
+            transform: scale(1.1);
+        }
+        .logo {
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1));
+        }
+        .message-box {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .message-content {
+            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes pulse-border {
+            0% {
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+            100% {
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+        
+        .typewriter h1 {
+            white-space: normal; 
+            overflow: hidden; 
+            letter-spacing: .05em; 
+        }
+        .scroll-down-arrow {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .code-block {
+            position: absolute;
+            font-family: monospace;
+            pointer-events: none;
+            user-select: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            animation: float 15s infinite ease-in-out;
+            color: rgba(255, 255, 255, 1);
+        }
+        .code-block:nth-child(1) { top: 10%; left: 5%; animation-duration: 18s; animation-delay: 1s; font-size: 12px; }
+        .code-block:nth-child(2) { top: 30%; right: 10%; animation-duration: 12s; animation-delay: 3s; font-size: 10px; }
+        .code-block:nth-child(3) { bottom: 20%; left: 20%; animation-duration: 20s; animation-delay: 5s; font-size: 14px; }
+        .code-block:nth-child(4) { top: 50%; left: 40%; animation-duration: 16s; animation-delay: 2s; font-size: 11px; }
+        .code-block:nth-child(5) { bottom: 5%; right: 25%; animation-duration: 22s; animation-delay: 6s; font-size: 13px; }
+        .code-block:nth-child(6) { top: 60%; left: 15%; animation-duration: 17s; animation-delay: 4s; font-size: 15px; }
+        .code-block:nth-child(7) { top: 80%; right: 5%; animation-duration: 19s; animation-delay: 7s; font-size: 10px; }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(10px, 15px); }
+            50% { transform: translate(0, 0); }
+            75% { transform: translate(-15px, -10px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .glowing-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(128, 0, 128, 0.1), transparent), radial-gradient(circle at 100% 0%, rgba(0, 128, 128, 0.1), transparent);
+            background-size: 200% 200%;
+            animation: glowing-pan 20s linear infinite;
+            z-index: -10;
+        }
+
+        @keyframes glowing-pan {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .sub-text-fade {
+            animation: fadeInDown 2s ease-in-out forwards;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .social-link {
+            transition: all 0.3s ease-in-out;
+            background: rgba(30, 41, 59, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .social-link:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .social-link i {
+            transition: color 0.3s ease-in-out;
+        }
+        .social-link.facebook:hover i { color: #1877f2; }
+        .social-link.instagram:hover i { color: #e4405f; }
+        .social-link.twitter:hover i { color: #1da1f2; }
+        .social-link.discord:hover i { color: #5865f2; }
+        .social-link.telegram:hover i { color: #0088cc; }
+        .social-link.linkedin:hover i { color: #0a66c2; }
+        .social-link.github:hover i { color: #fff; }
+        .social-link.steam:hover i { color: #00adee; }
+        .social-link.epic:hover i { color: #ff0000; }
+
+        /* Swipe Button Style */
+        .btn-swipe {
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+            max-width: 100%;
+            text-transform: uppercase;
+            border: 1px solid currentColor;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 9999px;
+            transition: color 0.5s ease-in-out;
+        }
+        .btn-swipe::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            transform: translateX(-100%);
+            transition: transform 0.5s ease-in-out;
+        }
+        .btn-swipe:hover {
+            color: #1a202c; /* Tailwind's gray-900 or a similar dark color */
+        }
+        .btn-swipe:hover::before {
+            transform: translateX(0);
+        }
+        
+        .btn-c {
+            color: #61DAFB;
+        }
+        .btn-c::before {
+            background-color: #61DAFB;
+        }
+        .btn-c:hover {
+            color: #0c0f16;
+        }
+
+        .btn-cpp {
+            color: #00599C;
+        }
+        .btn-cpp::before {
+            background-color: #00599C;
+        }
+        .btn-cpp:hover {
+            color: #0c0f16;
+        }
+
+        .btn-python {
+            color: #FFDE57;
+        }
+        .btn-python::before {
+            background-color: #FFDE57;
+        }
+        .btn-python:hover {
+            color: #0c0f16;
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+    <div class="glowing-background"></div>
+    <div id="top" class="relative min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 overflow-hidden">
+        <div class="code-block" style="opacity: 0.1;">const greeting = "Hello World";</div>
+        <div class="code-block" style="opacity: 0.1;">.btn { display: flex; }</div>
+        <div class="code-block" style="opacity: 0.1;">#include &lt;iostream&gt;</div>
+        <div class="code-block" style="opacity: 0.1;">const PI = 3.14;</div>
+        <div class="code-block" style="opacity: 0.1;">def hello_world():</div>
+        <div class="code-block" style="opacity: 0.1;">&lt;div class="container"&gt;&lt;/div&gt;</div>
+        <div class="code-block" style="opacity: 0.1;">std::cout << "Hello C++";</div>
+
+        <header class="text-center mb-16 z-10" data-aos="fade-up">
+            <div class="typewriter max-w-4xl mx-auto">
+                <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4 tracking-tight">
+                    Your AI-Powered Code Lab
+                </h1>
+            </div>
+            <p class="sub-text-fade opacity-0 text-base sm:text-lg md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mt-4">
+                Unlock the future of coding with intelligent assistance and lightning-fast compilation.
+            </p>
+        </header>
+        
+        <a href="#main-content" class="absolute bottom-12 scroll-down-arrow z-10">
+            <svg class="w-12 h-12 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21L12 3M12 21L17 16M12 21L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+    </div>
+
+    <main id="main-content" class="w-full max-w-5xl mx-auto px-6 sm:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-aos="fade-up">
+            <!-- C Compiler Card -->
+            <div id="c-card" class="compiler-card p-8 rounded-3xl flex flex-col items-center text-center shadow-lg">
+                <div class="icon-container rounded-full p-5 mb-6">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/C_Programming_Language.svg/380px-C_Programming_Language.svg.png?20201031132917" alt="C Logo" class="w-16 h-16 logo">
+                </div>
+                <h2 class="text-2xl font-bold mb-2">C</h2>
+                <p class="text-gray-400 text-sm mb-4">Compile and run your C code with AI assistance.</p>
+                <a href="https://compiler.aranag.site/c" class="btn-swipe btn-c w-full text-center">Open Compiler</a>
+            </div>
+
+            <!-- C++ Compiler Card -->
+            <div id="cpp-card" class="compiler-card p-8 rounded-3xl flex flex-col items-center text-center shadow-lg">
+                <div class="icon-container rounded-full p-5 mb-6">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg" alt="C++ Logo" class="w-16 h-16 logo">
+                </div>
+                <h2 class="text-2xl font-bold mb-2">C++</h2>
+                <p class="text-gray-400 text-sm mb-4">Experience next-level C++ development with AI tools.</p>
+                <a href="https://compiler.aranag.site/cpp" class="btn-swipe btn-cpp w-full text-center">Open Compiler</a>
+            </div>
+
+            <!-- Python Compiler Card -->
+            <div id="python-card" class="compiler-card p-8 rounded-3xl flex flex-col items-center text-center shadow-lg">
+                <div class="icon-container rounded-full p-5 mb-6">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python Logo" class="w-16 h-16 logo">
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Python</h2>
+                <p class="text-gray-400 text-sm mb-4">Write, run, and debug Python code with smart AI suggestions.</p>
+                <a href="https://compiler.aranag.site/python" class="btn-swipe btn-python w-full text-center">Open Compiler</a>
+            </div>
+        </div>
+
+        <center><p class="text-xs text-gray-500 mt-4 italic">More compilers are coming soon...</p></center>
+        
+        <!-- A Developer's Companion Section -->
+        <section class="mt-24 text-center" data-aos="fade-up">
+            <h2 class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 mb-10">
+                A Developer's Companion
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="compiler-card p-6 rounded-2xl text-left">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl text-yellow-400 mr-4">💡</span>
+                        <h3 class="text-xl font-bold">Smart Code Suggestions</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Our AI provides intelligent, context-aware suggestions to accelerate your coding and reduce errors.</p>
+                </div>
+                <div class="compiler-card p-6 rounded-2xl text-left">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl text-red-400 mr-4">🐛</span>
+                        <h3 class="text-xl font-bold">Advanced Debugging</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Get real-time feedback on your code with detailed explanations and fixes for common bugs.</p>
+                </div>
+                <div class="compiler-card p-6 rounded-2xl text-left">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl text-green-400 mr-4">⚡️</span>
+                        <h3 class="text-xl font-bold">Lightning-Fast Compilation</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Compile and execute your code in a fraction of the time with our highly optimized servers.</p>
+                </div>
+                <div class="compiler-card p-6 rounded-2xl text-left">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl text-indigo-400 mr-4">☁️</span>
+                        <h3 class="text-xl font-bold">Cloud-Based IDE</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Access your projects from anywhere, on any device. No setup or installation required.</p>
+                </div>
+                <div class="compiler-card p-6 rounded-2xl text-left">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl text-cyan-400 mr-4">🤖</span>
+                        <h3 class="text-xl font-bold">AI Code Generation</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Generate entire functions or components from a simple description, saving you valuable time.</p>
+                </div>
+                <div class="compiler-card p-6 rounded-2xl text-left">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl text-orange-400 mr-4">🤝</span>
+                        <h3 class="text-xl font-bold">Collaborate in Real-Time</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Share your code and work on projects with others, all within our collaborative environment.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- New AI Code Assistant Section -->
+        <div class="mt-24 text-center" data-aos="fade-up">
+            <h2 class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500 mb-6">
+                ✨ AI Code Assistant ✨
+            </h2>
+            <div class="compiler-card p-8 rounded-3xl flex flex-col items-center text-center shadow-lg">
+                <p class="text-gray-400 text-base mb-4 max-w-2xl">
+                    Need help with your code? Ask our AI to generate a snippet, explain a concept, or solve a problem.
+                </p>
+                <textarea id="ai-prompt-input" class="w-full h-28 bg-gray-800 text-gray-200 p-4 rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none" placeholder="e.g., 'Write a Python function to check for a palindrome.'"></textarea>
+                <button id="ai-generate-btn" class="mt-6 w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-200">
+                    Generate Code ✨
+                </button>
+                <div id="ai-response-container" class="mt-6 w-full text-left bg-gray-900 p-4 rounded-xl border border-gray-700 hidden">
+                    <pre id="ai-response-text" class="whitespace-pre-wrap text-sm text-gray-300"></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Follow Me Everywhere Section -->
+        <section class="mt-24 text-center" data-aos="fade-up">
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">Follow Me Everywhere</h2>
+            <div class="flex flex-wrap justify-center items-center gap-6 md:gap-8 max-w-4xl mx-auto">
+                <a href="https://facebook.com/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link facebook w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-facebook-f text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                <a href="https://instagram.com/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link instagram w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-instagram text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                <a href="https://twitter.com/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link twitter w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-twitter text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                <a href="https://discord.com/users/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link discord w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-discord text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                <a href="https://t.me/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link telegram w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-telegram-plane text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                <a href="https://linkedin.com/in/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link linkedin w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-linkedin-in text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                <a href="https://github.com/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link github w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-github text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                 <a href="https://steamcommunity.com/id/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link steam w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fab fa-steam text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+                <a href="https://www.epicgames.com/id/notamitgamer" target="_blank" rel="noopener noreferrer" class="social-link epic w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-gamepad text-2xl sm:text-3xl text-gray-400"></i>
+                </a>
+            </div>
+            <a href="https://aranag.site"><p class="text-lg text-gray-400 mt-10">aranag.site</p></a>
+            <a href="https://wa.me/917278779512?text=hi"><p class="text-lg text-gray-400 mt-2 flex items-center justify-center"><i class="fab fa-whatsapp text-green-500 mr-2"></i> 7278779512</p></a>
+            <p class="text-xs text-gray-500 mt-4 italic">Note: Other account with my name is either not my account or fake one</p>
+        </section>
+    </main>
+    <footer class="mt-20 text-center text-gray-500 text-sm">
+        <p>&copy; 2025 AI Code Compiler. All rights reserved.</p>
+    </footer>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init();
+            
+            // Typewriter effect logic
+            const headerText = "Your AI-Powered Code Lab";
+            const h1Element = document.querySelector('.typewriter h1');
+            h1Element.textContent = ""; 
+            let i = 0;
+            const speed = 75;
+
+            function typeWriter() {
+                if (i < headerText.length) {
+                    h1Element.textContent += headerText.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, speed);
+                } else {
+                    document.querySelector('.sub-text-fade').style.animation = 'fadeInDown 2s ease-in-out forwards 1.5s';
+                }
+            }
+            setTimeout(typeWriter, 500);
+
+            const generateBtn = document.getElementById('ai-generate-btn');
+            const promptInput = document.getElementById('ai-prompt-input');
+            const responseContainer = document.getElementById('ai-response-container');
+            const responseText = document.getElementById('ai-response-text');
+
+            generateBtn.addEventListener('click', async () => {
+                const userPrompt = promptInput.value.trim();
+                if (!userPrompt) {
+                    responseText.textContent = 'Please enter a prompt to generate code.';
+                    responseContainer.classList.remove('hidden');
+                    return;
+                }
+                
+                generateBtn.textContent = 'Generating...';
+                generateBtn.disabled = true;
+                responseContainer.classList.remove('hidden');
+                responseText.textContent = 'Thinking...';
+                
+                const systemPrompt = "You are an expert code assistant. Your task is to respond to a user's request for code or explanations. Provide well-commented code snippets and clear, concise explanations. Use markdown for code formatting. If the request is not about code, politely state that you can only assist with code-related queries.";
+                const apiKey = "AIzaSyAi1FdeIJ4PzihkCrOGztdVHIyJ7xIoVQ0";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                let retryCount = 0;
+                const maxRetries = 3;
+                
+                const callApiWithRetry = async () => {
+                    try {
+                        const payload = {
+                            contents: [{ parts: [{ text: userPrompt }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] },
+                        };
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (!response.ok) {
+                            throw new Error(`API error: ${response.statusText}`);
+                        }
+                        const result = await response.json();
+                        const candidate = result?.candidates?.[0];
+                        if (candidate && candidate.content?.parts?.[0]?.text) {
+                            responseText.textContent = candidate.content.parts[0].text;
+                        } else {
+                            responseText.textContent = 'Sorry, I could not generate a response. Please try again.';
+                        }
+                    } catch (error) {
+                        console.error('Error during API call:', error);
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            const delay = Math.pow(2, retryCount) * 1000;
+                            await new Promise(res => setTimeout(res, delay));
+                            await callApiWithRetry();
+                        } else {
+                            responseText.textContent = 'An error occurred. Please try again later.';
+                        }
+                    } finally {
+                        generateBtn.textContent = 'Generate Code ✨';
+                        generateBtn.disabled = false;
+                    }
+                };
+
+                await callApiWithRetry();
+            });
+        });
+    </script>
+</body>
+</html>
