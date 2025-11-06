@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARANAG | NCT code</title>
+    <title>NCT Code</title>
     <!-- Link to Cascadia Code font from CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xz/fonts@1/serve/cascadia-code.min.css">
-    <link rel="icon" type="image/x-icon" href="https://aranag.site/nct.png">
     <style>
         /* Base styling for the entire page */
         body {
@@ -16,12 +15,95 @@
             /* Prioritize Cascadia Code, fall back to other monospaced fonts */
             font-family: 'Cascadia Code', 'Fira Code', 'Roboto Mono', monospace;
             color: white; /* Default text color for the page */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
 
         h1 {
             color: #f0f0f0; /* White for the main heading */
             text-align: center;
             margin-bottom: 20px;
+        }
+
+        /* Container for the tabs */
+        .tab-container {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Tab buttons styling */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #f0f0f0;
+            cursor: pointer;
+            transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px 5px 0 0;
+            margin: 0 5px;
+        }
+
+        .tab-button:hover {
+            color: #1abc9c;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            color: #1abc9c;
+            font-weight: bold;
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #1abc9c;
+            animation: tabUnderline 0.3s forwards;
+        }
+
+        @keyframes tabUnderline {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        /* Tab content styling */
+        .tab-content {
+            display: none;
+            padding: 15px 0;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Styling for the code block container */
@@ -40,761 +122,978 @@
             border: 1px solid #333; /* Subtle border */
         }
 
-        /* --- Syntax Highlighting Styles --- */
-        /* These classes are applied to <span> tags within the <pre> block */
-
-        /* HTML Tags (e.g., <div>, <p>, <h1>) */
-        .tag {
-            color: #569cd6; /* A shade of blue */
+        /* Download section styling */
+        .download-item {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            border: 1px solid #333;
         }
 
-        /* HTML Attributes (e.g., class, id, href) */
-        .attribute {
-            color: #9cd656; /* A shade of green */
+        .download-item h3 {
+            color: #1abc9c;
+            margin-bottom: 5px;
         }
 
-        /* HTML Attribute Values (e.g., "container", "text/css") */
-        .string {
-            color: #d69d66; /* A shade of orange/brown for strings */
+        .download-item p {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-bottom: 10px;
         }
 
-        /* CSS Selectors (e.g., .container, #id, h1) */
-        .selector {
-            color: #dcdcaa; /* A lighter yellow/gold */
+        .download-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        /* CSS Properties (e.g., background-color, font-size) */
-        .property {
-            color: #4ec9b0; /* A teal color */
+        .download-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
         }
 
-        /* CSS Values (e.g., black, 16px, center) */
-        .value {
-            color: #ce9178; /* A reddish-brown */
+        .download-button.thank-you {
+            background-color: #28a745;
+            cursor: default;
         }
 
-        /* Comments (HTML, CSS, and JavaScript) */
-        .comment {
-            color: #6a9955; /* A darker green */
-            font-style: italic;
+        /* Syntax Highlighting Styles (from original code) */
+        .tag { color: #569cd6; }
+        .attribute { color: #9cd656; }
+        .string { color: #d69d66; }
+        .selector { color: #dcdcaa; }
+        .property { color: #4ec9b0; }
+        .value { color: #ce9178; }
+        .comment { color: #6a9955; font-style: italic; }
+        .keyword { color: #c586c0; }
+        .js-identifier { color: #9cdcfe; }
+        .number { color: #b5cea8; }
+        .operator { color: #ff80ed; }
+        .punctuation { color: #f0f0f0; }
+        .highlight-h1 { color: #e65555; font-weight: bold; }
+        .highlight-u { color: #e6e655; font-weight: bold; text-decoration: underline; }
+
+        /* Original NCT app styles (modified to fit new structure) */
+        .logo {
+            font-size: 3em;
+            font-family: 'Roboto';
+            color: #fff;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.4);
+            margin-bottom: 10px;
+            animation: logoColorChange 3s ease infinite;
         }
 
-        /* JavaScript Keywords (e.g., const, function, return) */
-        .keyword {
-            color: #c586c0; /* Purple */
+        @keyframes logoColorChange {
+            0% { color: #FF416C; }
+            33% { color: #4285F4; }
+            66% { color: #34A853; }
+            100% { color: #FF416C; }
         }
 
-        /* JavaScript Variables/Identifiers (general names) */
-        .js-identifier {
-            color: #9cdcfe; /* Light blue */
+        .container { /* This will now be the main content area for the NCT app, not the whole page */
+            background: #fff;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px; /* Added margin to separate from tabs */
         }
 
-        /* Numbers in JavaScript/CSS */
-        .number {
-            color: #b5cea8; /* Light green */
+        /* Other NCT app styles from original code */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
 
-        /* JavaScript operators (e.g., =, +, -, ==, ===, =>) */
-        .operator {
-            color: #ff80ed; /* Pink/Magenta */
+        .popup-box {
+            text-align: center;
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
-        /* JavaScript punctuation (e.g., ;, ,, (, ), { }) */
-        .punctuation {
-            color: #f0f0f0; /* Off-white */
+        .popup-box h2 { margin-bottom: 15px; }
+        .popup-box button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .popup-box button:hover { background-color: #0056b3; }
+
+        .menu {
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Specific HTML elements highlighted for demonstration */
-        .highlight-h1 {
-            color: #e65555; /* Red */
+        .menu ul {
+            list-style: none;
+            display: flex;
+            padding: 0;
+            gap: 10px;
+        }
+
+        .menu li {
+            font-size: 1.2em;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .menu li:hover {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            transform: scale(1.05);
+        }
+
+        .input-section { margin-bottom: 20px; }
+        .input-section label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+            color: #34495e;
+        }
+
+        .input-section input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2em;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .input-section input:focus {
+            outline: none;
+            border-color: #1abc9c;
+            box-shadow: 0 4px 8px rgba(26, 188, 156, 0.4);
+        }
+
+        .actions button {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .actions button:hover {
+            background: linear-gradient(135deg, #16a085, #1abc9c);
+            transform: scale(1.05);
+        }
+        .support button {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #1abc9c, #16a100);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .support button:hover {
+            background: linear-gradient(135deg, #16a100, #1abc9c);
+            transform: scale(1.05);
+        }
+
+        .output {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .output h3 {
+            font-size: 1.3em;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        #stepsOutput {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #7f8c8d;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #resultOutput {
+            font-size: 1.4em;
             font-weight: bold;
+            color: #34495e;
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
-        .highlight-u {
-            color: #e6e655; /* Yellow */
-            font-weight: bold;
-            text-decoration: underline;
+        #otp-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          z-index: 1000;
+        }
+        #otp-modal div {
+          margin: 10% auto;
+          padding: 20px;
+          background: white;
+          width: 80%;
+          max-width: 400px;
+          text-align: center;
+          border-radius: 8px;
         }
 
     </style>
 </head>
 <body>
 
-    <h1>--- Code NCT | ARANAG ---</h1>
+    <h1>--- Code NCT  ---</h1>
 
-    <pre class="code-block">
-        <span class="tag">&lt;!DOCTYPE html&gt;</span>
-        <span class="tag">&lt;html</span> <span class="attribute">lang=</span><span class="string">"en"</span><span class="tag">&gt;</span>
-        <span class="tag">&lt;head&gt;</span>
-            <span class="tag">&lt;meta</span> <span class="attribute">charset=</span><span class="string">"UTF-8"</span><span class="tag">&gt;</span>
-            <span class="tag">&lt;meta</span> <span class="attribute">name=</span><span class="string">"viewport"</span> <span class="attribute">content=</span><span class="string">"width=device-width, initial-scale=1.0"</span><span class="tag">&gt;</span>
-            <span class="tag">&lt;title&gt;</span>Conversion Tool<span class="tag">&lt;/title&gt;</span>
-            <span class="tag">&lt;style&gt;</span>
-                <span class="comment">/* Full-screen popup overlay styling */</span>
-                <span class="selector">.popup-overlay</span> {
-                    <span class="property">position</span>: <span class="value">fixed</span>;
-                    <span class="property">top</span>: <span class="value">0</span>;
-                    <span class="property">left</span>: <span class="value">0</span>;
-                    <span class="property">width</span>: <span class="value">100%</span>;
-                    <span class="property">height</span>: <span class="value">100%</span>;
-                    <span class="property">background</span>: <span class="value">rgba(0, 0, 0, 0.8)</span>;
-                    <span class="property">color</span>: <span class="value">white</span>;
-                    <span class="property">display</span>: <span class="value">flex</span>;
-                    <span class="property">align-items</span>: <span class="value">center</span>;
-                    <span class="property">justify-content</span>: <span class="value">center</span>;
-                    <span class="property">z-index</span>: <span class="value">1000</span>;
+    <div class="tab-container">
+        <div class="tabs">
+            <button class="tab-button active" data-tab="code">Code</button>
+            <button class="tab-button" data-tab="download">Download</button>
+        </div>
+
+        <div id="code-tab-content" class="tab-content active">
+
+    <br><center>This code might have error. Please download the perfect code from the download tab</center><br>
+            
+            <pre class="code-block">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Conversion Tool&lt;/title&gt;
+    &lt;style&gt;
+        /* Full-screen popup overlay styling */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup-box {
+            text-align: center;
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-box h2 {
+            margin-bottom: 15px;
+        }
+
+        .popup-box button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .popup-box button:hover {
+            background-color: #0056b3;
+        }
+        /* Global reset for all elements */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #FF416C, #FF4B2B, #4285F4, #34A853, #FBBC05, #FF416C, #FF416C, #FF4B2B, #4285F4, #34A853, #FBBC05, #FF416C);
+            background-size: 300% 300%;
+            /* Larger background to enable smooth transition */
+            animation: gradientAnimation 15s infinite;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            flex-direction: column;
+            padding: 10px;
+        }
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        /* Main container */
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header styling */
+        h1 {
+            font-size: 2.5em;
+            color: #34495e;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Swiping menu */
+        .menu {
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .menu ul {
+            list-style: none;
+            display: flex;
+            padding: 0;
+            gap: 10px;
+        }
+
+        .menu li {
+            font-size: 1.2em;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .menu li:hover {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            transform: scale(1.05);
+        }
+
+        /* Input section */
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .input-section label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+            color: #34495e;
+        }
+
+        .input-section input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2em;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .input-section input:focus {
+            outline: none;
+            border-color: #1abc9c;
+            box-shadow: 0 4px 8px rgba(26, 188, 156, 0.4);
+        }
+
+        /* Buttons */
+        .actions button {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .actions button:hover {
+            background: linear-gradient(135deg, #16a085, #1abc9c);
+            transform: scale(1.05);
+        }
+        .support button {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #1abc9c, #16a100);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .support button:hover {
+            background: linear-gradient(135deg, #16a100, #1abc9c);
+            transform: scale(1.05);
+        }
+
+        /* Output sections */
+        .output {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .output h3 {
+            font-size: 1.3em;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        #stepsOutput {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #7f8c8d;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #resultOutput {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #34495e;
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        #otp-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          z-index: 1000;
+        }
+        #otp-modal div {
+          margin: 10% auto;
+          padding: 20px;
+          background: white;
+          width: 80%;
+          max-width: 400px;
+          text-align: center;
+          border-radius: 8px;
+        }
+
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Popup --&gt;
+    &lt;div class="popup-overlay" id="paymentPopup"&gt;
+        &lt;div class="popup-box"&gt;
+            &lt;h2&gt;Support Us&lt;/h2&gt;
+            &lt;p&gt;This app is free to use.
+            Consider supporting us to help improve and maintain it.&lt;/p&gt;
+            &lt;button id="payNowButton"&gt;Pay Now&lt;/button&gt;
+            &lt;button id="loginButton"&gt;Continue Without Paying&lt;/button&gt;
+        	&lt;button id="closePopup"&gt;Logged in&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="container"&gt;
+        &lt;h1 class="logo"&gt;&lt;u&gt;Number Conversion Tool&lt;/u&gt;&lt;/h1&gt;
+
+        &lt;div class="menu"&gt;
+            &lt;ul id="conversionList"&gt;
+                &lt;li data-type="binary-to-decimal"&gt;Binary to Decimal&lt;/li&gt;
+                &lt;li data-type="decimal-to-binary"&gt;Decimal to Binary&lt;/li&gt;
+                &lt;li data-type="binary-to-octal"&gt;Binary to Octal&lt;/li&gt;
+                &lt;li data-type="octal-to-binary"&gt;Octal to Binary&lt;/li&gt;
+                &lt;li data-type="binary-to-hex"&gt;Binary to Hex&lt;/li&gt;
+                &lt;li data-type="hex-to-binary"&gt;Hex to Binary&lt;/li&gt;
+                &lt;li data-type="decimal-to-octal"&gt;Decimal to Octal&lt;/li&gt;
+                &lt;li data-type="octal-to-decimal"&gt;Octal to Decimal&lt;/li&gt;
+                &lt;li data-type="decimal-to-hex"&gt;Decimal to Hex&lt;/li&gt;
+                &lt;li data-type="hex-to-decimal"&gt;Hex to Decimal&lt;/li&gt;
+                &lt;li data-type="octal-to-hex"&gt;Octal to Hex&lt;/li&gt;
+                &lt;li data-type="hex-to-octal"&gt;Hex to Octal&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+
+        &lt;div class="input-section"&gt;
+            &lt;label for="inputNumber"&gt;Enter Number:&lt;/label&gt;
+            &lt;input type="text" id="inputNumber" placeholder="Enter number"&gt;
+        &lt;/div&gt;
+
+        &lt;div class="actions"&gt;
+            &lt;button id="convertButton"&gt;Convert&lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;div class="output"&gt;
+            &lt;h3&gt;Steps:&lt;/h3&gt;
+            &lt;pre id="stepsOutput"&gt;&lt;/pre&gt;
+            &lt;h3&gt;Result:&lt;/h3&gt;
+            &lt;p id="resultOutput"&gt;&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;br&gt;&lt;div class="container" align="center"&gt;
+            &lt;p&gt;&lt;u&gt;Made by Amit Dutta, NBCBHS (HS : 2024-25)&lt;/u&gt;&lt;/p&gt;&lt;br&gt;
+	&lt;div class="support"&gt;
+          &lt;button id="payNowButton"&gt;Support&lt;/button&gt;
+          &lt;span style="margin: 0 5px;"&gt;&nbsp;&lt;/span&gt;
+          &lt;a href="https://forms.gle/Y2AWZhQFNVvApxq67"&gt;&lt;button&gt;Give Feedback&lt;/button&gt;&lt;/a&gt;
+        &lt;/div&gt;
+&lt;/div&gt;
+
+    &lt;script&gt;
+        // Razorpay payment link
+        const razorpayLink = "https://rzp.io/rzp/MffwgmY";
+    	const loginurl="https://script.google.com/macros/s/--- secret code is hidden ---/exec";
+
+        // Get popup elements
+        const paymentPopup = document.getElementById("paymentPopup");
+        const payNowButton = document.getElementById("payNowButton");
+        const closePopup = document.getElementById("closePopup");
+    	const loginButton = document.getElementById("loginButton");
+
+        // Redirect to Razorpay payment link
+        payNowButton.addEventListener("click", () => {
+            window.open(razorpayLink, "_blank");
+        });
+
+        // Close the popup
+        closePopup.addEventListener("click", () => {
+            paymentPopup.style.display = "none";
+        });
+    	loginButton.addEventListener("click", () => {
+    	    window.open(loginurl, "_blank");
+    	});
+
+        // Show popup on page load
+        window.onload = () => {
+            paymentPopup.style.display = "flex";
+        };
+    &lt;/script&gt;
+    &lt;script&gt;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const conversionList = document.getElementById('conversionList');
+        const convertButton = document.getElementById('convertButton');
+        const inputNumber = document.getElementById('inputNumber');
+        const stepsOutput = document.getElementById('stepsOutput');
+        const resultOutput = document.getElementById('resultOutput');
+
+        let selectedConversion = 'binary-to-decimal';
+
+        conversionList.addEventListener('click', (event) => {
+            if (event.target.tagName === 'LI') {
+                selectedConversion = event.target.dataset.type;
+                clearOutput();
+            }
+        });
+
+        convertButton.addEventListener('click', () => {
+            const number = inputNumber.value.trim();
+            if (!number) {
+                alert('Please enter a number!');
+                return;
+            }
+            performConversion(number, selectedConversion);
+        });
+
+        function performConversion(number, conversionType) {
+            stepsOutput.textContent = '';
+            resultOutput.textContent = '';
+
+            try {
+                let result, steps;
+                switch (conversionType) {
+                    case 'binary-to-decimal':
+                        ({ result, steps } = binaryToDecimal(number));
+                        break;
+                    case 'decimal-to-binary':
+                        ({ result, steps } = decimalToBinary(number));
+                        break;
+                    case 'binary-to-octal':
+                        ({ result, steps } = binaryToOctal(number));
+                        break;
+                    case 'octal-to-binary':
+                        ({ result, steps } = octalToBinary(number));
+                        break;
+                    case 'binary-to-hex':
+                        ({ result, steps } = binaryToHex(number));
+                        break;
+                    case 'hex-to-binary':
+                        ({ result, steps } = hexToBinary(number));
+                        break;
+                    case 'decimal-to-octal':
+                        ({ result, steps } = decimalToOctal(number));
+                        break;
+                    case 'octal-to-decimal':
+                        ({ result, steps } = octalToDecimal(number));
+                        break;
+                    case 'decimal-to-hex':
+                        ({ result, steps } = decimalToHex(number));
+                        break;
+                    case 'hex-to-decimal':
+                        ({ result, steps } = hexToDecimal(number));
+                        break;
+                    case 'octal-to-hex':
+                        ({ result, steps } = octalToHex(number));
+                        break;
+                    case 'hex-to-octal':
+                        ({ result, steps } = hexToOctal(number));
+                        break;
+                    default:
+                        throw new Error('Conversion type not supported.');
                 }
 
-                <span class="selector">.popup-box</span> {
-                    <span class="property">text-align</span>: <span class="value">center</span>;
-                    <span class="property">background</span>: <span class="value">#333</span>;
-                    <span class="property">padding</span>: <span class="value">20px</span>;
-                    <span class="property">border-radius</span>: <span class="value">10px</span>;
-                    <span class="property">max-width</span>: <span class="value">90%</span>;
-                    <span class="property">width</span>: <span class="value">400px</span>;
-                    <span class="property">box-shadow</span>: <span class="value">0 4px 8px rgba(0, 0, 0, 0.3)</span>;
+                stepsOutput.textContent = steps;
+                resultOutput.textContent = `Result: ${result}`;
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Utility Functions
+        function binaryToDecimal(binary) {
+            const [integerPart, fractionalPart] = binary.split('.');
+            let result = 0;
+            let steps = [];
+
+            if (integerPart) {
+                integerPart.split('').reverse().forEach((digit, index) => {
+                    const value = parseInt(digit, 10) * Math.pow(2, index);
+                    steps.push(`${digit} * 2^${index} = ${value}`);
+                    result += value;
+                });
+            }
+
+            if (fractionalPart) {
+                fractionalPart.split('').forEach((digit, index) => {
+                    const value = parseInt(digit, 10) * Math.pow(2, -(index + 1));
+                    steps.push(`${digit} * 2^-${index + 1} = ${value}`);
+                    result += value;
+                });
+            }
+
+            return { result: result.toString(), steps: steps.join('\n') };
+        }
+
+        function decimalToBinary(decimal) {
+            const [integerPart, fractionalPart] = decimal.split('.');
+            let integerResult = '';
+            let steps = [];
+            let num = parseInt(integerPart, 10);
+
+            while (num > 0) {
+                const remainder = num % 2;
+                integerResult = remainder + integerResult;
+                steps.push(`${num} / 2 = ${Math.floor(num / 2)}, remainder ${remainder}`);
+                num = Math.floor(num / 2);
+            }
+
+            let fractionalResult = '';
+            if (fractionalPart) {
+                let fracPart = parseFloat('0.' + fractionalPart);
+                for (let i = 0; i < 4 && fracPart !== 0; i++) {
+                    fracPart *= 2;
+                    const bit = Math.floor(fracPart);
+                    fractionalResult += bit.toString();
+                    fracPart -= bit;
+                    steps.push(`0.${fracPart.toFixed(4)} * 2 -> ${bit}`);
+                }
+            }
+
+            return { result: integerResult + (fractionalResult ? '.' + fractionalResult : ''), steps: steps.join('\n') };
+        }
+
+        function binaryToOctal(binary) {
+            const decimal = binaryToDecimal(binary).result;
+            return decimalToOctal(decimal);
+        }
+
+        function octalToBinary(octal) {
+            const decimal = octalToDecimal(octal).result;
+            return decimalToBinary(decimal);
+        }
+
+        function binaryToHex(binary) {
+            const decimal = binaryToDecimal(binary).result;
+            return decimalToHex(decimal);
+        }
+
+        function hexToBinary(hex) {
+            const decimal = hexToDecimal(hex).result;
+            return decimalToBinary(decimal);
+        }
+
+        function decimalToOctal(decimal) {
+            const [integerPart, fractionalPart] = decimal.split('.');
+            let integerResult = '';
+            let steps = [];
+            let num = parseInt(integerPart, 10);
+
+            while (num > 0) {
+                const remainder = num % 8;
+                integerResult = remainder + integerResult;
+                steps.push(`${num} / 8 = ${Math.floor(num / 8)}, remainder ${remainder}`);
+                num = Math.floor(num / 8);
+            }
+
+            let fractionalResult = '';
+            if (fractionalPart) {
+                let fracPart = parseFloat('0.' + fractionalPart);
+                for (let i = 0; i < 4 && fracPart !== 0; i++) {
+                    fracPart *= 8;
+                    const digit = Math.floor(fracPart);
+                    fractionalResult += digit.toString();
+                    fracPart -= digit;
+                    steps.push(`0.${fracPart.toFixed(4)} * 8 -> ${digit}`);
+                }
+            }
+
+            return { result: integerResult + (fractionalResult ? '.' + fractionalResult : ''), steps: steps.join('\n') };
+        }
+
+        function octalToDecimal(octal) {
+            const [integerPart, fractionalPart] = octal.split('.');
+            let result = 0;
+            let steps = [];
+
+            if (integerPart) {
+                integerPart.split('').reverse().forEach((digit, index) => {
+                    const value = parseInt(digit, 10) * Math.pow(8, index);
+                    steps.push(`${digit} * 8^${index} = ${value}`);
+                    result += value;
+                });
+            }
+
+            if (fractionalPart) {
+                fractionalPart.split('').forEach((digit, index) => {
+                    const value = parseInt(digit, 10) * Math.pow(8, -(index + 1));
+                    steps.push(`${digit} * 8^-${index + 1} = ${value}`);
+                    result += value;
+                });
+            }
+
+            return { result: result.toString(), steps: steps.join('\n') };
+        }
+
+        function decimalToHex(decimal) {
+            const [integerPart, fractionalPart] = decimal.split('.');
+            let integerResult = '';
+            let steps = [];
+            let num = parseInt(integerPart, 10);
+
+            while (num > 0) {
+                const remainder = num % 16;
+                const hexChar = remainder < 10 ? remainder : String.fromCharCode(remainder + 87);
+                integerResult = hexChar + integerResult;
+                steps.push(`${num} / 16 = ${Math.floor(num / 16)}, remainder ${hexChar}`);
+                num = Math.floor(num / 16);
+            }
+
+            let fractionalResult = '';
+            if (fractionalPart) {
+                let fracPart = parseFloat('0.' + fractionalPart);
+                for (let i = 0; i < 4 && fracPart !== 0; i++) {
+                    fracPart *= 16;
+                    const digit = Math.floor(fracPart);
+                    const hexChar = digit < 10 ? digit : String.fromCharCode(digit + 87);
+                    fractionalResult += hexChar;
+                    fracPart -= digit;
+                    steps.push(`0.${fracPart.toFixed(4)} * 16 -> ${hexChar}`);
+                }
+            }
+
+            return { result: integerResult + (fractionalResult ? '.' + fractionalResult : ''), steps: steps.join('\n') };
+        }
+
+        function hexToDecimal(hex) {
+            const [integerPart, fractionalPart] = hex.split('.');
+            let result = 0;
+            let steps = [];
+
+            if (integerPart) {
+                integerPart.split('').reverse().forEach((digit, index) => {
+                    const value = parseInt(digit, 16) * Math.pow(16, index);
+                    steps.push(`${digit} * 16^${index} = ${value}`);
+                    result += value;
+                });
+            }
+
+            if (fractionalPart) {
+                fractionalPart.split('').forEach((digit, index) => {
+                    const value = parseInt(digit, 16) * Math.pow(16, -(index + 1));
+                    steps.push(`${digit} * 16^-${index + 1} = ${value}`);
+                    result += value;
+                });
+            }
+
+            return { result: result.toString(), steps: steps.join('\n') };
+        }
+
+        function octalToHex(octal) {
+            const decimal = octalToDecimal(octal).result;
+            return decimalToHex(decimal);
+        }
+
+        function hexToOctal(hex) {
+            const decimal = hexToDecimal(hex).result;
+            return decimalToOctal(decimal);
+        }
+
+        function clearOutput() {
+            stepsOutput.textContent = '';
+            resultOutput.textContent = '';
+            inputNumber.value = '';
+        }
+    });
+
+    </script>
+</body>
+</html>
+</pre>
+        </div>
+
+        <div id="download-tab-content" class="tab-content">
+            <div class="download-item">
+                <h3>NCT_App_Source_Code.txt</h3>
+                <p>Full source code of the Number Conversion Tool web application.</p>
+                <button class="download-button" data-file="/download/nct_app_source_code.txt">Download</button>
+            </div>
+            <div class="download-item">
+                <h3>NCT App</h3>
+                <p>Download the app here.</p>
+                <button class="download-button" data-file="https://github.com/notamitgamer/app/releases/download/app/nct.apk">Download</button>
+            </div>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const downloadButtons = document.querySelectorAll('.download-button');
+
+        // Function to switch tabs
+        function switchTab(selectedTab) {
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            document.querySelector(`.tab-button[data-tab="${selectedTab}"]`).classList.add('active');
+            document.getElementById(`${selectedTab}-tab-content`).classList.add('active');
+        }
+
+        // Event listeners for tab buttons
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                switchTab(tab);
+            });
+        });
+
+        // Event listeners for download buttons
+        downloadButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const fileUrl = button.dataset.file;
+
+                if (fileUrl) {
+                    const a = document.createElement('a');
+                    a.href = fileUrl;
+                    a.download = fileUrl.split('/').pop(); // Optional: force filename
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                 }
 
-                <span class="selector">.popup-box h2</span> {
-                    <span class="property">margin-bottom</span>: <span class="value">15px</span>;
-                }
-
-                <span class="selector">.popup-box button</span> {
-                    <span class="property">margin-top</span>: <span class="value">15px</span>;
-                    <span class="property">padding</span>: <span class="value">10px 20px</span>;
-                    <span class="property">border</span>: <span class="value">none</span>;
-                    <span class="property">background-color</span>: <span class="value">#007bff</span>;
-                    <span class="property">color</span>: <span class="value">white</span>;
-                    <span class="property">border-radius</span>: <span class="value">5px</span>;
-                    <span class="property">cursor</span>: <span class="value">pointer</span>;
-                }
-
-                <span class="selector">.popup-box button:hover</span> {
-                    <span class="property">background-color</span>: <span class="value">#0056b3</span>;
-                }
-                <span class="comment">/* Global reset for all elements */</span>
-                <span class="selector">*</span> {
-                    <span class="property">margin</span>: <span class="value">0</span>;
-                    <span class="property">padding</span>: <span class="value">0</span>;
-                    <span class="property">box-sizing</span>: <span class="value">border-box</span>;
-                }
-
-                <span class="comment">/* Body styling */</span>
-                <span class="selector">body</span> {
-                    <span class="property">font-family</span>: <span class="string">'Arial', sans-serif</span>;
-                    <span class="property">background</span>: <span class="value">linear-gradient(45deg, #FF416C, #FF4B2B, #4285F4, #34A853, #FBBC05, #FF416C, #FF416C, #FF4B2B, #4285F4, #34A853, #FBBC05, #FF416C)</span>;
-                    <span class="property">background-size</span>: <span class="value">300% 300%</span>;
-                    <span class="comment">/* Larger background to enable smooth transition */</span>
-                    <span class="property">animation</span>: <span class="value">gradientAnimation 15s infinite</span>;
-                    <span class="property">color</span>: <span class="value">#333</span>;
-                    <span class="property">display</span>: <span class="value">flex</span>;
-                    <span class="property">justify-content</span>: <span class="value">center</span>;
-                    <span class="property">align-items</span>: <span class="value">flex-start</span>;
-                    <span class="property">min-height</span>: <span class="value">100vh</span>;
-                    <span class="property">flex-direction</span>: <span class="value">column</span>;
-                    <span class="property">padding</span>: <span class="value">10px</span>;
-                }
-                <span class="selector">@keyframes gradientAnimation</span> {
-                    <span class="selector">0%</span> {
-                        <span class="property">background-position</span>: <span class="value">0% 50%</span>;
-                    }
-                    <span class="selector">50%</span> {
-                        <span class="property">background-position</span>: <span class="value">100% 50%</span>;
-                    }
-                    <span class="selector">100%</span> {
-                        <span class="property">background-position</span>: <span class="value">0% 50%</span>;
-                    }
-                }
-                <span class="comment">/* Main container */</span>
-                <span class="selector">.container</span> {
-                    <span class="property">background</span>: <span class="value">#fff</span>;
-                    <span class="property">width</span>: <span class="value">100%</span>;
-                    <span class="property">max-width</span>: <span class="value">900px</span>;
-                    <span class="property">padding</span>: <span class="value">20px</span>;
-                    <span class="property">border-radius</span>: <span class="value">12px</span>;
-                    <span class="property">box-shadow</span>: <span class="value">0 4px 12px rgba(0, 0, 0, 0.2)</span>;
-                    <span class="property">text-align</span>: <span class="value">center</span>;
-                    <span class="property">position</span>: <span class="value">relative</span>;
-                    <span class="property">overflow</span>: <span class="value">hidden</span>;
-                }
-
-                <span class="comment">/* Header styling */</span>
-                <span class="selector">h1</span> {
-                    <span class="property">font-size</span>: <span class="value">2.5em</span>;
-                    <span class="property">color</span>: <span class="value">#34495e</span>;
-                    <span class="property">margin-bottom</span>: <span class="value">20px</span>;
-                    <span class="property">font-weight</span>: <span class="value">bold</span>;
-                    <span class="property">text-shadow</span>: <span class="value">2px 2px 4px rgba(0, 0, 0, 0.1)</span>;
-                }
-
-                <span class="comment">/* Swiping menu */</span>
-                <span class="selector">.menu</span> {
-                    <span class="property">margin-bottom</span>: <span class="value">20px</span>;
-                    <span class="property">overflow-x</span>: <span class="value">auto</span>;
-                    <span class="property">white-space</span>: <span class="value">nowrap</span>;
-                    <span class="property">-webkit-overflow-scrolling</span>: <span class="value">touch</span>;
-                }
-
-                <span class="selector">.menu ul</span> {
-                    <span class="property">list-style</span>: <span class="value">none</span>;
-                    <span class="property">display</span>: <span class="value">flex</span>;
-                    <span class="property">padding</span>: <span class="value">0</span>;
-                    <span class="property">gap</span>: <span class="value">10px</span>;
-                }
-
-                <span class="selector">.menu li</span> {
-                    <span class="property">font-size</span>: <span class="value">1.2em</span>;
-                    <span class="property">padding</span>: <span class="value">10px 15px</span>;
-                    <span class="property">background</span>: <span class="value">linear-gradient(135deg, #34495e, #2c3e50)</span>;
-                    <span class="property">color</span>: <span class="value">#fff</span>;
-                    <span class="property">cursor</span>: <span class="value">pointer</span>;
-                    <span class="property">border-radius</span>: <span class="value">8px</span>;
-                    <span class="property">transition</span>: <span class="value">transform 0.3s ease, background 0.3s ease</span>;
-                }
-
-                <span class="selector">.menu li:hover</span> {
-                    <span class="property">background</span>: <span class="value">linear-gradient(135deg, #1abc9c, #16a085)</span>;
-                    <span class="property">transform</span>: <span class="value">scale(1.05)</span>;
-                }
-
-                <span class="comment">/* Input section */</span>
-                <span class="selector">.input-section</span> {
-                    <span class="property">margin-bottom</span>: <span class="value">20px</span>;
-                }
-
-                <span class="selector">.input-section label</span> {
-                    <span class="property">font-size</span>: <span class="value">1.1em</span>;
-                    <span class="property">margin-bottom</span>: <span class="value">10px</span>;
-                    <span class="property">display</span>: <span class="value">block</span>;
-                    <span class="property">color</span>: <span class="value">#34495e</span>;
-                }
-
-                <span class="selector">.input-section input</span> {
-                    <span class="property">width</span>: <span class="value">100%</span>;
-                    <span class="property">padding</span>: <span class="value">12px</span>;
-                    <span class="property">font-size</span>: <span class="value">1.2em</span>;
-                    <span class="property">border</span>: <span class="value">1px solid #ccc</span>;
-                    <span class="property">border-radius</span>: <span class="value">8px</span>;
-                    <span class="property">margin-bottom</span>: <span class="value">20px</span>;
-                    <span class="property">box-sizing</span>: <span class="value">border-box</span>;
-                    <span class="property">transition</span>: <span class="value">box-shadow 0.3s ease</span>;
-                }
-
-                <span class="selector">.input-section input:focus</span> {
-                    <span class="property">outline</span>: <span class="value">none</span>;
-                    <span class="property">border-color</span>: <span class="value">#1abc9c</span>;
-                    <span class="property">box-shadow</span>: <span class="value">0 4px 8px rgba(26, 188, 156, 0.4)</span>;
-                }
-
-                <span class="comment">/* Buttons */</span>
-                <span class="selector">.actions button</span> {
-                    <span class="property">padding</span>: <span class="value">12px 20px</span>;
-                    <span class="property">font-size</span>: <span class="value">1.2em</span>;
-                    <span class="property">background</span>: <span class="value">linear-gradient(135deg, #1abc9c, #16a085)</span>;
-                    <span class="property">color</span>: <span class="value">white</span>;
-                    <span class="property">border</span>: <span class="value">none</span>;
-                    <span class="property">border-radius</span>: <span class="value">8px</span>;
-                    <span class="property">cursor</span>: <span class="value">pointer</span>;
-                    <span class="property">transition</span>: <span class="value">background 0.3s ease, transform 0.2s ease</span>;
-                }
-
-                <span class="selector">.actions button:hover</span> {
-                    <span class="property">background</span>: <span class="value">linear-gradient(135deg, #16a085, #1abc9c)</span>;
-                    <span class="property">transform</span>: <span class="value">scale(1.05)</span>;
-                }
-                <span class="selector">.support button</span> {
-                    <span class="property">padding</span>: <span class="value">12px 20px</span>;
-                    <span class="property">font-size</span>: <span class="value">1.2em</span>;
-                    <span class="property">background</span>: <span class="value">linear-gradient(135deg, #1abc9c, #16a100)</span>;
-                    <span class="property">color</span>: <span class="value">white</span>;
-                    <span class="property">border</span>: <span class="value">none</span>;
-                    <span class="property">border-radius</span>: <span class="value">8px</span>;
-                    <span class="property">cursor</span>: <span class="value">pointer</span>;
-                    <span class="property">transition</span>: <span class="value">background 0.3s ease, transform 0.2s ease</span>;
-                }
-
-                <span class="selector">.support button:hover</span> {
-                    <span class="property">background</span>: <span class="value">linear-gradient(135deg, #16a100, #1abc9c)</span>;
-                    <span class="property">transform</span>: <span class="value">scale(1.05)</span>;
-                }
-
-                <span class="comment">/* Output sections */</span>
-                <span class="selector">.output</span> {
-                    <span class="property">margin-top</span>: <span class="value">30px</span>;
-                    <span class="property">text-align</span>: <span class="value">left</span>;
-                }
-
-                <span class="selector">.output h3</span> {
-                    <span class="property">font-size</span>: <span class="value">1.3em</span>;
-                    <span class="property">color</span>: <span class="value">#34495e</span>;
-                    <span class="property">margin-bottom</span>: <span class="value">10px</span>;
-                }
-
-                <span class="selector">#stepsOutput</span> {
-                    <span class="property">background</span>: <span class="value">#ecf0f1</span>;
-                    <span class="property">padding</span>: <span class="value">15px</span>;
-                    <span class="property">border-radius</span>: <span class="value">8px</span>;
-                    <span class="property">font-family</span>: <span class="string">'Courier New', Courier, monospace</span>;
-                    <span class="property">color</span>: <span class="value">#7f8c8d</span>;
-                    <span class="property">white-space</span>: <span class="value">pre-wrap</span>;
-                    <span class="property">word-wrap</span>: <span class="value">break-word</span>;
-                    <span class="property">overflow-x</span>: <span class="value">auto</span>;
-                    <span class="property">box-shadow</span>: <span class="value">inset 0 2px 4px rgba(0, 0, 0, 0.1)</span>;
-                    <span class="property">margin-bottom</span>: <span class="value">20px</span>;
-                }
-
-                <span class="selector">#resultOutput</span> {
-                    <span class="property">font-size</span>: <span class="value">1.4em</span>;
-                    <span class="property">font-weight</span>: <span class="value">bold</span>;
-                    <span class="property">color</span>: <span class="value">#34495e</span>;
-                    <span class="property">background</span>: <span class="value">#f9fafb</span>;
-                    <span class="property">padding</span>: <span class="value">15px</span>;
-                    <span class="property">border-radius</span>: <span class="value">8px</span>;
-                    <span class="property">border</span>: <span class="value">1px solid #ddd</span>;
-                    <span class="property">box-shadow</span>: <span class="value">0 2px 6px rgba(0, 0, 0, 0.1)</span>;
-                }
-
-                <span class="comment">/* Responsive design */</span>
-                <span class="selector">@media (max-width: 768px)</span> {
-                    <span class="selector">.container</span> {
-                        <span class="property">width</span>: <span class="value">100%</span>;
-                        <span class="property">padding</span>: <span class="value">15px</span>;
-                    }
-
-                    <span class="selector">h1</span> {
-                        <span class="property">font-size</span>: <span class="value">2em</span>;
-                    }
-
-                    <span class="selector">.menu li</span> {
-                        <span class="property">padding</span>: <span class="value">10px</span>;
-                        <span class="property">font-size</span>: <span class="value">1em</span>;
-                    }
-
-                    <span class="selector">.input-section input</span> {
-                        <span class="property">padding</span>: <span class="value">10px</span>;
-                    }
-
-                    <span class="selector">.actions button</span> {
-                        <span class="property">padding</span>: <span class="value">10px 15px</span>;
-                        <span class="property">font-size</span>: <span class="value">1em</span>;
-                    }
-
-                    <span class="selector">.output</span> {
-                        <span class="property">font-size</span>: <span class="value">0.9em</span>;
-                    }
-                }
-                <span class="selector">.logo</span> {
-                  <span class="property">font-size</span>: <span class="value">3em</span>;
-                  <span class="property">font-family</span>: <span class="string">'Roboto'</span>;
-                  <span class="property">color</span>: <span class="value">#fff</span>;
-                  <span class="property">text-shadow</span>: <span class="value">1px 1px 5px rgba(0, 0, 0, 0.4)</span>;
-                  <span class="property">margin-bottom</span>: <span class="value">10px</span>;
-                  <span class="property">animation</span>: <span class="value">logoColorChange 3s ease infinite</span>;
-                }
-
-                <span class="selector">@keyframes logoColorChange</span> {
-                  <span class="selector">0%</span> {
-                    <span class="property">color</span>: <span class="value">#FF416C</span>;
-                  }
-                  <span class="selector">33%</span> {
-                    <span class="property">color</span>: <span class="value">#4285F4</span>;
-                  }
-                  <span class="selector">66%</span> {
-                    <span class="property">color</span>: <span class="value">#34A853</span>;
-                  }
-                  <span class="selector">100%</span> {
-                    <span class="property">color</span>: <span class="value">#FF416C</span>;
-                  }
-                }
-                <span class="selector">#otp-modal</span> {
-                  <span class="property">display</span>: <span class="value">none</span>;
-                  <span class="property">position</span>: <span class="value">fixed</span>;
-                  <span class="property">top</span>: <span class="value">0</span>;
-                  <span class="property">left</span>: <span class="value">0</span>;
-                  <span class="property">width</span>: <span class="value">100%</span>;
-                  <span class="property">height</span>: <span class="value">100%</span>;
-                  <span class="property">background</span>: <span class="value">rgba(0, 0, 0, 0.7)</span>;
-                  <span class="property">z-index</span>: <span class="value">1000</span>;
-                }
-                <span class="selector">#otp-modal div</span> {
-                  <span class="property">margin</span>: <span class="value">10% auto</span>;
-                  <span class="property">padding</span>: <span class="value">20px</span>;
-                  <span class="property">background</span>: <span class="value">white</span>;
-                  <span class="property">width</span>: <span class="value">80%</span>;
-                  <span class="property">max-width</span>: <span class="value">400px</span>;
-                  <span class="property">text-align</span>: <span class="value">center</span>;
-                  <span class="property">border-radius</span>: <span class="value">8px</span>;
-                }
-
-            <span class="tag">&lt;/style&gt;</span>
-        <span class="tag">&lt;/head&gt;</span>
-        <span class="tag">&lt;body&gt;</span>
-            <span class="comment">&lt;!-- Popup --&gt;</span>
-            <span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"popup-overlay"</span> <span class="attribute">id=</span><span class="string">"paymentPopup"</span><span class="tag">&gt;</span>
-                <span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"popup-box"</span><span class="tag">&gt;</span>
-                    <span class="tag">&lt;h2&gt;</span>Support Us<span class="tag">&lt;/h2&gt;</span>
-                    <span class="tag">&lt;p&gt;</span>This app is free to use.
-                    Consider supporting us to help improve and maintain it.<span class="tag">&lt;/p&gt;</span>
-                    <span class="tag">&lt;button</span> <span class="attribute">id=</span><span class="string">"payNowButton"</span><span class="tag">&gt;</span>Pay Now<span class="tag">&lt;/button&gt;</span>
-                    <span class="tag">&lt;button</span> <span class="attribute">id=</span><span class="string">"loginButton"</span><span class="tag">&gt;</span>Continue Without Paying<span class="tag">&lt;/button&gt;</span>
-                	<span class="tag">&lt;button</span> <span class="attribute">id=</span><span class="string">"closePopup"</span><span class="tag">&gt;</span>Logged in<span class="tag">&lt;/button&gt;</span>
-                <span class="tag">&lt;/div&gt;</span>
-            <span class="tag">&lt;/div&gt;</span>
-
-            <span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"container"</span><span class="tag">&gt;</span>
-                <span class="tag">&lt;h1</span> <span class="attribute">class=</span><span class="string">"logo"</span><span class="tag">&gt;</span><span class="highlight-u">&lt;u&gt;</span>Number Conversion Tool<span class="highlight-u">&lt;/u&gt;</span><span class="tag">&lt;/h1&gt;</span>
-
-                <span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"menu"</span><span class="tag">&gt;</span>
-                    <span class="tag">&lt;ul</span> <span class="attribute">id=</span><span class="string">"conversionList"</span><span class="tag">&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"binary-to-decimal"</span><span class="tag">&gt;</span>Binary to Decimal<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"decimal-to-binary"</span><span class="tag">&gt;</span>Decimal to Binary<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"binary-to-octal"</span><span class="tag">&gt;</span>Binary to Octal<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"octal-to-binary"</span><span class="tag">&gt;</span>Octal to Binary<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"binary-to-hex"</span><span class="tag">&gt;</span>Binary to Hex<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"hex-to-binary"</span><span class="tag">&gt;</span>Hex to Binary<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"decimal-to-octal"</span><span class="tag">&gt;</span>Decimal to Octal<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"octal-to-decimal"</span><span class="tag">&gt;</span>Octal to Decimal<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"decimal-to-hex"</span><span class="tag">&gt;</span>Decimal to Hex<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"hex-to-decimal"</span><span class="tag">&gt;</span>Hex to Decimal<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"octal-to-hex"</span><span class="tag">&gt;</span>Octal to Hex<span class="tag">&lt;/li&gt;</span>
-                        <span class="tag">&lt;li</span> <span class="attribute">data-type=</span><span class="string">"hex-to-octal"</span><span class="tag">&gt;</span>Hex to Octal<span class="tag">&lt;/li&gt;</span>
-                    <span class="tag">&lt;/ul&gt;</span>
-                <span class="tag">&lt;/div&gt;</span>
-
-                <span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"input-section"</span><span class="tag">&gt;</span>
-                    <span class="tag">&lt;label</span> <span class="attribute">for=</span><span class="string">"inputNumber"</span><span class="tag">&gt;</span>Enter Number:<span class="tag">&lt;/label&gt;</span>
-                    <span class="tag">&lt;input</span> <span class="attribute">type=</span><span class="string">"text"</span> <span class="attribute">id=</span><span class="string">"inputNumber"</span> <span class="attribute">placeholder=</span><span class="string">"Enter number"</span><span class="tag">&gt;</span>
-                <span class="tag">&lt;/div&gt;</span>
-
-                <span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"actions"</span><span class="tag">&gt;</span>
-                    <span class="tag">&lt;button</span> <span class="attribute">id=</span><span class="string">"convertButton"</span><span class="tag">&gt;</span>Convert<span class="tag">&lt;/button&gt;</span>
-                <span class="tag">&lt;/div&gt;</span>
-
-                <span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"output"</span><span class="tag">&gt;</span>
-                    <span class="tag">&lt;h3&gt;</span>Steps:<span class="tag">&lt;/h3&gt;</span>
-                    <span class="tag">&lt;pre</span> <span class="attribute">id=</span><span class="string">"stepsOutput"</span><span class="tag">&gt;&lt;/pre&gt;</span>
-                    <span class="tag">&lt;h3&gt;</span>Result:<span class="tag">&lt;/h3&gt;</span>
-                    <span class="tag">&lt;p</span> <span class="attribute">id=</span><span class="string">"resultOutput"</span><span class="tag">&gt;&lt;/p&gt;</span>
-                <span class="tag">&lt;/div&gt;</span>
-            <span class="tag">&lt;/div&gt;</span>
-        <span class="tag">&lt;br&gt;</span><span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"container"</span> <span class="attribute">align=</span><span class="string">"center"</span><span class="tag">&gt;</span>
-                    <span class="tag">&lt;p&gt;</span><span class="highlight-u">&lt;u&gt;</span>Made by Amit Dutta, NBCBHS (HS : 2024-25)<span class="highlight-u">&lt;/u&gt;</span><span class="tag">&lt;/p&gt;</span><span class="tag">&lt;br&gt;</span>
-        	<span class="tag">&lt;div</span> <span class="attribute">class=</span><span class="string">"support"</span><span class="tag">&gt;</span>
-          <span class="tag">&lt;button</span> <span class="attribute">id=</span><span class="string">"payNowButton"</span><span class="tag">&gt;</span>Support<span class="tag">&lt;/button&gt;</span>
-          <span class="tag">&lt;span</span> <span class="attribute">style=</span><span class="string">"margin: 0 5px;"</span><span class="tag">&gt;</span>&nbsp;<span class="tag">&lt;/span&gt;</span>
-          <span class="tag">&lt;a</span> <span class="attribute">href=</span><span class="string">"https://forms.gle/Y2AWZhQFNVvApxq67"</span><span class="tag">&gt;&lt;button&gt;</span>Give Feedback<span class="tag">&lt;/button&gt;&lt;/a&gt;</span>
-        <span class="tag">&lt;/div&gt;</span>
-        <span class="tag">&lt;/div&gt;</span>
-
-            <span class="tag">&lt;script&gt;</span>
-                <span class="comment">// Razorpay payment link</span>
-                <span class="keyword">const</span> <span class="js-identifier">razorpayLink</span> <span class="operator">=</span> <span class="string">"https://rzp.io/rzp/MffwgmY"</span><span class="punctuation">;</span>
-            	<span class="keyword">const</span> <span class="js-identifier">loginurl</span><span class="operator">=</span><span class="string">"https://script.google.com/macros/s/--- secret code is hidden ---/exec"</span><span class="punctuation">;</span>
-
-                <span class="comment">// Get popup elements</span>
-                <span class="keyword">const</span> <span class="js-identifier">paymentPopup</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">"paymentPopup"</span>)<span class="punctuation">;</span>
-                <span class="keyword">const</span> <span class="js-identifier">payNowButton</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">"payNowButton"</span>)<span class="punctuation">;</span>
-                <span class="keyword">const</span> <span class="js-identifier">closePopup</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">"closePopup"</span>)<span class="punctuation">;</span>
-            	<span class="keyword">const</span> <span class="js-identifier">loginButton</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">"loginButton"</span>)<span class="punctuation">;</span>
-
-                <span class="comment">// Redirect to Razorpay payment link</span>
-                <span class="js-identifier">payNowButton</span>.<span class="js-identifier">addEventListener</span>(<span class="string">"click"</span><span class="punctuation">,</span> <span class="punctuation">()</span> <span class="operator">=&gt;</span> {
-                    <span class="js-identifier">window</span>.<span class="js-identifier">open</span>(<span class="js-identifier">razorpayLink</span><span class="punctuation">,</span> <span class="string">"_blank"</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">)</span><span class="punctuation">;</span>
-
-                <span class="comment">// Close the popup</span>
-                <span class="js-identifier">closePopup</span>.<span class="js-identifier">addEventListener</span>(<span class="string">"click"</span><span class="punctuation">,</span> <span class="punctuation">()</span> <span class="operator">=&gt;</span> {
-                    <span class="js-identifier">paymentPopup</span>.<span class="js-identifier">style</span>.<span class="js-identifier">display</span> <span class="operator">=</span> <span class="string">"none"</span><span class="punctuation">;</span>
-                }<span class="punctuation">)</span><span class="punctuation">;</span>
-            	<span class="js-identifier">loginButton</span>.<span class="js-identifier">addEventListener</span>(<span class="string">"click"</span><span class="punctuation">,</span> <span class="punctuation">()</span> <span class="operator">=&gt;</span> {
-            	    <span class="js-identifier">window</span>.<span class="js-identifier">open</span>(<span class="js-identifier">loginurl</span><span class="punctuation">,</span> <span class="string">"_blank"</span>)<span class="punctuation">;</span>
-            	}<span class="punctuation">)</span><span class="punctuation">;</span>
-
-                <span class="comment">// Show popup on page load</span>
-                <span class="js-identifier">window</span>.<span class="js-identifier">onload</span> <span class="operator">=</span> <span class="punctuation">()</span> <span class="operator">=&gt;</span> {
-                    <span class="js-identifier">paymentPopup</span>.<span class="js-identifier">style</span>.<span class="js-identifier">display</span> <span class="operator">=</span> <span class="string">"flex"</span><span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-            <span class="tag">&lt;/script&gt;</span>
-            <span class="tag">&lt;script&gt;</span>
-
-            <span class="js-identifier">document</span>.<span class="js-identifier">addEventListener</span>(<span class="string">'DOMContentLoaded'</span><span class="punctuation">,</span> <span class="punctuation">()</span> <span class="operator">=&gt;</span> {
-                <span class="keyword">const</span> <span class="js-identifier">conversionList</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">'conversionList'</span>)<span class="punctuation">;</span>
-                <span class="keyword">const</span> <span class="js-identifier">convertButton</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">'convertButton'</span>)<span class="punctuation">;</span>
-                <span class="keyword">const</span> <span class="js-identifier">inputNumber</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">'inputNumber'</span>)<span class="punctuation">;</span>
-                <span class="keyword">const</span> <span class="js-identifier">stepsOutput</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">'stepsOutput'</span>)<span class="punctuation">;</span>
-                <span class="keyword">const</span> <span class="js-identifier">resultOutput</span> <span class="operator">=</span> <span class="js-identifier">document</span>.<span class="js-identifier">getElementById</span>(<span class="string">'resultOutput'</span>)<span class="punctuation">;</span>
-
-                <span class="keyword">let</span> <span class="js-identifier">selectedConversion</span> <span class="operator">=</span> <span class="string">'binary-to-decimal'</span><span class="punctuation">;</span>
-
-                <span class="js-identifier">conversionList</span>.<span class="js-identifier">addEventListener</span>(<span class="string">'click'</span><span class="punctuation">,</span> <span class="punctuation">(</span><span class="js-identifier">event</span><span class="punctuation">)</span> <span class="operator">=&gt;</span> {
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">event</span>.<span class="js-identifier">target</span>.<span class="js-identifier">tagName</span> <span class="operator">===</span> <span class="string">'LI'</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">selectedConversion</span> <span class="operator">=</span> <span class="js-identifier">event</span>.<span class="js-identifier">target</span>.<span class="js-identifier">dataset</span>.<span class="js-identifier">type</span><span class="punctuation">;</span>
-                        <span class="js-identifier">clearOutput</span>()<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-                }<span class="punctuation">)</span><span class="punctuation">;</span>
-
-                <span class="js-identifier">convertButton</span>.<span class="js-identifier">addEventListener</span>(<span class="string">'click'</span><span class="punctuation">,</span> <span class="punctuation">()</span> <span class="operator">=&gt;</span> {
-                    <span class="keyword">const</span> <span class="js-identifier">number</span> <span class="operator">=</span> <span class="js-identifier">inputNumber</span>.<span class="js-identifier">value</span>.<span class="js-identifier">trim</span>()<span class="punctuation">;</span>
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="operator">!</span><span class="js-identifier">number</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">alert</span>(<span class="string">'Please enter a number!'</span>)<span class="punctuation">;</span>
-                        <span class="keyword">return</span><span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-                    <span class="js-identifier">performConversion</span>(<span class="js-identifier">number</span><span class="punctuation">,</span> <span class="js-identifier">selectedConversion</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">)</span><span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">performConversion</span>(<span class="js-identifier">number</span><span class="punctuation">,</span> <span class="js-identifier">conversionType</span><span class="punctuation">)</span> {
-                    <span class="js-identifier">stepsOutput</span>.<span class="js-identifier">textContent</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="js-identifier">resultOutput</span>.<span class="js-identifier">textContent</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-
-                    <span class="keyword">try</span> {
-                        <span class="keyword">let</span> <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span><span class="punctuation">;</span>
-                        <span class="keyword">switch</span> <span class="punctuation">(</span><span class="js-identifier">conversionType</span><span class="punctuation">)</span> {
-                            <span class="keyword">case</span> <span class="string">'binary-to-decimal'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">binaryToDecimal</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'decimal-to-binary'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">decimalToBinary</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'binary-to-octal'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">binaryToOctal</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'octal-to-binary'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">octalToBinary</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'binary-to-hex'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">binaryToHex</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'hex-to-binary'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">hexToBinary</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'decimal-to-octal'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">decimalToOctal</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'octal-to-decimal'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">octalToDecimal</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'decimal-to-hex'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">decimalToHex</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'hex-to-decimal'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">hexToDecimal</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'octal-to-hex'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">octalToHex</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">case</span> <span class="string">'hex-to-octal'</span><span class="punctuation">:</span>
-                                <span class="punctuation">(</span>{ <span class="js-identifier">result</span><span class="punctuation">,</span> <span class="js-identifier">steps</span> } <span class="operator">=</span> <span class="js-identifier">hexToOctal</span>(<span class="js-identifier">number</span>))<span class="punctuation">;</span>
-                                <span class="keyword">break</span><span class="punctuation">;</span>
-                            <span class="keyword">default</span><span class="punctuation">:</span>
-                                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="js-identifier">Error</span>(<span class="string">'Conversion type not supported.'</span>)<span class="punctuation">;</span>
-                        }<span class="punctuation">;</span>
-
-                        <span class="js-identifier">stepsOutput</span>.<span class="js-identifier">textContent</span> <span class="operator">=</span> <span class="js-identifier">steps</span><span class="punctuation">;</span>
-                        <span class="js-identifier">resultOutput</span>.<span class="js-identifier">textContent</span> <span class="operator">=</span> <span class="string">`Result: ${result}`</span><span class="punctuation">;</span>
-                    } <span class="keyword">catch</span> <span class="punctuation">(</span><span class="js-identifier">error</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">alert</span>(<span class="js-identifier">error</span>.<span class="js-identifier">message</span>)<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="comment">// Utility Functions</span>
-                <span class="keyword">function</span> <span class="js-identifier">binaryToDecimal</span>(<span class="js-identifier">binary</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="punctuation">[</span><span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="js-identifier">fractionalPart</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="js-identifier">binary</span>.<span class="js-identifier">split</span>(<span class="string">'.'</span>)<span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">result</span> <span class="operator">=</span> <span class="number">0</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">steps</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">;</span>
-
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">integerPart</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">integerPart</span>.<span class="js-identifier">split</span>(<span class="string">''</span>).<span class="js-identifier">reverse</span>().<span class="js-identifier">forEach</span>(<span class="punctuation">(</span><span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="js-identifier">index</span><span class="punctuation">)</span> <span class="operator">=&gt;</span> {
-                            <span class="keyword">const</span> <span class="js-identifier">value</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="number">10</span>) <span class="operator">*</span> <span class="js-identifier">Math</span>.<span class="js-identifier">pow</span>(<span class="number">2</span><span class="punctuation">,</span> <span class="js-identifier">index</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${digit} * 2^${index} = ${value}`</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">result</span> <span class="operator">+=</span> <span class="js-identifier">value</span><span class="punctuation">;</span>
-                        }<span class="punctuation">)</span><span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">fractionalPart</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">fractionalPart</span>.<span class="js-identifier">split</span>(<span class="string">''</span>).<span class="js-identifier">forEach</span>(<span class="punctuation">(</span><span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="js-identifier">index</span><span class="punctuation">)</span> <span class="operator">=&gt;</span> {
-                            <span class="keyword">const</span> <span class="js-identifier">value</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="number">10</span>) <span class="operator">*</span> <span class="js-identifier">Math</span>.<span class="js-identifier">pow</span>(<span class="number">2</span><span class="punctuation">,</span> <span class="operator">-</span><span class="punctuation">(</span><span class="js-identifier">index</span> <span class="operator">+</span> <span class="number">1</span><span class="punctuation">)</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${digit} * 2^-${index + 1} = ${value}`</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">result</span> <span class="operator">+=</span> <span class="js-identifier">value</span><span class="punctuation">;</span>
-                        }<span class="punctuation">)</span><span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">return</span> { <span class="js-identifier">result</span><span class="punctuation">:</span> <span class="js-identifier">result</span>.<span class="js-identifier">toString</span>()<span class="punctuation">,</span> <span class="js-identifier">steps</span><span class="punctuation">:</span> <span class="js-identifier">steps</span>.<span class="js-identifier">join</span>(<span class="string">'\n'</span>) }<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">decimalToBinary</span>(<span class="js-identifier">decimal</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="punctuation">[</span><span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="js-identifier">fractionalPart</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="js-identifier">decimal</span>.<span class="js-identifier">split</span>(<span class="string">'.'</span>)<span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">integerResult</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">steps</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">num</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="number">10</span>)<span class="punctuation">;</span>
-
-                    <span class="keyword">while</span> <span class="punctuation">(</span><span class="js-identifier">num</span> <span class="operator">&gt;</span> <span class="number">0</span><span class="punctuation">)</span> {
-                        <span class="keyword">const</span> <span class="js-identifier">remainder</span> <span class="operator">=</span> <span class="js-identifier">num</span> <span class="operator">%</span> <span class="number">2</span><span class="punctuation">;</span>
-                        <span class="js-identifier">integerResult</span> <span class="operator">=</span> <span class="js-identifier">remainder</span> <span class="operator">+</span> <span class="js-identifier">integerResult</span><span class="punctuation">;</span>
-                        <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${num} / 2 = ${Math.floor(num / 2)}, remainder ${remainder}`</span>)<span class="punctuation">;</span>
-                        <span class="js-identifier">num</span> <span class="operator">=</span> <span class="js-identifier">Math</span>.<span class="js-identifier">floor</span>(<span class="js-identifier">num</span> <span class="operator">/</span> <span class="number">2</span>)<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">let</span> <span class="js-identifier">fractionalResult</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">fractionalPart</span><span class="punctuation">)</span> {
-                        <span class="keyword">let</span> <span class="js-identifier">fracPart</span> <span class="operator">=</span> <span class="js-identifier">parseFloat</span>(<span class="string">'0.'</span> <span class="operator">+</span> <span class="js-identifier">fractionalPart</span>)<span class="punctuation">;</span>
-                        <span class="keyword">for</span> <span class="punctuation">(</span><span class="keyword">let</span> <span class="js-identifier">i</span> <span class="operator">=</span> <span class="number">0</span><span class="punctuation">;</span> <span class="js-identifier">i</span> <span class="operator">&lt;</span> <span class="number">4</span> <span class="operator">&amp;&amp;</span> <span class="js-identifier">fracPart</span> <span class="operator">!==</span> <span class="number">0</span><span class="punctuation">;</span> <span class="js-identifier">i</span><span class="operator">++</span><span class="punctuation">)</span> {
-                            <span class="js-identifier">fracPart</span> <span class="operator">*=</span> <span class="number">2</span><span class="punctuation">;</span>
-                            <span class="keyword">const</span> <span class="js-identifier">bit</span> <span class="operator">=</span> <span class="js-identifier">Math</span>.<span class="js-identifier">floor</span>(<span class="js-identifier">fracPart</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">fractionalResult</span> <span class="operator">+=</span> <span class="js-identifier">bit</span>.<span class="js-identifier">toString</span>()<span class="punctuation">;</span>
-                            <span class="js-identifier">fracPart</span> <span class="operator">-=</span> <span class="js-identifier">bit</span><span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`0.${fracPart.toFixed(4)} * 2 -> ${bit}`</span>)<span class="punctuation">;</span>
-                        }<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">return</span> { <span class="js-identifier">result</span><span class="punctuation">:</span> <span class="js-identifier">integerResult</span> <span class="operator">+</span> <span class="punctuation">(</span><span class="js-identifier">fractionalResult</span> <span class="operator">?</span> <span class="string">'.'</span> <span class="operator">+</span> <span class="js-identifier">fractionalResult</span> <span class="operator">:</span> <span class="string">''</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="js-identifier">steps</span><span class="punctuation">:</span> <span class="js-identifier">steps</span>.<span class="js-identifier">join</span>(<span class="string">'\n'</span>) }<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">binaryToOctal</span>(<span class="js-identifier">binary</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="js-identifier">decimal</span> <span class="operator">=</span> <span class="js-identifier">binaryToDecimal</span>(<span class="js-identifier">binary</span>).<span class="js-identifier">result</span><span class="punctuation">;</span>
-                    <span class="keyword">return</span> <span class="js-identifier">decimalToOctal</span>(<span class="js-identifier">decimal</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">octalToBinary</span>(<span class="js-identifier">octal</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="js-identifier">decimal</span> <span class="operator">=</span> <span class="js-identifier">octalToDecimal</span>(<span class="js-identifier">octal</span>).<span class="js-identifier">result</span><span class="punctuation">;</span>
-                    <span class="keyword">return</span> <span class="js-identifier">decimalToBinary</span>(<span class="js-identifier">decimal</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">binaryToHex</span>(<span class="js-identifier">binary</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="js-identifier">decimal</span> <span class="operator">=</span> <span class="js-identifier">binaryToDecimal</span>(<span class="js-identifier">binary</span>).<span class="js-identifier">result</span><span class="punctuation">;</span>
-                    <span class="keyword">return</span> <span class="js-identifier">decimalToHex</span>(<span class="js-identifier">decimal</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">hexToBinary</span>(<span class="js-identifier">hex</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="js-identifier">decimal</span> <span class="operator">=</span> <span class="js-identifier">hexToDecimal</span>(<span class="js-identifier">hex</span>).<span class="js-identifier">result</span><span class="punctuation">;</span>
-                    <span class="keyword">return</span> <span class="js-identifier">decimalToBinary</span>(<span class="js-identifier">decimal</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">decimalToOctal</span>(<span class="js-identifier">decimal</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="punctuation">[</span><span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="js-identifier">fractionalPart</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="js-identifier">decimal</span>.<span class="js-identifier">split</span>(<span class="string">'.'</span>)<span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">integerResult</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">steps</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">num</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="number">10</span>)<span class="punctuation">;</span>
-
-                    <span class="keyword">while</span> <span class="punctuation">(</span><span class="js-identifier">num</span> <span class="operator">&gt;</span> <span class="number">0</span><span class="punctuation">)</span> {
-                        <span class="keyword">const</span> <span class="js-identifier">remainder</span> <span class="operator">=</span> <span class="js-identifier">num</span> <span class="operator">%</span> <span class="number">8</span><span class="punctuation">;</span>
-                        <span class="js-identifier">integerResult</span> <span class="operator">=</span> <span class="js-identifier">remainder</span> <span class="operator">+</span> <span class="js-identifier">integerResult</span><span class="punctuation">;</span>
-                        <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${num} / 8 = ${Math.floor(num / 8)}, remainder ${remainder}`</span>)<span class="punctuation">;</span>
-                        <span class="js-identifier">num</span> <span class="operator">=</span> <span class="js-identifier">Math</span>.<span class="js-identifier">floor</span>(<span class="js-identifier">num</span> <span class="operator">/</span> <span class="number">8</span>)<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">let</span> <span class="js-identifier">fractionalResult</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">fractionalPart</span><span class="punctuation">)</span> {
-                        <span class="keyword">let</span> <span class="js-identifier">fracPart</span> <span class="operator">=</span> <span class="js-identifier">parseFloat</span>(<span class="string">'0.'</span> <span class="operator">+</span> <span class="js-identifier">fractionalPart</span>)<span class="punctuation">;</span>
-                        <span class="keyword">for</span> <span class="punctuation">(</span><span class="keyword">let</span> <span class="js-identifier">i</span> <span class="operator">=</span> <span class="number">0</span><span class="punctuation">;</span> <span class="js-identifier">i</span> <span class="operator">&lt;</span> <span class="number">4</span> <span class="operator">&amp;&amp;</span> <span class="js-identifier">fracPart</span> <span class="operator">!==</span> <span class="number">0</span><span class="punctuation">;</span> <span class="js-identifier">i</span><span class="operator">++</span><span class="punctuation">)</span> {
-                            <span class="js-identifier">fracPart</span> <span class="operator">*=</span> <span class="number">8</span><span class="punctuation">;</span>
-                            <span class="keyword">const</span> <span class="js-identifier">digit</span> <span class="operator">=</span> <span class="js-identifier">Math</span>.<span class="js-identifier">floor</span>(<span class="js-identifier">fracPart</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">fractionalResult</span> <span class="operator">+=</span> <span class="js-identifier">digit</span>.<span class="js-identifier">toString</span>()<span class="punctuation">;</span>
-                            <span class="js-identifier">fracPart</span> <span class="operator">-=</span> <span class="js-identifier">digit</span><span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`0.${fracPart.toFixed(4)} * 8 -> ${digit}`</span>)<span class="punctuation">;</span>
-                        }<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">return</span> { <span class="js-identifier">result</span><span class="punctuation">:</span> <span class="js-identifier">integerResult</span> <span class="operator">+</span> <span class="punctuation">(</span><span class="js-identifier">fractionalResult</span> <span class="operator">?</span> <span class="string">'.'</span> <span class="operator">+</span> <span class="js-identifier">fractionalResult</span> <span class="operator">:</span> <span class="string">''</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="js-identifier">steps</span><span class="punctuation">:</span> <span class="js-identifier">steps</span>.<span class="js-identifier">join</span>(<span class="string">'\n'</span>) }<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">octalToDecimal</span>(<span class="js-identifier">octal</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="punctuation">[</span><span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="js-identifier">fractionalPart</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="js-identifier">octal</span>.<span class="js-identifier">split</span>(<span class="string">'.'</span>)<span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">result</span> <span class="operator">=</span> <span class="number">0</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">steps</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">;</span>
-
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">integerPart</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">integerPart</span>.<span class="js-identifier">split</span>(<span class="string">''</span>).<span class="js-identifier">reverse</span>().<span class="js-identifier">forEach</span>(<span class="punctuation">(</span><span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="js-identifier">index</span><span class="punctuation">)</span> <span class="operator">=&gt;</span> {
-                            <span class="keyword">const</span> <span class="js-identifier">value</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="number">10</span>) <span class="operator">*</span> <span class="js-identifier">Math</span>.<span class="js-identifier">pow</span>(<span class="number">8</span><span class="punctuation">,</span> <span class="js-identifier">index</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${digit} * 8^${index} = ${value}`</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">result</span> <span class="operator">+=</span> <span class="js-identifier">value</span><span class="punctuation">;</span>
-                        }<span class="punctuation">)</span><span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">fractionalPart</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">fractionalPart</span>.<span class="js-identifier">split</span>(<span class="string">''</span>).<span class="js-identifier">forEach</span>(<span class="punctuation">(</span><span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="js-identifier">index</span><span class="punctuation">)</span> <span class="operator">=&gt;</span> {
-                            <span class="keyword">const</span> <span class="js-identifier">value</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="number">10</span>) <span class="operator">*</span> <span class="js-identifier">Math</span>.<span class="js-identifier">pow</span>(<span class="number">8</span><span class="punctuation">,</span> <span class="operator">-</span><span class="punctuation">(</span><span class="js-identifier">index</span> <span class="operator">+</span> <span class="number">1</span><span class="punctuation">)</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${digit} * 8^-${index + 1} = ${value}`</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">result</span> <span class="operator">+=</span> <span class="js-identifier">value</span><span class="punctuation">;</span>
-                        }<span class="punctuation">)</span><span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">return</span> { <span class="js-identifier">result</span><span class="punctuation">:</span> <span class="js-identifier">result</span>.<span class="js-identifier">toString</span>()<span class="punctuation">,</span> <span class="js-identifier">steps</span><span class="punctuation">:</span> <span class="js-identifier">steps</span>.<span class="js-identifier">join</span>(<span class="string">'\n'</span>) }<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">decimalToHex</span>(<span class="js-identifier">decimal</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="punctuation">[</span><span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="js-identifier">fractionalPart</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="js-identifier">decimal</span>.<span class="js-identifier">split</span>(<span class="string">'.'</span>)<span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">integerResult</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">steps</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">num</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="number">10</span>)<span class="punctuation">;</span>
-
-                    <span class="keyword">while</span> <span class="punctuation">(</span><span class="js-identifier">num</span> <span class="operator">&gt;</span> <span class="number">0</span><span class="punctuation">)</span> {
-                        <span class="keyword">const</span> <span class="js-identifier">remainder</span> <span class="operator">=</span> <span class="js-identifier">num</span> <span class="operator">%</span> <span class="number">16</span><span class="punctuation">;</span>
-                        <span class="keyword">const</span> <span class="js-identifier">hexChar</span> <span class="operator">=</span> <span class="js-identifier">remainder</span> <span class="operator">&lt;</span> <span class="number">10</span> <span class="operator">?</span> <span class="js-identifier">remainder</span> <span class="operator">:</span> <span class="js-identifier">String</span>.<span class="js-identifier">fromCharCode</span>(<span class="js-identifier">remainder</span> <span class="operator">+</span> <span class="number">87</span>)<span class="punctuation">;</span>
-                        <span class="js-identifier">integerResult</span> <span class="operator">=</span> <span class="js-identifier">hexChar</span> <span class="operator">+</span> <span class="js-identifier">integerResult</span><span class="punctuation">;</span>
-                        <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${num} / 16 = ${Math.floor(num / 16)}, remainder ${hexChar}`</span>)<span class="punctuation">;</span>
-                        <span class="js-identifier">num</span> <span class="operator">=</span> <span class="js-identifier">Math</span>.<span class="js-identifier">floor</span>(<span class="js-identifier">num</span> <span class="operator">/</span> <span class="number">16</span>)<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">let</span> <span class="js-identifier">fractionalResult</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">fractionalPart</span><span class="punctuation">)</span> {
-                        <span class="keyword">let</span> <span class="js-identifier">fracPart</span> <span class="operator">=</span> <span class="js-identifier">parseFloat</span>(<span class="string">'0.'</span> <span class="operator">+</span> <span class="js-identifier">fractionalPart</span>)<span class="punctuation">;</span>
-                        <span class="keyword">for</span> <span class="punctuation">(</span><span class="keyword">let</span> <span class="js-identifier">i</span> <span class="operator">=</span> <span class="number">0</span><span class="punctuation">;</span> <span class="js-identifier">i</span> <span class="operator">&lt;</span> <span class="number">4</span> <span class="operator">&amp;&amp;</span> <span class="js-identifier">fracPart</span> <span class="operator">!==</span> <span class="number">0</span><span class="punctuation">;</span> <span class="js-identifier">i</span><span class="operator">++</span><span class="punctuation">)</span> {
-                            <span class="js-identifier">fracPart</span> <span class="operator">*=</span> <span class="number">16</span><span class="punctuation">;</span>
-                            <span class="keyword">const</span> <span class="js-identifier">digit</span> <span class="operator">=</span> <span class="js-identifier">Math</span>.<span class="js-identifier">floor</span>(<span class="js-identifier">fracPart</span>)<span class="punctuation">;</span>
-                            <span class="keyword">const</span> <span class="js-identifier">hexChar</span> <span class="operator">=</span> <span class="js-identifier">digit</span> <span class="operator">&lt;</span> <span class="number">10</span> <span class="operator">?</span> <span class="js-identifier">digit</span> <span class="operator">:</span> <span class="js-identifier">String</span>.<span class="js-identifier">fromCharCode</span>(<span class="js-identifier">digit</span> <span class="operator">+</span> <span class="number">87</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">fractionalResult</span> <span class="operator">+=</span> <span class="js-identifier">hexChar</span><span class="punctuation">;</span>
-                            <span class="js-identifier">fracPart</span> <span class="operator">-=</span> <span class="js-identifier">digit</span><span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`0.${fracPart.toFixed(4)} * 16 -> ${hexChar}`</span>)<span class="punctuation">;</span>
-                        }<span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">return</span> { <span class="js-identifier">result</span><span class="punctuation">:</span> <span class="js-identifier">integerResult</span> <span class="operator">+</span> <span class="punctuation">(</span><span class="js-identifier">fractionalResult</span> <span class="operator">?</span> <span class="string">'.'</span> <span class="operator">+</span> <span class="js-identifier">fractionalResult</span> <span class="operator">:</span> <span class="string">''</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="js-identifier">steps</span><span class="punctuation">:</span> <span class="js-identifier">steps</span>.<span class="js-identifier">join</span>(<span class="string">'\n'</span>) }<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">hexToDecimal</span>(<span class="js-identifier">hex</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="punctuation">[</span><span class="js-identifier">integerPart</span><span class="punctuation">,</span> <span class="js-identifier">fractionalPart</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="js-identifier">hex</span>.<span class="js-identifier">split</span>(<span class="string">'.'</span>)<span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">result</span> <span class="operator">=</span> <span class="number">0</span><span class="punctuation">;</span>
-                    <span class="keyword">let</span> <span class="js-identifier">steps</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">;</span>
-
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">integerPart</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">integerPart</span>.<span class="js-identifier">split</span>(<span class="string">''</span>).<span class="js-identifier">reverse</span>().<span class="js-identifier">forEach</span>(<span class="punctuation">(</span><span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="js-identifier">index</span><span class="punctuation">)</span> <span class="operator">=&gt;</span> {
-                            <span class="keyword">const</span> <span class="js-identifier">value</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="number">16</span>) <span class="operator">*</span> <span class="js-identifier">Math</span>.<span class="js-identifier">pow</span>(<span class="number">16</span><span class="punctuation">,</span> <span class="js-identifier">index</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${digit} * 16^${index} = ${value}`</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">result</span> <span class="operator">+=</span> <span class="js-identifier">value</span><span class="punctuation">;</span>
-                        }<span class="punctuation">)</span><span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">if</span> <span class="punctuation">(</span><span class="js-identifier">fractionalPart</span><span class="punctuation">)</span> {
-                        <span class="js-identifier">fractionalPart</span>.<span class="js-identifier">split</span>(<span class="string">''</span>).<span class="js-identifier">forEach</span>(<span class="punctuation">(</span><span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="js-identifier">index</span><span class="punctuation">)</span> <span class="operator">=&gt;</span> {
-                            <span class="keyword">const</span> <span class="js-identifier">value</span> <span class="operator">=</span> <span class="js-identifier">parseInt</span>(<span class="js-identifier">digit</span><span class="punctuation">,</span> <span class="number">16</span>) <span class="operator">*</span> <span class="js-identifier">Math</span>.<span class="js-identifier">pow</span>(<span class="number">16</span><span class="punctuation">,</span> <span class="operator">-</span><span class="punctuation">(</span><span class="js-identifier">index</span> <span class="operator">+</span> <span class="number">1</span><span class="punctuation">)</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">steps</span>.<span class="js-identifier">push</span>(<span class="string">`${digit} * 16^-${index + 1} = ${value}`</span>)<span class="punctuation">;</span>
-                            <span class="js-identifier">result</span> <span class="operator">+=</span> <span class="js-identifier">value</span><span class="punctuation">;</span>
-                        }<span class="punctuation">)</span><span class="punctuation">;</span>
-                    }<span class="punctuation">;</span>
-
-                    <span class="keyword">return</span> { <span class="js-identifier">result</span><span class="punctuation">:</span> <span class="js-identifier">result</span>.<span class="js-identifier">toString</span>()<span class="punctuation">,</span> <span class="js-identifier">steps</span><span class="punctuation">:</span> <span class="js-identifier">steps</span>.<span class="js-identifier">join</span>(<span class="string">'\n'</span>) }<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">octalToHex</span>(<span class="js-identifier">octal</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="js-identifier">decimal</span> <span class="operator">=</span> <span class="js-identifier">octalToDecimal</span>(<span class="js-identifier">octal</span>).<span class="js-identifier">result</span><span class="punctuation">;</span>
-                    <span class="keyword">return</span> <span class="js-identifier">decimalToHex</span>(<span class="js-identifier">decimal</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">hexToOctal</span>(<span class="js-identifier">hex</span><span class="punctuation">)</span> {
-                    <span class="keyword">const</span> <span class="js-identifier">decimal</span> <span class="operator">=</span> <span class="js-identifier">hexToDecimal</span>(<span class="js-identifier">hex</span>).<span class="js-identifier">result</span><span class="punctuation">;</span>
-                    <span class="keyword">return</span> <span class="js-identifier">decimalToOctal</span>(<span class="js-identifier">decimal</span>)<span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-
-                <span class="keyword">function</span> <span class="js-identifier">clearOutput</span>(<span class="punctuation">)</span> {
-                    <span class="js-identifier">stepsOutput</span>.<span class="js-identifier">textContent</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="js-identifier">resultOutput</span>.<span class="js-identifier">textContent</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                    <span class="js-identifier">inputNumber</span>.<span class="js-identifier">value</span> <span class="operator">=</span> <span class="string">''</span><span class="punctuation">;</span>
-                }<span class="punctuation">;</span>
-            }<span class="punctuation">)</span><span class="punctuation">;</span>
-
-            <span class="tag">&lt;/script&gt;</span>
-        <span class="tag">&lt;/body&gt;</span>
-        <span class="tag">&lt;/html&gt;</span>
-    </pre>
+                // UI feedback
+                button.textContent = 'Thank You!';
+                button.classList.add('thank-you');
+                button.disabled = true;
+
+                setTimeout(() => {
+                    button.textContent = 'Download';
+                    button.classList.remove('thank-you');
+                    button.disabled = false;
+                }, 3000);
+            });
+        });
+    });
+</script>
 
 </body>
 </html>

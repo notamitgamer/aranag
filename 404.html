@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Page Not Found</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Prevent scrollbars from animation */
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            max-width: 90%;
+        }
+
+        .boy-container {
+            position: relative;
+            width: 200px; /* Adjust size as needed */
+            height: 250px; /* Adjust size as needed */
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+
+        .boy {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            animation: cry 1.5s infinite alternate;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 30px;
+            box-sizing: border-box;
+        }
+
+        /* SVG styles for the boy */
+        .boy-svg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .boy-head {
+            fill: #add8e6; /* Skin color */
+        }
+
+        .boy-body {
+            fill: #87ceeb; /* Shirt color */
+        }
+
+        .boy-arm {
+            fill: #add8e6; /* Skin color */
+        }
+
+        .tear {
+            width: 5px;
+            height: 15px;
+            background-color: #4682b4; /* Blue for tears */
+            border-radius: 50%;
+            position: absolute;
+            top: 70px; /* Adjust tear position */
+            animation: fallTear 1s infinite;
+            opacity: 0;
+        }
+
+        .tear.left {
+            left: 60px;
+            animation-delay: 0.2s;
+        }
+
+        .tear.right {
+            right: 60px;
+            animation-delay: 0.5s;
+        }
+
+        .board {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            background-color: #8b4513; /* Wood color */
+            border: 2px solid #5a2c00;
+            border-radius: 5px;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            bottom: 50px; /* Initial position relative to the boy */
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: bottom center;
+            animation: holdBoard 0s forwards; /* Initial state, controlled by JS */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* Added transform and box-shadow to transition */
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2); /* Initial shadow */
+        }
+
+        a:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px) scale(1.05); /* Lift and slightly enlarge on hover */
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4); /* More prominent shadow on hover */
+        }
+
+        /* Animations */
+        @keyframes cry {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+
+        @keyframes fallTear {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(30px); opacity: 0; }
+        }
+
+        @keyframes boardFall {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            100% { transform: translate(-50%, 150px) rotate(45deg); opacity: 0; }
+        }
+
+        @keyframes boardPickUp {
+            0% { transform: translate(-50%, 150px) rotate(45deg); opacity: 0; }
+            50% { transform: translate(-50%, 50px) rotate(-10deg); opacity: 1; }
+            100% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes boardHold {
+            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(-50%, 5px) rotate(2deg); }
+            100% { transform: translate(-50%, 0) rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="boy-container">
+            <div class="boy">
+                <!-- Simple SVG for the boy -->
+                <svg class="boy-svg" viewBox="0 0 200 250" preserveAspectRatio="xMidYMid meet">
+                    <circle class="boy-head" cx="100" cy="70" r="50"/>
+                    <rect class="boy-body" x="60" y="120" width="80" height="130" rx="20" ry="20"/>
+                    <!-- Arms (simplified) -->
+                    <rect class="boy-arm" x="40" y="130" width="20" height="80" rx="10" ry="10" transform="rotate(-10 50 170)"/>
+                    <rect class="boy-arm" x="140" y="130" width="20" height="80" rx="10" ry="10" transform="rotate(10 150 170)"/>
+                </svg>
+                <div class="tear left"></div>
+                <div class="tear right"></div>
+            </div>
+            <div class="board" id="board">Page Not Found</div>
+        </div>
+        <h1>404</h1>
+        <p>Oops! The page you're looking for doesn't exist.</p>
+        <a href="/">Go to Homepage</a>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const boy = document.querySelector('.boy');
+
+        function animateBoard() {
+            // Board falls
+            board.style.animation = 'boardFall 1s forwards';
+
+            setTimeout(() => {
+                // Board picks up and holds
+                board.style.animation = 'boardPickUp 1.5s forwards, boardHold 3s 1.5s infinite linear';
+                board.style.opacity = '1'; // Ensure it's visible after picking up
+
+                // Restart the loop after a delay
+                setTimeout(() => {
+                    animateBoard();
+                }, 3000); // Adjust this delay to control loop speed
+            }, 1000); // Delay before picking up starts
+        }
+
+        // Initial call to start the animation loop
+        animateBoard();
+    </script>
+</body>
+</html>

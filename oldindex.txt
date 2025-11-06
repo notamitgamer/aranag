@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <link rel="canonical" href="https://aranag.site" />
+    <link rel="icon" type="image/x-icon" href="https://aranag.site/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="https://aranag.site/logoar32x32.png">
+    <title>Amit Dutta - Portfolio</title>
+    <meta name="description" content="Just trying to show some of my Project. - Amit Dutta">
+    <meta name="keywords" content="Amit,amit,amit dutta,Amit Dutta,aranag,project,showcase,project showcase,amit madhyamgram,amitda,madhyamgram,apc college,apc,ARANAG,notamitgamer">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Website",
+        "name": "Amit Dutta",
+        "alternateName":["Amit Dutta","notamitgamer"],
+        "url": "https://aranag.site"
+    }
+    </script>
+    <!-- Tailwind CSS CDN for quick styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoIZ2j/u/t3vA2tK7S2pX2a5pW5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- AOS (Animate On Scroll) CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        /* Custom styles for a clean look */
+        html {
+            scroll-behavior: smooth; /* Smooth scrolling for navigation */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Very light blue-gray background */
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1.5rem; /* Responsive padding */
+            @screen sm {
+                padding: 2rem;
+            }
+            @screen lg {
+                padding: 2.5rem;
+            }
+        }
+
+        /* Enhanced profile picture shadow and border */
+        .profile-pic-container {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            border: 4px solid #357ABD;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .profile-pic-container:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-color: #2C3E50;
+        }
+
+        /* Smooth transitions for buttons and links */
+        a, .project-link-button, .cta-button {
+            transition: all 0.3s ease;
+        }
+        a:hover, .project-link-button:hover, .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Back to top button */
+        #back-to-top {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        #back-to-top:hover {
+            background-color: #357ABD;
+            transform: scale(1.1);
+        }
+
+        /* Sticky Navigation Bar */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: #4A90E2; /* Same as header */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+        /* Adjusted navbar-nav for better mobile display */
+        .navbar-nav {
+            display: flex;
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+            justify-content: center; /* Center items when wrapped */
+            gap: 0.75rem; /* Consistent gap for all screens, slightly larger than before */
+            padding: 0 0.5rem; /* Add minimal horizontal padding */
+        }
+        .navbar-nav a {
+            color: white;
+            font-weight: 600;
+            padding: 0.4rem 0.6rem; /* Slightly reduced padding for mobile */
+            font-size: 0.85rem; /* Slightly reduced font size for mobile */
+            border-radius: 8px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        @media (min-width: 768px) { /* Restore larger padding/font size for desktop */
+            .navbar-nav a {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+        }
+        .navbar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+
+        .header {
+            background-color: #4A90E2; /* Solid blue header */
+            color: white;
+            padding: 4rem 0 10rem 0; /* Increased bottom padding to make the box taller and give more room for the image */
+            text-align: center;
+            border-bottom-left-radius: 40px; /* Larger radius */
+            border-bottom-right-radius: 40px; /* Larger radius */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+            position: relative; /* For profile picture positioning */
+            overflow: hidden; /* Ensure pattern doesn't spill */
+        }
+        .header h1 {
+            font-size: 3rem; /* Default font size */
+            @screen sm {
+                font-size: 4rem; /* Medium screens */
+            }
+            @screen md {
+                font-size: 5rem; /* Larger screens */
+            }
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1.125rem; /* Default font size */
+            @screen sm {
+                font-size: 1.25rem; /* Medium screens */
+            }
+            @screen md {
+                font-size: 1.5rem; /* Larger screens */
+            }
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-pic-container {
+            position: absolute;
+            bottom: 50px; /* Changed to 0px to ensure the entire picture is visible within the header */
+            /* Centering fix: Use left, right, and auto margins */
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 140px; /* Increased width for bigger profile picture */
+            border-radius: 50%;
+            padding: 5px; /* Border around the image */
+            background-color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex; /* For internal centering of the image */
+            justify-content: center;
+            align-items: center;
+            
+        }
+        .profile-pic {
+            width: 140px; /* Increased width */
+            height: 140px; /* Increased height */
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4A90E2; /* Blue border */
+            
+        }
+
+        .section-title {
+            font-size: 2rem; /* Default font size */
+            @screen sm {
+                font-size: 2.25rem;
+            }
+            @screen md {
+                font-size: 2.5rem;
+            }
+            font-weight: bold;
+            color: #2C3E50; /* Dark blue-gray */
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px; /* Slightly wider line */
+            height: 5px; /* Thicker line */
+            background-color: #4A90E2; /* Blue accent */
+            margin: 10px auto 0;
+            border-radius: 2.5px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 16px; /* More rounded corners */
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer initial shadow */
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-8px); /* Larger lift */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+        }
+        .project-type {
+            font-weight: 600;
+            color: #4A90E2; /* Blue accent */
+            margin-bottom: 0.5rem;
+            display: flex; /* For icon alignment */
+            align-items: center;
+            gap: 0.5rem; /* Space between icon and text */
+        }
+        .project-description {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .project-link-button {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            background-color: #4A90E2;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .project-link-button:hover {
+            background-color: #357ABD;
+            transform: translateY(-2px);
+        }
+
+        /* Skills Section Styling */
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid */
+            gap: 1.5rem;
+            justify-items: center; /* Center items in their grid cells */
+            text-align: center;
+        }
+        .skill-item {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .skill-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .skill-item i {
+            font-size: 2.5rem;
+            color: #4A90E2;
+            margin-bottom: 0.5rem;
+        }
+        .skill-item p {
+            font-weight: 500;
+            color: #2C3E50;
+        }
+
+
+        .contact-icons {
+            flex-wrap: wrap; /* Allow icons to wrap on smaller screens */
+            justify-content: center; /* Center icons when wrapped */
+            gap: 1.5rem; /* Space between icons */
+        }
+        .contact-icons a {
+            color: #4A90E2; /* Blue for icons */
+            font-size: 2.5rem; /* Larger icons */
+            transition: color 0.2s ease, transform 0.2s ease;
+            display: inline-block; /* Ensure transform works */
+        }
+        .contact-icons a:hover {
+            color: #357ABD; /* Darker blue on hover */
+            transform: translateY(-3px) scale(1.05); /* Slight lift and scale on hover */
+        }
+
+        /* Call to Action Section */
+        .cta-section {
+            background-color: #4A90E2;
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 20px;
+            margin: 4rem auto;
+            max-width: 800px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: white;
+            color: #4A90E2;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .cta-button:hover {
+            background-color: #E0E0E0;
+            color: #357ABD;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Navigation Bar -->
+    <nav class="navbar">
+        <div class="container flex justify-center navbar-nav">
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#skills">Skills</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <h1 class="font-extrabold mb-4" data-aos="fade-up">Amit Dutta</h1>
+            <p class="font-light" data-aos="fade-up" data-aos-delay="100">Coder</p>
+            <div class="profile-pic-container" data-aos="zoom-in" data-aos-delay="200">
+                <!-- IMPORTANT: Replace 'https://placehold.co/100x100/4A90E2/FFFFFF?text=AD' with YOUR ACTUAL PROFILE PICTURE URL -->
+                <img src="https://aranag.site/profilepic.jpg" class="profile-pic">
+            </div>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 mt-12" data-aos="fade-up">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="card text-center p-8" data-aos="fade-up" data-aos-delay="100">
+                <p class="text-lg text-gray-700">
+                    Hello! I'm Amit Dutta, a passionate developer with a strong foundation in various technologies. I thrive on
+                    turning innovative ideas into practical solutions, whether it's through web development,
+                     or intelligent AI models. I'm excited to share my work and discuss how my skills can contribute to your team.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-16 bg-white">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">My Projects</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Project 1: HTML Project -->
+                <div class="card" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="text-xl font-semibold mb-2">Interactive Web calculater</h3>
+                    <p class="project-type"><i class="fas fa-globe"></i> HTML/CSS/JS Project</p>
+                    <p class="project-description">
+                        Developed a responsive and interactive web calculater, it can convert numbers between the number system(Binary, Decimal, Octal, Hexadecimal).
+                        Check out the code here 
+                    </p>
+                    <a href="/codenct" class="project-link-button" target="_blank" rel="noopener noreferrer">View Project</a>
+                </div>
+
+                <!-- Project 2: Python Project 1 -->
+                <div class="card" data-aos="fade-up" data-aos-delay="300">
+                    <h3 class="text-xl font-semibold mb-2">ADPKG</h3>
+                    <p class="project-type"><i class="fab fa-python"></i> Python Project</p>
+                    <p class="project-description">
+                        A comprehensive Python package for various mathematical and financial calculations. 
+                        This package includes modules for compound interest, number theory 
+                        (prime checking, factorial, permutation, combination), string manipulation, matrix operations, and basic statistics (mean, median, mode).
+                    </p>
+                    <a href="https://pypi.org/project/adpkg/" class="project-link-button" target="_blank" rel="noopener noreferrer">View Project</a>
+                </div>
+
+                <!-- Project 3: AI Model Project -->
+                <div class="card" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-xl font-semibold mb-2">AI Model</h3>
+                    <p class="project-type"><i class="fas fa-brain"></i> AI Model Project</p>
+                    <p class="project-description">
+                        Trained a deep learning model, achieving high accuracy.
+                    </p>
+                    <a href="https://ada.aranag.site" class="project-link-button" target="_blank" rel="noopener noreferrer">View Project</a>
+                </div>
+
+                <div class="card" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-xl font-semibold mb-2">WBSU Code</h3>
+                    <p class="project-type"><i class="fas fa-code"></i>Codes</p>
+                    <p class="project-description">
+                        Checkout this repo to get all code for B.SC. HONS COMPUTER SCIENCE (WBSU) 
+                    </p>
+                    <a href="https://aranag.site/github.html" class="project-link-button" target="_blank" rel="noopener noreferrer">View Codes</a>
+                    <a href="https://aranag.site/github-tution.html" class="project-link-button" target="_blank" rel="noopener noreferrer">View T-Codes</a>
+                    <a href="https://github.com/notamitgamer/bsc" class="project-link-button" target="_blank" rel="noopener noreferrer">View Github Repo</a>
+                </div>
+
+                <div class="card" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-xl font-semibold mb-2">Online AI Compiler</h3>
+                    <p class="project-type"><i class="fas fa-terminal"></i> AI-Powered Compiler</p>
+                    <p class="project-description">
+                        Checkout this AI powered compiler. This compiler is powered by Gemini Model 2.5 Flash. Now available for C, C++ and Python programming language with some limitation.
+                    </p>
+                    <a href="https://compiler.aranag.site" class="project-link-button" target="_blank" rel="noopener noreferrer">Visit Now</a>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-16">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">My Skills</h2>
+            <div class="card p-8" data-aos="fade-up" data-aos-delay="100">
+                <div class="skill-grid">
+                    <div class="skill-item" data-aos="zoom-in" data-aos-delay="200">
+                        <i class="fas fa-laptop-code"></i>
+                        <p>Web Development</p>
+                    </div>
+                    <div class="skill-item" data-aos="zoom-in" data-aos-delay="250">
+                        <i class="fab fa-python"></i>
+                        <p>Python</p>
+                    </div>
+                    <div class="skill-item" data-aos="zoom-in" data-aos-delay="300">
+                        <i class="fas fa-database"></i>
+                        <p>Database Management</p>
+                    </div>
+                    <div class="skill-item" data-aos="zoom-in" data-aos-delay="400">
+                        <i class="fas fa-cloud"></i>
+                        <p>Google Firebase</p>
+                    </div>
+                    <div class="skill-item" data-aos="zoom-in" data-aos-delay="400">
+                        <i class="fas fa-cloud"></i>
+                        <p>Render</p>
+                    </div>
+                    <div class="skill-item" data-aos="zoom-in" data-aos-delay="500">
+                        <i class="fas fa-mobile-alt"></i>
+                        <p>Responsive Design</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section" data-aos="fade-up">
+        <h2>Ready to collaborate or have a chat?</h2>
+        <p class="text-lg mb-6">I'm always eager to discuss new opportunities and exciting projects.</p>
+        <a href="#contact" class="cta-button">Let's Connect!</a>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Get in Touch</h2>
+            <div class="card text-center p-8" data-aos="fade-up" data-aos-delay="100">
+                <p class="text-lg text-gray-700 mb-6">
+                    I'm always open to new opportunities and collaborations. Feel free to reach out!
+                </p>
+                <div class="flex justify-center items-center contact-icons">
+                    <a href="mailto:amitdutta4255@gmail.com" aria-label="Email Amit Dutta" class="group" data-aos="zoom-in" data-aos-delay="200">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                    <a href="https://linkedin.com/in/notamitgamer" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile of Amit Dutta" class="group" data-aos="zoom-in" data-aos-delay="250">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://facebook.com/notamitgamer" target="_blank" rel="noopener noreferrer" aria-label="Facebook Profile of Amit Dutta" class="group" data-aos="zoom-in" data-aos-delay="300">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://instagram.com/notamitgamer" target="_blank" rel="noopener noreferrer" aria-label="Instagram Profile of Amit Dutta" class="group" data-aos="zoom-in" data-aos-delay="350">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://twitter.com/notamitgamer" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter) Profile of Amit Dutta" class="group" data-aos="zoom-in" data-aos-delay="400">
+                        <i class="fab fa-twitter"></i> <!-- Using fa-twitter for broader compatibility with beta3 CDN -->
+                    </a>
+                    <a href="https://wa.me/+917278779512" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp of Amit Dutta" class="group" data-aos="zoom-in" data-aos-delay="450">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://github.com/notamitgamer" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile of Amit Dutta" class="group" data-aos="zoom-in" data-aos-delay="500">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-16 rounded-t-2xl">
+        <div class="container">
+            <p>&copy; 2025 Amit Dutta. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- AOS (Animate On Scroll) JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800, // animation duration
+            once: true,    // Reverted to true: animation will happen only once - while scrolling down
+        });
+    </script>
+
+    <script>
+        // Script to hide navbar on scroll down and show on scroll up
+        let lastScrollTop = 0;
+        const navbar = document.querySelector('.navbar');
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down - hide navbar
+                navbar.style.top = '-80px'; // move navbar up out of view (adjust height if needed)
+                navbar.style.transition = 'top 0.3s ease-in-out';
+            } else {
+                // Scrolling up - show navbar with animation
+                navbar.style.top = '0';
+                navbar.style.transition = 'top 0.3s ease-in-out';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+        });
+    </script>
+
+    </body>
+    <button id="back-to-top" aria-label="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+    <script>
+        // Back to top button functionality
+        const backToTopButton = document.getElementById('back-to-top');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'flex';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+    </html>
