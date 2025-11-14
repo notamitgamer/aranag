@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BSc Repository File Index</title>
+    <title>notamitgamer/bsc Repository File Index</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -22,9 +22,33 @@
       .chevron.rotated {
         transform: rotate(180deg);
       }
-      #modal-body pre {
-        max-height: 70vh;
+
+      /* --- Enhanced Code Viewer Modal Styles --- */
+      #code-modal .modal-content-area {
+        /* Ensure the code viewer takes up maximum available height */
+        height: 90vh;
+        max-height: 90vh;
       }
+      #modal-code-container {
+        /* Remove default padding from the outer container */
+        padding: 0;
+        flex-grow: 1; /* Allow the container to fill space */
+        display: flex; /* Flex context for pre element */
+      }
+      #modal-code-container pre {
+        /* Full width and height inside its container */
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 1rem; /* Padding inside the code block */
+        overflow: auto;
+        /* Custom background and border to look more like a proper viewer */
+        background-color: #1e1e1e; /* Darker background for code */
+        border-radius: 0 0 0.5rem 0.5rem;
+        line-height: 1.4;
+      }
+      /* --- End Code Viewer Modal Styles --- */
+
       /* Animation for success feedback */
       .btn-success-pulse {
         background-color: #10b981 !important; /* Tailwind green-500 */
@@ -42,6 +66,25 @@
           box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
         }
       }
+      /* Ensure code display is readable */
+      .code-match-line {
+        background-color: #f3f4f6;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem; /* text-xs */
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-break: break-all;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+      }
+
+      /* Active state for search results */
+      .search-file-item.active {
+        background-color: #dbeafe; /* Blue-100 */
+        border-color: #60a5fa; /* Blue-400 */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
     </style>
   </head>
   <body class="bg-gray-100">
@@ -49,22 +92,121 @@
       <div
         class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden"
       >
-        <div class="p-8">
+        <div class="p-4 md:p-8">
           <div class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800">
-              BSc Repository Contents
+              notamitgamer/bsc Repository Contents
             </h1>
-            <p class="text-gray-500 mt-2">
-              A quick navigation guide to the files in the repository. <br><br>
-              <b>For optimal viewing and experience, please use a desktop browser.</b>
+            <p class="text-gray-500 mt-2 text-sm md:text-base">
+              A quick navigation guide to the files in the repository. <br />
+              <b
+                >For optimal viewing and experience, please use a desktop
+                browser.</b
+              >
+            </p>
+            <p class="text-gray-500 mt-2 text-sm md:text-base">
+              GitHub Repository URL:
+              <a
+                href="https://github.com/notamitgamer/bsc"
+                class="text-blue-600 hover:underline"
+                >https://github.com/notamitgamer/bsc</a
+              >
             </p>
           </div>
-          <div class="space-y-4">
-            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">
-              Files and Folders
+
+          <!-- SEARCH BAR (Enhanced with Icon and Clear Button) -->
+          <div class="mb-8 relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <!-- Search Icon -->
+              <svg
+                class="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search files by name or content keywords (Press '/' to focus)"
+              class="w-full p-3 pl-10 pr-10 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+              oninput="handleSearch()"
+              autocomplete="off"
+            />
+            <!-- Clear Button -->
+            <button
+              id="clear-search-btn"
+              onclick="clearSearch()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none hidden"
+              title="Clear Search"
+            >
+              <svg
+                class="w-5 h-5 text-gray-400 hover:text-gray-600 transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
+          <!-- END SEARCH BAR -->
+
+          <!-- SEARCH RESULTS SECTION (Mobile responsive layout) -->
+          <div id="search-results-container" class="hidden mb-8">
+            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
+              Search Results (<span id="result-count">0</span> files)
             </h2>
-            <ul class="space-y-3">
-              
+            <div
+              class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4"
+            >
+              <!-- 1. File List (Wider on mobile, 1/3 on desktop) -->
+              <div
+                id="result-file-list"
+                class="w-full md:w-1/3 space-y-2 border rounded-xl p-4 bg-gray-50 max-h-[50vh] md:max-h-[60vh] overflow-y-auto"
+              >
+                <p id="search-placeholder" class="text-sm text-gray-500">
+                  Start typing to see file matches...
+                </p>
+              </div>
+              <!-- 2. Code Match Display (Wider on mobile, 2/3 on desktop) -->
+              <div
+                id="result-code-matches"
+                class="w-full md:w-2/3 border rounded-xl p-4 bg-white shadow-inner max-h-[50vh] md:max-h-[60vh] overflow-y-auto relative"
+              >
+                <p id="code-match-placeholder" class="text-sm text-gray-500">
+                  Select a file from the left to view matching code lines, or
+                  refine your search.
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- END SEARCH RESULTS SECTION -->
+
+          <!-- INITIAL FILE LIST (Hidden when searching) -->
+          <div id="initial-file-list">
+            <div class="space-y-4">
+              <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">
+                Files and Folders
+              </h2>
+              <ul class="space-y-3">
+                
                         <li class="border rounded-lg overflow-hidden">
                             <div class="folder-header bg-gray-100 p-4 cursor-pointer hover:bg-blue-100 transition-colors duration-200" onclick="toggleFolder('c')">
                                 <div class="flex items-center justify-between">
@@ -3892,7 +4034,7 @@ int main()
                                     <div class="flex items-center">
                                         <svg class="w-6 h-6 text-blue-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                                         <span class="font-medium text-gray-800">practice-c</span>
-                                        <span class="ml-2 text-sm text-gray-500">(10 files)</span>
+                                        <span class="ml-2 text-sm text-gray-500">(11 files)</span>
                                     </div>
                                     <div class="flex items-center space-x-4">
                                         <a href="https://github.com/notamitgamer/bsc/tree/main/practice-c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" onclick="event.stopPropagation()" title="View folder on GitHub">
@@ -4339,6 +4481,71 @@ int main()
 }</code></pre>
                                         </div>
                                     </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">pc011.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/practice-c/pc011.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-practice-c-pc011_c', 'pc011.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-practice-c-pc011_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/practice-c/pc011.c">
+                                            <pre><code class="language-c">/* Write a C program that takes two positive integers, L (Lower Bound)
+and U (Upper Bound), as input from the user. The program must find and print
+the count of all numbers between L and U (inclusive) that
+are also a Palindrome Number. */
+/* Author - Amit Dutta, Date - 11th November, 2025 */
+
+#include &lt;stdio.h&gt;
+#define true 1
+#define false 0
+
+int isPalindrome(int num)
+{
+    int temp = num, numRev = 0;
+    while (temp &gt; 0)
+    {
+        numRev = (numRev * 10) + (temp % 10);
+        temp /= 10;
+    }
+    if (num == numRev)
+        return true;
+    else
+        return false;
+}
+
+int main()
+{
+    int uBound, lBound, num, palindromeCount = 0;
+    printf(&quot;Enter the Lower Bound and Upper Bound : &quot;);
+    if (scanf(&quot;%d %d&quot;, &amp;lBound, &amp;uBound) != 2)
+    {
+        printf(&quot;\nOnly Integer values are allowed.&quot;);
+        return 1;
+    }
+    if (lBound &lt; 0 || uBound &lt; 0 || lBound &gt; uBound)
+    {
+        printf(&quot;\nPlease enter appropriate inforamtion.&quot;);
+        return 1;
+    }
+    printf(&quot;Palindrome Numbers from %d to %d :&quot;, lBound, uBound);
+    for (num = lBound; num &lt;= uBound; num++)
+    {
+        if (isPalindrome(num))
+        {
+            printf(&quot;  %d&quot;, num);
+            palindromeCount++;
+        }
+    }
+    printf(&quot;\nTotal Palindrome number found inside the range (%d to %d) : %d&quot;, lBound, uBound, palindromeCount);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
                 </ul>
             </div>
         </li>
@@ -4349,7 +4556,7 @@ int main()
                                     <div class="flex items-center">
                                         <svg class="w-6 h-6 text-blue-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                                         <span class="font-medium text-gray-800">tuition-c</span>
-                                        <span class="ml-2 text-sm text-gray-500">(78 files)</span>
+                                        <span class="ml-2 text-sm text-gray-500">(101 files)</span>
                                     </div>
                                     <div class="flex items-center space-x-4">
                                         <a href="https://github.com/notamitgamer/bsc/tree/main/tuition-c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" onclick="event.stopPropagation()" title="View folder on GitHub">
@@ -4856,6 +5063,841 @@ int main()
     printf(&quot;\nMaturity Amount : %d&quot;, si + p);
     return 0;
 }</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-015.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-015.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-015_c', 'APC-PRAC-015.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-015_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-015.c">
+                                            <pre><code class="language-c">/* Write a program to display all numbers between lb (lower bound) and up (upper bound)
+which ends with digit 7 or divisible by 7. */
+/* Author - Amit Dutta, Date - 06th November, 2025 */
+// File Name - amit0611202501.c (LAB), APC-PRAC-015.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int lb, ub, i;
+    printf(&quot;Enter the lb, ub : &quot;);
+    scanf(&quot;%d %d&quot;, &amp;lb, &amp;ub);
+    printf(&quot;\nEnds with 7 :&quot;);
+    for (i = lb; i &lt;= ub; i++)
+    {
+        if (i % 10 == 7)
+        {
+            printf(&quot;  %d&quot;, i);
+        }
+    }
+    printf(&quot;\nDivisible by 7 :&quot;);
+    for (i = lb; i &lt;= ub; i++)
+    {
+        if (i % 7 == 0)
+        {
+            printf(&quot;  %d&quot;, i);
+        }
+    }
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-016.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-016.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-016_c', 'APC-PRAC-016.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-016_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-016.c">
+                                            <pre><code class="language-c">/* Write a program to check palindrome number. */
+/* Author - Amit Dutta, Date - 06th November, 2025 */
+// File Name - amit0611202502.c (LAB), APC-PRAC-016.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int num, temp, rev = 0;
+    printf(&quot;Enter the number : &quot;);
+    scanf(&quot;%d&quot;, &amp;num);
+    temp = num;
+    while (temp &gt; 0)
+    {
+        rev = (rev * 10) + (temp % 10);
+        temp /= 10;
+    }
+    if (rev == num)
+        printf(&quot;\nInput %d is a palindrome number.&quot;, num);
+    else
+        printf(&quot;\nInput %d is not a palindrome number.&quot;, num);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-017.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-017.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-017_c', 'APC-PRAC-017.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-017_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-017.c">
+                                            <pre><code class="language-c">/* Write a program to check perfect number. */
+/* Author - Amit Dutta, Date - 06th November, 2025 */
+// File Name - amit0611202503.c (LAB), APC-PRAC-017.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int num, i, divisibleSum = 0;
+    printf(&quot;Enter a number : &quot;);
+    scanf(&quot;%d&quot;, &amp;num);
+    for (i = 1; i &lt;= num / 2; i++)
+    {
+        if (num % i == 0)
+        {
+            divisibleSum += i;
+        }
+    }
+    if (divisibleSum == num)
+        printf(&quot;\nInput %d ia a Perfect Number.&quot;, num);
+    else
+        printf(&quot;\nInput %d is NOT a Perfect Number.&quot;, num);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-018.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-018.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-018_c', 'APC-PRAC-018.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-018_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-018.c">
+                                            <pre><code class="language-c">/* Write a program to check Automorphic Number. */
+/* Author - Amit Dutta, Date - 06th November, 2025 */
+// File Name - amit0611202504.c (LAB), APC-PRAC-018.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+
+int main()
+{
+    int num, square, count = 0, temp, modNum;
+    printf(&quot;Enter the number : &quot;);
+    scanf(&quot;%d&quot;, &amp;num);
+    square = (int)pow(num, 2);
+    temp = num;
+    while (temp &gt; 0)
+    {
+        temp /= 10;
+        count++;
+    }
+    modNum = (int)pow(10, count);
+    temp = square % modNum;
+    if (num == temp)
+        printf(&quot;\nInput %d is a Automorphic Number.&quot;, num);
+    else
+        printf(&quot;\nInput %d is a Automorphic Number.&quot;, num);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-019.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-019.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-019_c', 'APC-PRAC-019.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-019_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-019.c">
+                                            <pre><code class="language-c">/* Write a program to find hcf of two numbers */
+/* Author - Amit Dutta, Date - 07th November, 2025 */
+// File Name - amit0711202501.c (LAB), APC-PRAC-019.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int a, b, temp, temp_a, temp_b;
+    printf(&quot;Enter the a and b : &quot;);
+    scanf(&quot;%d %d&quot;, &amp;a, &amp;b);
+    temp_a = a, temp_b = b;
+    while (b &gt; 0)
+    {
+        temp = a;
+        a = b;
+        b = temp % b;
+    }
+    printf(&quot;\nHCF of %d and %d is : %d\n&quot;, temp_a, temp_b, a);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-020.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-020.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-020_c', 'APC-PRAC-020.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-020_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-020.c">
+                                            <pre><code class="language-c">/* Write a program to check if two number is co-prime or not */
+/* Author - Amit Dutta, Date - 07th November, 2025 */
+// File Name - amit0711202502.c (LAB), APC-PRAC-020.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int a, b, temp, temp_a, temp_b;
+    printf(&quot;Enter the a and b : &quot;);
+    scanf(&quot;%d %d&quot;, &amp;a, &amp;b);
+    temp_a = a, temp_b = b;
+    while (b &gt; 0)
+    {
+        temp = a;
+        a = b;
+        b = temp % b;
+    }
+    if (a == 1)
+        printf(&quot;\n%d and %d is co-prime\n&quot;, temp_a, temp_b);
+    else
+        printf(&quot;\n%d and %d is NOT co-prime\n&quot;, temp_a, temp_b);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-021.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-021.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-021_c', 'APC-PRAC-021.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-021_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-021.c">
+                                            <pre><code class="language-c">/* Write a program to check special number (sum of digit + product of digit = original number) */
+/* Author - Amit Dutta, Date - 07th November, 2025 */
+// File Name - amit0711202503.c (LAB), APC-PRAC-021.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int num, temp, sumOfDigit = 0, productOfDigit = 1;
+    printf(&quot;Enter the number to check if it is a special number : &quot;);
+    scanf(&quot;%d&quot;, &amp;num);
+    temp = num;
+    while (temp &gt; 0)
+    {
+        sumOfDigit += temp % 10;
+        productOfDigit *= temp % 10;
+        temp /= 10;
+    }
+    temp = sumOfDigit + productOfDigit;
+    if (num == temp)
+        printf(&quot;\nInput %d is a special number.&quot;, num);
+    else
+        printf(&quot;\nInput %d is not a special number.&quot;, num);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-022.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-022.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-022_c', 'APC-PRAC-022.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-022_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-022.c">
+                                            <pre><code class="language-c">/* Write a program to accept a number and check whether the number is twisted prime or not */
+/* Author - Amit Dutta, Date - 07th November, 2025 */
+// File Name - amit0711202504.c (LAB), APC-PRAC-022.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+#include &lt;stdbool.h&gt;
+
+bool checkPrime(int num)
+{
+    if (num &lt; 2)
+        return false;
+    if (num == 2)
+        return true;
+    if (num % 2 == 0)
+        return false;
+    int limit = (int)sqrt(num);
+    for (int i = 3; i &lt;= limit; i += 2)
+        if (num % i == 0)
+            return false;
+    return true;
+}
+
+int reverseNumber(int num)
+{
+    int reverse = 0;
+    while (num &gt; 0)
+    {
+        reverse = (reverse * 10) + (num % 10);
+        num /= 10;
+    }
+    return reverse;
+}
+
+int main()
+{
+    int num;
+    printf(&quot;Enter the number : &quot;);
+    scanf(&quot;%d&quot;, &amp;num);
+    if (!checkPrime(num))
+    {
+        printf(&quot;\nInput %d is not a prime number.&quot;, num);
+        return 0;
+    }
+    if (checkPrime(reverseNumber(num)))
+        printf(&quot;\nInput %d is a twisted prime number.&quot;, num);
+    else
+        printf(&quot;\nInput %d is not a twisted prime number.&quot;, num);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-023.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-023.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-023_c', 'APC-PRAC-023.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-023_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-023.c">
+                                            <pre><code class="language-c">/* Pattern :
+    (a) 1, -3, 5, -7, 9, -11, ... upto n times
+    (b) 0, 3, 8, 15, ... upto n times
+*/
+/* Author - Amit Dutta, Date - 07th November, 2025 */
+// File Name - amit0711202505.c (LAB), APC-PRAC-023.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+#include &lt;stdbool.h&gt;
+
+int main()
+{
+    int n, i, temp = 1;
+    bool isNegative = true;
+    printf(&quot;Enter the n : &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    printf(&quot;\nPattern A :&quot;);
+    for (i = 1; i &lt;= n; i++)
+    {
+        if (!isNegative)
+        {
+            printf(&quot;  %d&quot;, temp * -1);
+            isNegative = true;
+        }
+        else
+        {
+            printf(&quot;  %d&quot;, temp);
+            isNegative = false;
+        }
+        temp += 2;
+    }
+    printf(&quot;\nPattern B :&quot;);
+    for (i = 1; i &lt;= n; i++)
+    {
+        temp = (i * i) - 1;
+        printf(&quot;  %d&quot;, temp);
+    }
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-024.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-024.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-024_c', 'APC-PRAC-024.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-024_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-024.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	1
+	2	1
+	3	2	1
+	4	3	2	1
+	5	4	3	2	1
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202501.c (LAB), APC-PRAC-024.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = 1; i &lt;= n; i++) {
+		for(j = i; j &gt;= 1; j--) {
+			printf(&quot;%d    &quot;, j);
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-025.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-025.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-025_c', 'APC-PRAC-025.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-025_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-025.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	5    4    3    2    1
+	5    4    3    2
+	5    4    3
+	5    4
+	5
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202502.c (LAB), APC-PRAC-025.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = 1; i &lt;= n; i++) {
+		for(j = n; j &gt;= i; j--) {
+			printf(&quot;%d    &quot;, j);
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-026.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-026.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-026_c', 'APC-PRAC-026.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-026_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-026.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	5
+	5    4
+	5    4    3
+	5    4    3    2
+	5    4    3    2    1
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202503.c (LAB), APC-PRAC-026.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = n; i &gt;= 1; i--) {
+		for(j = n; j &gt;= i; j--) {
+			printf(&quot;%d    &quot;, j);
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-027.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-027.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-027_c', 'APC-PRAC-027.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-027_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-027.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	1    2    3    4    5
+	2    3    4    5
+	3    4    5
+	4    5
+	5
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202504.c (LAB), APC-PRAC-027.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = 1; i &lt;= n; i++) {
+		for(j = i; j &lt;= n; j++) {
+			printf(&quot;%d    &quot;, j);
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-028.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-028.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-028_c', 'APC-PRAC-028.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-028_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-028.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	1
+	2       3
+	4       5       6
+	7       8       9       10
+	11      12      13      14      15
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202505.c (LAB), APC-PRAC-028.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j, temp = 1;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = 1; i &lt;= n; i++) {
+		for(j = 1; j &lt;= i; j++) {
+			printf(&quot;%d\t&quot;, temp);
+			temp++;
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-029.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-029.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-029_c', 'APC-PRAC-029.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-029_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-029.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	1
+	1   0
+	1   0   1
+	1   0   1   0
+	1   0   1   0   1
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202506.c (LAB), APC-PRAC-029.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = 1; i &lt;= n; i++) {
+		for(j = 1; j &lt;= i; j++) {
+			if(j % 2 == 0) printf(&quot;0   &quot;);
+			else printf(&quot;1   &quot;);
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-030.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-030.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-030_c', 'APC-PRAC-030.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-030_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-030.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	#
+	@   @
+	#   #   #
+	@   @   @   @
+	#   #   #   #   #
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202507.c (LAB), APC-PRAC-030.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = 1; i &lt;= n; i++) {
+		for(j = 1; j &lt;= i; j++) {
+			if(i % 2 == 0) printf(&quot;@   &quot;);
+			else printf(&quot;#   &quot;);
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-031.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-031.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-031_c', 'APC-PRAC-031.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-031_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-031.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	1       2       3       4       5
+	6       7       8       9
+	10      11      12
+	13      14
+	15
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202508.c (LAB), APC-PRAC-031.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j, temp = 1;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = n; i &gt;= 1; i--) {
+		for(j = 1; j &lt;= i; j++) {
+			printf(&quot;%d\t&quot;, temp);
+			temp++;
+		}
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">APC-PRAC-032.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-032.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-APC-PRAC-032_c', 'APC-PRAC-032.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-APC-PRAC-032_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/APC-PRAC-032.c">
+                                            <pre><code class="language-c">/*
+Pattern:
+	A
+	B       B
+	C       C       C
+	D       D       D       D
+	E       E       E       E       E
+*/
+/* Author = Amit Dutta, Date - 13th November, 2025 */
+// File Name - amit1311202509.c (LAB), APC-PRAC-032.c (Local)
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include&lt;stdio.h&gt; 
+int main() {
+	int n, i, j; char temp = &#x27;A&#x27;;
+	printf(&quot;Enter the n : &quot;);
+	scanf(&quot;%d&quot;, &amp;n);
+	for(i = 1; i &lt;= n; i++) {
+		for(j = 1; j &lt;= i; j++) {
+			printf(&quot;%c\t&quot;, temp);
+		}
+		temp++;
+		printf(&quot;\n&quot;);
+	}
+	return 0;
+}
+</code></pre>
                                         </div>
                                     </li>
 
@@ -7384,11 +8426,364 @@ int main()
 </code></pre>
                                         </div>
                                     </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">P050-SHORT.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P050-SHORT.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-P050-SHORT_c', 'P050-SHORT.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-P050-SHORT_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P050-SHORT.c">
+                                            <pre><code class="language-c">/* Write a program to input a number and check whether it is Disarium Number or not.
+    Note : A number is said to Disarium if sum of its digit powered by with their
+    respective position is equal to the original number. */
+/* Author - Amit Dutta, Date - 08th November, 2025 */
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+
+int main()
+{
+    int num;
+    printf(&quot;Enter the number : &quot;);
+    scanf(&quot;%d&quot;, &amp;num);
+    int position = printf(&quot;%d&quot;, num);
+    int temp = num;
+    int res = 0;
+    while (temp &gt; 0)
+    {
+        res += (int)pow(temp % 10, position);
+        position--;
+        temp /= 10;
+    }
+    if (res == num)
+        printf(&quot; is a Disarium Number.&quot;);
+    else
+        printf(&quot; is Not a Disarium Number.&quot;);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">P050.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P050.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-P050_c', 'P050.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-P050_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P050.c">
+                                            <pre><code class="language-c">/* Write a program to input a number and check whether it is Disarium Number or not.
+    Note : A number is said to Disarium if sum of its digit powered by with their
+    respective position is equal to the original number. */
+/* Author - Amit Dutta, Date - 08th November, 2025 */
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+
+int main()
+{
+    int num, res = 0, temp, position = 0;
+    printf(&quot;Enter the number : &quot;);
+    scanf(&quot;%d&quot;, &amp;num);
+    temp = num;
+    while (temp &gt; 0)
+    {
+        position++;
+        temp /= 10;
+    }
+    temp = num;
+    while (temp &gt; 0)
+    {
+        res += (int)pow(temp % 10, position);
+        position--;
+        temp /= 10;
+    }
+    if (res == num)
+        printf(&quot;\nInput %d is a Disarium Number.&quot;, num);
+    else
+        printf(&quot;\nInput %d is Not a Disarium Number.&quot;, num);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">P051.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P051.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-P051_c', 'P051.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-P051_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P051.c">
+                                            <pre><code class="language-c">/* Write a program to input two number and check whether they are Amicable Pair or not
+    Example :  Sum of Proper Divisors of 220 (1, 2, 4, 5, 10, 11, 20, 22, 44, 55, 110) = 284
+               Sum of Proper Divisors of 284 (1, 2, 4, 71, 142) = 220 */
+/* Author - Amit Dutta, Date - 09th November, 2025 */
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int a, b, i, sa = 0, sb = 0;
+    printf(&quot;Enter two number : &quot;);
+    scanf(&quot;%d %d&quot;, &amp;a, &amp;b);
+    for (i = 1; i &lt;= a / 2; i++)
+        if (a % i == 0)
+            sa += i;
+    for (i = 1; i &lt;= b / 2; i++)
+        if (b % i == 0)
+            sb += i;
+    if (sa == b &amp;&amp; sb == a)
+        printf(&quot;\nInput %d and %d is Amicable Pair.&quot;, a, b);
+    else
+        printf(&quot;\nInput %d and %d is Not Amicable Pair.&quot;, a, b);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">P052.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P052.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-P052_c', 'P052.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-P052_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P052.c">
+                                            <pre><code class="language-c">/* Print the sum of this series for upto n element.
+    Series: 1 + (1 + 2) + (1 + 2 + 3) + (1 + 2 + 3 + 4) + ... + (1 + 2 + 3 + ... + n) */
+/* Author - Amit Dutta, Date - 09th November, 2025 */
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int n, sum = 0, temp = 0, i;
+    printf(&quot;Enter the n : &quot;);
+    scanf(&quot;%d&quot;, &amp;n);
+    for (i = 1; i &lt;= n; i++)
+    {
+        temp += i;
+        sum += temp;
+    }
+    printf(&quot;%d&quot;, sum);
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <div class="flex items-center p-3 pl-8 hover:bg-gray-50 transition-colors duration-200">
+                                            <svg class="w-6 h-6 text-green-500 mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            <span class="text-gray-700">P053.c</span>
+                                            <div class="ml-auto flex items-center space-x-4">
+                                                <a href="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P053.c" target="_blank" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors" title="View file on GitHub">
+                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
+                                                </a>
+                                                <button onclick="showCode('code-tuition-c-P053_c', 'P053.c')" class="text-green-600 font-semibold text-sm hover:underline">View Code</button>
+                                            </div>
+                                        </div>
+                                        <div id="code-tuition-c-P053_c" class="hidden" data-github-url="https://github.com/notamitgamer/bsc/blob/main/tuition-c/P053.c">
+                                            <pre><code class="language-c">/* Print all pattern */
+/* Author - Amit Dutta, Date - 09th November, 2025 */
+
+// This code has not been compiled.
+// If you find any issues, please create a new issue on GitHub regarding them.
+// Go to this link to create a new issue: https://github.com/notamitgamer/bsc/issues
+
+#include &lt;stdio.h&gt;
+
+int main()
+{
+    int i, j, temp;
+
+    printf(&quot;\n\nPattern 1 : \n\n&quot;);
+    /*
+    9   9   9   9   9
+    7   7   7   7   7
+    5   5   5   5   5
+    3   3   3   3   3
+    1   1   1   1   1
+    */
+    temp = 9;
+    for (i = 1; i &lt;= 5; i++)
+    {
+        for (j = 1; j &lt;= 5; j++)
+        {
+            printf(&quot;%d  &quot;, temp);
+        }
+        printf(&quot;\n&quot;);
+        temp -= 2;
+    }
+
+    // Another method print above pattern
+    printf(&quot;\n\nPattern 1 : \n\n&quot;);
+    for (i = 9; i &gt;= 1; i -= 2)
+    {
+        for (j = 1; j &lt;= 5; j++)
+        {
+            printf(&quot;%d  &quot;, i);
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    printf(&quot;\n\nPattern 2 : \n\n&quot;);
+    /*
+    1   2   3   4   5
+    1   2   3   4   5
+    1   2   3   4   5
+    */
+    for (i = 1; i &lt;= 3; i++)
+    {
+        for (j = 1; j &lt;= 5; j++)
+        {
+            printf(&quot;%d  &quot;, j);
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    printf(&quot;\n\nPattern 3 : \n\n&quot;);
+    /*
+    5   4   3   2   1
+    5   4   3   2   1
+    */
+    for (i = 1; i &lt;= 2; i++)
+    {
+        for (j = 5; j &gt;= 1; j--)
+        {
+            printf(&quot;%d  &quot;, j);
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    printf(&quot;\n\nPattern 4 : \n\n&quot;);
+    /*
+    1   2   3   4
+    5   6   7   8
+    9   10  11  12
+    */
+    temp = 1;
+    for (i = 1; i &lt;= 3; i++)
+    {
+        for (j = 1; j &lt;= 4; j++)
+        {
+            printf(&quot;%d  &quot;, temp);
+            temp++;
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    printf(&quot;\n\nPattern 5 : \n\n&quot;);
+    /*
+    1   2   3   4
+    4   8   12  16
+    1   2   3   4
+    4   8   12  16
+    1   2   3   4
+    */
+    for (i = 1; i &lt;= 5; i++)
+    {
+        for (j = 1; j &lt;= 4; j++)
+        {
+            if (i % 2 == 0)
+                printf(&quot;%d  &quot;, j * 4);
+            else
+                printf(&quot;%d  &quot;, j);
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    printf(&quot;\n\nPattern 6 : \n\n&quot;);
+    /*
+    1
+    2   4
+    3   5   7
+    6   8   10  12
+    9   11  13  15  17
+    */
+    int odd = 1, even = 2;
+    for (i = 1; i &lt;= 5; i++)
+    {
+        for (j = 1; j &lt;= i; j++)
+        {
+            if (i % 2 == 0)
+            {
+                printf(&quot;%d  &quot;, even);
+                even += 2;
+            }
+            else
+            {
+                printf(&quot;%d  &quot;, odd);
+                odd += 2;
+            }
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    printf(&quot;\n\nPattern 7 : \n\n&quot;);
+    /*
+    1   2   3   4   5
+    6   7   8   9
+    10  11  12
+    13  14
+    15
+    */
+    temp = 1;
+    for (i = 5; i &gt;= 1; i--)
+    {
+        for (j = 1; j &lt;= i; j++)
+        {
+            printf(&quot;%d  &quot;, temp);
+            temp++;
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    return 0;
+}</code></pre>
+                                        </div>
+                                    </li>
                 </ul>
             </div>
         </li>
-            </ul>
+              </ul>
+            </div>
           </div>
+          <!-- END INITIAL FILE LIST -->
         </div>
         <footer class="text-center py-4 bg-gray-50 border-t">
           <p class="text-sm text-gray-500">
@@ -7403,28 +8798,31 @@ int main()
       </div>
     </div>
 
-    <!-- Code Viewer Modal -->
+    <!-- Code Viewer Modal (Enhanced Design) -->
     <div
       id="code-modal"
-      class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 hidden z-50"
+      class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center p-2 md:p-4 hidden z-50"
     >
       <div
-        class="bg-gray-800 text-gray-100 rounded-lg shadow-2xl w-full max-w-5xl max-h-full flex flex-col"
+        class="bg-gray-800 text-gray-100 rounded-lg shadow-2xl w-full max-w-5xl modal-content-area flex flex-col"
       >
         <!-- Modal Header -->
         <div
-          class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 rounded-t-lg"
+          class="flex items-center justify-between p-3 md:p-4 border-b border-gray-700 bg-gray-900 rounded-t-lg flex-shrink-0"
         >
-          <h3 id="modal-filename" class="text-lg font-mono text-gray-300"></h3>
-          <div class="flex items-center space-x-3">
+          <h3
+            id="modal-filename"
+            class="text-sm md:text-lg font-mono text-gray-300 truncate"
+          ></h3>
+          <div class="flex items-center space-x-2 md:space-x-3">
+            <!-- Share Button -->
             <button
               id="share-btn"
               class="bg-gray-700 text-gray-200 p-2 rounded-md hover:bg-gray-600 relative transition-colors"
               title="Share file link (Copies GitHub URL if sharing is unavailable)"
             >
-              <!-- Default Share Icon -->
               <svg
-                class="w-5 h-5"
+                class="w-4 h-4 md:w-5 md:h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -7438,9 +8836,8 @@ int main()
                   d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4-4 4m4-4v13"
                 ></path>
               </svg>
-              <!-- Success Checkmark Icon (Hidden by Default) -->
               <svg
-                class="w-5 h-5 absolute inset-0 m-auto hidden text-green-400"
+                class="w-4 h-4 md:w-5 md:h-5 absolute inset-0 m-auto hidden text-green-400"
                 id="share-icon-success"
                 fill="none"
                 stroke="currentColor"
@@ -7455,18 +8852,18 @@ int main()
                 ></path>
               </svg>
             </button>
+            <!-- Copy Button -->
             <button
               id="copy-code-btn"
               class="bg-gray-700 text-gray-200 p-2 rounded-md hover:bg-gray-600 relative transition-colors"
               title="Copy code to clipboard"
             >
-              <!-- Default Copy Icon -->
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
                 height="16"
                 fill="currentColor"
-                class="bi bi-copy w-5 h-5"
+                class="bi bi-copy w-4 h-4 md:w-5 md:h-5"
                 viewBox="0 0 16 16"
                 id="copy-icon-default"
               >
@@ -7475,9 +8872,8 @@ int main()
                   d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"
                 />
               </svg>
-              <!-- Success Checkmark Icon (Hidden by Default) -->
               <svg
-                class="w-5 h-5 absolute inset-0 m-auto hidden text-green-400"
+                class="w-4 h-4 md:w-5 md:h-5 absolute inset-0 m-auto hidden text-green-400"
                 id="copy-icon-success"
                 fill="none"
                 stroke="currentColor"
@@ -7492,16 +8888,17 @@ int main()
                 ></path>
               </svg>
             </button>
+            <!-- Close Button -->
             <button
               onclick="hideCode()"
-              class="text-gray-400 hover:text-white text-3xl leading-none"
+              class="text-gray-400 hover:text-white text-2xl md:text-3xl leading-none"
             >
               &times;
             </button>
           </div>
         </div>
-        <!-- Modal Body -->
-        <div id="modal-body" class="p-1 overflow-y-auto">
+        <!-- Modal Body: Code Content -->
+        <div id="modal-body" class="overflow-y-auto flex-grow">
           <div id="modal-code-container" class="rounded-b-lg">
             <!-- Code will be injected here -->
           </div>
@@ -7528,7 +8925,7 @@ int main()
       const modalCodeContainer = document.getElementById(
         "modal-code-container"
       );
-      
+
       const copyBtn = document.getElementById("copy-code-btn");
       const copyIconDefault = document.getElementById("copy-icon-default");
       const copyIconSuccess = document.getElementById("copy-icon-success");
@@ -7538,43 +8935,314 @@ int main()
       const shareIconSuccess = document.getElementById("share-icon-success");
 
       let currentFileUrl = "";
-      
+
+      // --- SEARCH IMPLEMENTATION ---
+
+      // Global state for the search index
+      let fileSearchIndex = [];
+      let activeSearchTerm = "";
+      let indexBuilt = false; // Flag for lazy indexing
+
+      /**
+       * Builds the search index from all hidden code blocks on the page.
+       * This should be called only once.
+       */
+      function buildSearchIndex() {
+        if (indexBuilt) return;
+        console.log("Building search index...");
+        const codeBlocks = document.querySelectorAll('[id^="code-"]');
+        codeBlocks.forEach((block) => {
+          const id = block.id;
+          let filename = id.split("-").slice(2).join("-").replace(/_/g, ".");
+          // Handle path structure
+          if (
+            block.dataset.githubUrl &&
+            block.dataset.githubUrl.includes("/main/")
+          ) {
+            filename = block.dataset.githubUrl
+              .split("/")
+              .pop()
+              .replace(/%20/g, " "); // Decode URL for filename
+          } else if (filename.includes(".")) {
+            filename = filename.split("/").pop();
+          }
+
+          const preElement = block.querySelector("pre");
+          const codeElement = block.querySelector("code");
+
+          if (preElement && codeElement) {
+            fileSearchIndex.push({
+              id: id,
+              // Use the path after /main/
+              path: block.dataset.githubUrl.split("/main/")[1] || filename,
+              name: filename,
+              content: codeElement.textContent,
+              lines: codeElement.textContent.split("\n"),
+              language: codeElement.className.split("-").pop(),
+            });
+          }
+        });
+        indexBuilt = true;
+        console.log(`Search index built with ${fileSearchIndex.length} files.`);
+        // Re-run search if user was already typing
+        if (activeSearchTerm.length >= 2) {
+          handleSearch();
+        }
+      }
+
+      /**
+       * Clears the search input and restores the initial file list.
+       */
+      function clearSearch() {
+        document.getElementById("search-input").value = "";
+        activeSearchTerm = "";
+        document.getElementById("clear-search-btn").classList.add("hidden");
+        document.getElementById("initial-file-list").classList.remove("hidden");
+        document
+          .getElementById("search-results-container")
+          .classList.add("hidden");
+
+        // Reset placeholders
+        document.getElementById("result-file-list").innerHTML =
+          '<p id="search-placeholder" class="text-sm text-gray-500">Start typing to see file matches...</p>';
+        document.getElementById("result-code-matches").innerHTML =
+          '<p id="code-match-placeholder" class="text-sm text-gray-500">Select a file from the left to view matching code lines, or refine your search.</p>';
+        document.getElementById("result-count").textContent = "0";
+      }
+
+      /**
+       * Handles the search input event, managing visibility and filtering.
+       */
+      function handleSearch() {
+        const inputElement = document.getElementById("search-input");
+        const query = inputElement.value.trim();
+        activeSearchTerm = query;
+        const initialList = document.getElementById("initial-file-list");
+        const resultsContainer = document.getElementById(
+          "search-results-container"
+        );
+        const codeMatchesContainer = document.getElementById(
+          "result-code-matches"
+        );
+        const clearBtn = document.getElementById("clear-search-btn");
+
+        // Toggle clear button visibility
+        if (query.length > 0) {
+          clearBtn.classList.remove("hidden");
+          // Trigger lazy index build on first meaningful interaction
+          buildSearchIndex();
+        } else {
+          clearBtn.classList.add("hidden");
+        }
+
+        // Clear code matches and placeholder when a new search starts
+        codeMatchesContainer.innerHTML =
+          '<p id="code-match-placeholder" class="text-sm text-gray-500">Select a file from the left to view matching code lines, or refine your search.</p>';
+
+        if (query.length < 2 || !indexBuilt) {
+          initialList.classList.remove("hidden");
+          resultsContainer.classList.add("hidden");
+          document.getElementById("result-file-list").innerHTML =
+            '<p id="search-placeholder" class="text-sm text-gray-500">Start typing to see file matches...</p>';
+          document.getElementById("result-count").textContent = "0";
+          return;
+        }
+
+        initialList.classList.add("hidden");
+        resultsContainer.classList.remove("hidden");
+
+        const lowerQuery = query.toLowerCase();
+
+        const results = fileSearchIndex.filter(
+          (file) =>
+            file.name.toLowerCase().includes(lowerQuery) ||
+            file.path.toLowerCase().includes(lowerQuery) ||
+            file.content.toLowerCase().includes(lowerQuery)
+        );
+
+        displayFileResults(results);
+      }
+
+      /**
+       * Displays the list of files that match the search query (WhatsApp contact list analogy).
+       */
+      function displayFileResults(results) {
+        const fileListContainer = document.getElementById("result-file-list");
+        const resultCount = document.getElementById("result-count");
+
+        resultCount.textContent = results.length;
+        fileListContainer.innerHTML = "";
+
+        if (results.length === 0) {
+          fileListContainer.innerHTML =
+            '<p class="text-sm text-gray-500">No files matched your search term in name or content.</p>';
+          return;
+        }
+
+        const lowerQuery = activeSearchTerm.toLowerCase();
+        // Safe regex for highlighting matches
+        const regex = new RegExp(
+          `(${activeSearchTerm.replace(
+            /([.*+?^=!:${}()|\[\]\/\\])/g,
+            "\\$1"
+          )})`,
+          "gi"
+        );
+
+        results.forEach((file) => {
+          // Decode file name/path for display before highlighting
+          const decodedPath = decodeURIComponent(file.path);
+          const decodedName = decodeURIComponent(file.name);
+
+          const displayName = decodedName.replace(
+            regex,
+            '<span class="bg-yellow-200 font-semibold rounded-sm">$1</span>'
+          );
+          const displayPath = decodedPath.replace(
+            regex,
+            '<span class="bg-yellow-200 font-semibold rounded-sm">$1</span>'
+          );
+
+          const listItem = document.createElement("div");
+          // Add 'active' class capability
+          listItem.className =
+            "search-file-item p-3 rounded-lg shadow-sm cursor-pointer hover:bg-blue-100 transition-colors duration-150 border border-gray-200";
+          listItem.setAttribute("data-file-id", file.id);
+          listItem.innerHTML = `<p class="font-mono text-xs text-blue-600">${displayPath}</p><p class="text-sm font-medium text-gray-800">${displayName}</p>`;
+
+          listItem.onclick = () => {
+            // Remove 'active' state from all others, add to current
+            document
+              .querySelectorAll(".search-file-item")
+              .forEach((el) => el.classList.remove("active"));
+            listItem.classList.add("active");
+            displayCodeMatches(file);
+          };
+
+          fileListContainer.appendChild(listItem);
+        });
+      }
+
+      /**
+       * Displays the actual code lines that contain the search term for a selected file.
+       */
+      function displayCodeMatches(file) {
+        const codeMatchesContainer = document.getElementById(
+          "result-code-matches"
+        );
+        codeMatchesContainer.innerHTML = "";
+        const query = activeSearchTerm.toLowerCase();
+        const regex = new RegExp(
+          `(${activeSearchTerm.replace(
+            /([.*+?^=!:${}()|\[\]\/\\])/g,
+            "\\$1"
+          )})`,
+          "gi"
+        );
+
+        // Title/Header for the Code Matches container
+        const header = document.createElement("div");
+        header.className =
+          "sticky top-0 bg-white p-2 border-b mb-4 -mt-4 -mx-4 z-10 rounded-t-xl";
+
+        const resultsList = document.createElement("div");
+        resultsList.className = "space-y-4 pt-2";
+
+        let matchCount = 0;
+
+        file.lines.forEach((line, index) => {
+          if (line.toLowerCase().includes(query)) {
+            matchCount++;
+
+            const highlightedLine = line.replace(
+              regex,
+              '<span class="bg-yellow-300 rounded-sm font-semibold">$1</span>'
+            );
+
+            const matchItem = document.createElement("div");
+            matchItem.className = "code-match-line";
+            matchItem.innerHTML = `
+                <div class="text-blue-500 mb-1">Line ${index + 1}:</div>
+                <div class="text-gray-700">${highlightedLine}</div>
+            `;
+            resultsList.appendChild(matchItem);
+          }
+        });
+
+        // Update header with file info and match count
+        header.innerHTML = `
+            <h3 class="text-base font-semibold text-gray-800">${decodeURIComponent(
+              file.name
+            )}</h3>
+            <p class="text-xs text-gray-500">${decodeURIComponent(
+              file.path
+            )} &mdash; <span class="text-green-600 font-semibold">${matchCount} matches</span></p>
+        `;
+        codeMatchesContainer.appendChild(header);
+
+        if (matchCount > 0) {
+          codeMatchesContainer.appendChild(resultsList);
+        } else {
+          // Show message if search term matches filename/path but not content (rare, but possible)
+          codeMatchesContainer.innerHTML +=
+            '<p class="text-sm text-gray-500 mt-4">No specific content matches found for this file, but the name/path matched the keyword.</p>';
+        }
+
+        // *** View Full Code Button ***
+        const viewFullCodeButton = document.createElement("button");
+        viewFullCodeButton.className =
+          "mt-6 w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg";
+        viewFullCodeButton.textContent = `View Full Code for ${decodeURIComponent(
+          file.name
+        )}`;
+        viewFullCodeButton.onclick = () => {
+          showCode(file.id, decodeURIComponent(file.name)); // Reuses the existing showCode modal logic
+        };
+        codeMatchesContainer.appendChild(viewFullCodeButton);
+      }
+
+      // --- END SEARCH IMPLEMENTATION ---
+
       /**
        * Shows a successful copy animation on a button.
-       * @param {HTMLElement} button - The button element.
-       * @param {HTMLElement} defaultIcon - The default icon element.
-       * @param {HTMLElement} successIcon - The success icon element.
        */
       function animateSuccess(button, defaultIcon, successIcon) {
-          // 1. Swap icons
-          defaultIcon.classList.add("hidden");
-          successIcon.classList.remove("hidden");
-          
-          // 2. Apply success visual cue (green background pulse)
-          button.classList.add("btn-success-pulse");
-          button.classList.remove("bg-gray-700", "hover:bg-gray-600");
+        defaultIcon.classList.add("hidden");
+        successIcon.classList.remove("hidden");
 
-          // 3. Revert after 2 seconds
-          setTimeout(() => {
-              successIcon.classList.add("hidden");
-              defaultIcon.classList.remove("hidden");
-              button.classList.remove("btn-success-pulse");
-              button.classList.add("bg-gray-700", "hover:bg-gray-600");
-          }, 2000);
+        button.classList.add("btn-success-pulse");
+        button.classList.remove("bg-gray-700", "hover:bg-gray-600");
+
+        setTimeout(() => {
+          successIcon.classList.add("hidden");
+          defaultIcon.classList.remove("hidden");
+          button.classList.remove("btn-success-pulse");
+          button.classList.add("bg-gray-700", "hover:bg-gray-600");
+        }, 2000);
       }
 
       function showCode(codeBlockId, filename) {
         const codeBlock = document.getElementById(codeBlockId);
         if (codeBlock) {
           modalFilename.textContent = filename;
-          modalCodeContainer.innerHTML = codeBlock.innerHTML;
+
+          // Clone the content to avoid issues with highlight.js re-running
+          const codeContentClone = codeBlock
+            .querySelector("pre")
+            .cloneNode(true);
+          modalCodeContainer.innerHTML = ""; // Clear previous content
+          modalCodeContainer.appendChild(codeContentClone);
 
           currentFileUrl = codeBlock.dataset.githubUrl || "";
 
+          // The highlight.js class is already on the code element in the clone
           hljs.highlightElement(modalCodeContainer.querySelector("code"));
 
           modal.classList.remove("hidden");
           document.body.style.overflow = "hidden";
+
+          // Focus the modal content for better accessibility (optional)
+          modalCodeContainer.querySelector("pre").focus();
         }
       }
 
@@ -7587,18 +9255,15 @@ int main()
         const codeToCopy = modalCodeContainer.querySelector("code").innerText;
         navigator.clipboard.writeText(codeToCopy).then(
           () => {
-            // Use the reusable animation function for code copy
             animateSuccess(copyBtn, copyIconDefault, copyIconSuccess);
           },
           (err) => {
             console.error("Failed to copy text: ", err);
-            // Replace old alert with a console error or a custom message box if needed
           }
         );
       });
 
       shareBtn.addEventListener("click", async () => {
-        // Ensure currentFileUrl is set (it's the GitHub link)
         if (!currentFileUrl) return;
 
         const shareData = {
@@ -7606,32 +9271,48 @@ int main()
           text: `Check out the code for ${modalFilename.textContent}`,
           url: currentFileUrl,
         };
-        
-        // 1. Try to use Web Share API
+
         if (navigator.share) {
           try {
             await navigator.share(shareData);
-            // If sharing is successful, no need for clipboard animation
           } catch (err) {
-            // User likely cancelled the share dialog, no action needed
-            if (err.name !== 'AbortError') {
-                console.error("Share failed:", err.message);
+            if (err.name !== "AbortError") {
+              console.error("Share failed:", err.message);
             }
           }
         } else {
-          // 2. Fallback: Copy URL to clipboard
           navigator.clipboard.writeText(currentFileUrl).then(() => {
-            // Trigger animation to show link was copied
             animateSuccess(shareBtn, shareIconDefault, shareIconSuccess);
           });
         }
       });
 
       document.addEventListener("keydown", (e) => {
+        const searchInput = document.getElementById("search-input");
+
+        // 1. ESCAPE key closes modal
         if (e.key === "Escape" && !modal.classList.contains("hidden")) {
           hideCode();
+          return;
+        }
+
+        // 2. '/' key focuses search bar
+        // Check if the key is '/', the modal is not open, and the current focus is not an input field
+        if (
+          e.key === "/" &&
+          modal.classList.contains("hidden") &&
+          !/^(INPUT|TEXTAREA|SELECT)$/i.test(document.activeElement.tagName)
+        ) {
+          // Prevent the '/' character from being typed outside the input field
+          e.preventDefault();
+          searchInput.focus();
         }
       });
+
+      // Initial action: Lazy index building
+      // We don't call buildSearchIndex on load anymore.
+      // It's called on the first time the user types.
+      // This prioritizes page load speed.
     </script>
   </body>
 </html>
