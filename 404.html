@@ -3,218 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 Page Not Found</title>
+    <title>404 - Page Not Found | aranag.site</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
+
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
     <style>
-        body {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f2f5;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden; /* Prevent scrollbars from animation */
+        :root {
+            --bg-color: #09090b;
+            --grid-color: #27272a;
+            --accent-color: #6366f1; /* Indigo */
+            --accent-glow: #818cf8;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
         }
 
-        .container {
-            text-align: center;
-            padding: 20px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-            max-width: 90%;
-        }
-
-        .boy-container {
-            position: relative;
-            width: 200px; /* Adjust size as needed */
-            height: 250px; /* Adjust size as needed */
-            margin: 0 auto 20px;
-            overflow: hidden;
-        }
-
-        .boy {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            animation: cry 1.5s infinite alternate;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 30px;
+        * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* SVG styles for the boy */
-        .boy-svg {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-        }
-
-        .boy-head {
-            fill: #add8e6; /* Skin color */
-        }
-
-        .boy-body {
-            fill: #87ceeb; /* Shirt color */
-        }
-
-        .boy-arm {
-            fill: #add8e6; /* Skin color */
-        }
-
-        .tear {
-            width: 5px;
-            height: 15px;
-            background-color: #4682b4; /* Blue for tears */
-            border-radius: 50%;
-            position: absolute;
-            top: 70px; /* Adjust tear position */
-            animation: fallTear 1s infinite;
-            opacity: 0;
-        }
-
-        .tear.left {
-            left: 60px;
-            animation-delay: 0.2s;
-        }
-
-        .tear.right {
-            right: 60px;
-            animation-delay: 0.5s;
-        }
-
-        .board {
-            position: absolute;
-            width: 150px;
-            height: 80px;
-            background-color: #8b4513; /* Wood color */
-            border: 2px solid #5a2c00;
-            border-radius: 5px;
-            color: #fff;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2em;
-            font-weight: bold;
+            perspective: 1000px;
+        }
+
+        /* --- 3D Grid Container --- */
+        .animation-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+        .stagger-visualizer {
+            display: grid;
+            /* Grid columns will be set by JS now */
+            gap: 16px; 
+            width: 750px;
+            height: auto;
+            transform: rotateX(45deg) rotateZ(45deg);
+            transform-style: preserve-3d;
+        }
+
+        .stagger-visualizer .dot {
+            position: relative;
+            width: 100%; 
+            aspect-ratio: 1; 
+            background-color: var(--grid-color);
+            border-radius: 4px;
+            /* REMOVED BOX-SHADOW FOR PERFORMANCE */
+            /* box-shadow: -4px 4px 10px rgba(0,0,0,0.5); */ 
+            transition: background-color 0.2s;
+            /* GPU Acceleration Hint */
+            will-change: transform; 
+        }
+
+        /* --- UI Overlay --- */
+        .content-overlay {
+            position: relative;
+            z-index: 10;
             text-align: center;
-            bottom: 50px; /* Initial position relative to the boy */
-            left: 50%;
-            transform: translateX(-50%);
-            transform-origin: bottom center;
-            animation: holdBoard 0s forwards; /* Initial state, controlled by JS */
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .glitch-container {
+            position: relative;
+            display: inline-block;
         }
 
         h1 {
-            color: #333;
-            font-size: 3em;
-            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -5px;
+            color: #fff;
+            margin-bottom: 1rem;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
         }
 
         p {
-            color: #666;
-            font-size: 1.2em;
-            margin-bottom: 30px;
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+            max-width: 400px;
+            line-height: 1.5;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
         }
 
-        a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
+        .action-btn {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 32px;
+            background: #fff;
+            color: #000;
             text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* Added transform and box-shadow to transition */
-            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2); /* Initial shadow */
+            font-weight: 700;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
 
-        a:hover {
-            background-color: #0056b3;
-            transform: translateY(-3px) scale(1.05); /* Lift and slightly enlarge on hover */
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4); /* More prominent shadow on hover */
+        .action-btn:hover {
+            transform: scale(1.1);
         }
 
-        /* Animations */
-        @keyframes cry {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-5px); }
-        }
-
-        @keyframes fallTear {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(30px); opacity: 0; }
-        }
-
-        @keyframes boardFall {
-            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
-            100% { transform: translate(-50%, 150px) rotate(45deg); opacity: 0; }
-        }
-
-        @keyframes boardPickUp {
-            0% { transform: translate(-50%, 150px) rotate(45deg); opacity: 0; }
-            50% { transform: translate(-50%, 50px) rotate(-10deg); opacity: 1; }
-            100% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
-        }
-
-        @keyframes boardHold {
-            0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
-            50% { transform: translate(-50%, 5px) rotate(2deg); }
-            100% { transform: translate(-50%, 0) rotate(0deg); }
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 5rem; }
+            .stagger-visualizer { 
+                width: 100vw; /* Use viewport width instead of fixed larger width */
+                gap: 8px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="boy-container">
-            <div class="boy">
-                <!-- Simple SVG for the boy -->
-                <svg class="boy-svg" viewBox="0 0 200 250" preserveAspectRatio="xMidYMid meet">
-                    <circle class="boy-head" cx="100" cy="70" r="50"/>
-                    <rect class="boy-body" x="60" y="120" width="80" height="130" rx="20" ry="20"/>
-                    <!-- Arms (simplified) -->
-                    <rect class="boy-arm" x="40" y="130" width="20" height="80" rx="10" ry="10" transform="rotate(-10 50 170)"/>
-                    <rect class="boy-arm" x="140" y="130" width="20" height="80" rx="10" ry="10" transform="rotate(10 150 170)"/>
-                </svg>
-                <div class="tear left"></div>
-                <div class="tear right"></div>
-            </div>
-            <div class="board" id="board">Page Not Found</div>
+
+    <!-- 3D Animation Background -->
+    <div class="animation-wrapper">
+        <div class="stagger-visualizer"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-overlay">
+        <div class="glitch-container">
+            <h1 class="el-text">404</h1>
         </div>
-        <h1>404</h1>
-        <p>Oops! The page you're looking for doesn't exist.</p>
-        <a href="/">Go to Homepage</a>
+        <h2 class="el-text">Page Not Found</h2>
+        <p class="el-text">The dimension you requested is currently unreachable.</p>
+        <a href="/" class="action-btn el-text">Warp Home</a>
     </div>
 
     <script>
-        const board = document.getElementById('board');
-        const boy = document.querySelector('.boy');
+        const visualizer = document.querySelector('.stagger-visualizer');
+        const fragment = document.createDocumentFragment();
+        
+        // --- PERFORMANCE OPTIMIZATION ---
+        // Detect screen width to adjust grid size
+        const isMobile = window.innerWidth < 768;
+        
+        // Desktop: 16x16 (256 items) | Mobile: 9x9 (81 items)
+        // Drastically reducing items on mobile prevents the lag
+        const gridCols = isMobile ? 9 : 16; 
+        const gridRows = isMobile ? 9 : 16;
+        const numberOfElements = gridCols * gridRows;
 
-        function animateBoard() {
-            // Board falls
-            board.style.animation = 'boardFall 1s forwards';
+        // Apply dynamic grid template
+        visualizer.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
 
-            setTimeout(() => {
-                // Board picks up and holds
-                board.style.animation = 'boardPickUp 1.5s forwards, boardHold 3s 1.5s infinite linear';
-                board.style.opacity = '1'; // Ensure it's visible after picking up
-
-                // Restart the loop after a delay
-                setTimeout(() => {
-                    animateBoard();
-                }, 3000); // Adjust this delay to control loop speed
-            }, 1000); // Delay before picking up starts
+        // 1. Generate the Grid
+        for (let i = 0; i < numberOfElements; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            fragment.appendChild(dot);
         }
+        visualizer.appendChild(fragment);
 
-        // Initial call to start the animation loop
-        animateBoard();
+        // 2. The Anime.js Animation Sequence
+        const animation = anime.timeline({
+            targets: '.stagger-visualizer .dot',
+            easing: 'easeInOutSine',
+            delay: anime.stagger(50), 
+            loop: true,
+            autoplay: false 
+        });
+
+        animation
+        .add({
+            translateX: [
+                {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) },
+                {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) }
+            ],
+            translateY: [
+                {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) },
+                {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) }
+            ],
+            duration: 1000,
+            scale: .5,
+            delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+        })
+        .add({
+            translateX: () => anime.random(-10, 10),
+            translateY: () => anime.random(-10, 10),
+            delay: anime.stagger(8, {from: 'last'}),
+            scale: 1, 
+            backgroundColor: '#6366f1', 
+            duration: 1000,
+        })
+        .add({
+            translateX: 0,
+            translateY: 0,
+            scale: 1,
+            backgroundColor: '#27272a', 
+            duration: 1000,
+            delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+        });
+
+        animation.play();
+
+        // 3. Intro Animation for Text
+        anime({
+            targets: '.el-text',
+            opacity: [0, 1],
+            translateY: [50, 0],
+            duration: 800,
+            easing: 'easeOutExpo',
+            delay: anime.stagger(100, {start: 500})
+        });
+
     </script>
 </body>
 </html>
