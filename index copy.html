@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARANAG - Amit Dutta</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <style>
+      :root {
+        --bg-color: #09090b;       /* Zinc 950 */
+        --card-bg: #18181b;        /* Zinc 900 */
+        --grid-color: #27272a;     /* Zinc 800 */
+        --accent-color: #6366f1;   /* Indigo 500 */
+        --accent-glow: #818cf8;    /* Indigo 400 */
+        --text-primary: #f4f4f5;
+        --text-secondary: #a1a1aa;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        overflow-x: hidden;
+      }
+
+      /* Cursor Handling */
+      body.custom-cursor-active {
+        cursor: none;
+      }
+      body.custom-cursor-active a, 
+      body.custom-cursor-active button, 
+      body.custom-cursor-active input, 
+      body.custom-cursor-active textarea {
+        cursor: none;
+      }
+
+      h1, h2, h3, .font-mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      /* --- 3D GRID ANIMATION --- */
+      .animation-wrapper {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 0;
+        transform-style: preserve-3d;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .stagger-visualizer {
+        display: grid;
+        /* Columns handled by JS */
+        gap: 16px;
+        width: 750px;
+        height: auto;
+        transform: rotateX(45deg) rotateZ(45deg);
+        transform-style: preserve-3d;
+        opacity: 0.3;
+      }
+
+      .stagger-visualizer .dot {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1;
+        background-color: var(--grid-color);
+        border-radius: 4px;
+        will-change: transform;
+      }
+
+      @media (max-width: 768px) {
+        /* Optimize dot rendering on mobile */
+        .stagger-visualizer .dot {
+            border-radius: 2px; /* Simpler shape */
+        }
+        .stagger-visualizer {
+            gap: 8px; /* Tighter gap */
+            width: 100vw;
+        }
+      }
+
+      /* --- STATIC CUSTOM CURSOR (Zero Lag) --- */
+      .cursor-dot {
+        position: fixed;
+        top: 0; left: 0;
+        width: 0; height: 0;
+        z-index: 9999;
+        pointer-events: none;
+        will-change: transform; /* Hint to browser to use GPU */
+        display: none; 
+      }
+      
+      body.custom-cursor-active .cursor-dot {
+          display: block;
+      }
+
+      /* Visual Part - Static Diamond */
+      .cursor-dot::after {
+        content: "";
+        display: block;
+        width: 12px;
+        height: 12px;
+        border: 1.5px solid white;
+        background-color: transparent;
+        /* Static rotation, no transitions */
+        transform: translate(-50%, -50%) rotate(45deg);
+        mix-blend-mode: difference;
+      }
+      
+      @media (max-width: 768px), (hover: none) { 
+        .cursor-dot { display: none !important; } 
+        body.custom-cursor-active { cursor: auto !important; }
+      }
+
+      /* --- BACKGROUND WATERMARK --- */
+      .watermark-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        pointer-events: none;
+        width: 100%;
+        text-align: center;
+        opacity: 0.1; 
+        overflow: hidden;
+      }
+      
+      .watermark-text {
+        font-size: 20vw;
+        font-weight: 900;
+        color: transparent;
+        -webkit-text-stroke: 2px rgba(255, 255, 255, 0.5);
+        white-space: nowrap;
+        user-select: none;
+      }
+
+      /* --- INTRO STYLES --- */
+      #powered-intro {
+        position: fixed;
+        inset: 0;
+        background-color: #09090b;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      
+      .typing-char {
+        display: inline-block;
+        opacity: 0;
+        color: var(--accent-color);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 2rem;
+        font-weight: 700;
+        transform: translateY(10px);
+      }
+      
+      .progress-container {
+          width: 80%; /* Match text width roughly */
+          max-width: 350px;
+          height: 2px;
+          background-color: #27272a;
+          margin-top: 1.5rem;
+          position: relative;
+          overflow: hidden;
+      }
+      
+      .progress-bar {
+          width: 0%;
+          height: 100%;
+          background-color: var(--accent-color);
+          position: absolute;
+          left: 0;
+          top: 0;
+          box-shadow: 0 0 10px var(--accent-color);
+      }
+
+      @media (min-width: 768px) {
+          .typing-char { font-size: 4rem; }
+          .progress-container { max-width: 600px; }
+      }
+
+      #viewing-message {
+        position: absolute;
+        bottom: 2rem;
+        text-align: center;
+        width: 100%;
+        color: #52525b; 
+        font-size: 0.75rem;
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 0.1em;
+        opacity: 0;
+      }
+
+      /* --- UTILITIES & CARDS --- */
+      .glass-panel {
+        background: rgba(24, 24, 27, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        
+        /* PERFORMANCE OPTIMIZATION: Hardware Acceleration */
+        backface-visibility: hidden;
+        -webkit-font-smoothing: subpixel-antialiased;
+        transform: translateZ(0);
+        will-change: transform;
+      }
+      
+      /* Card Styles including 3D Tilt Container */
+      .card-container {
+          perspective: 1000px;
+      }
+
+      .project-card {
+        transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.2s ease, box-shadow 0.2s ease;
+        transform-style: preserve-3d;
+      }
+
+      /* Hover effects specifically for Mobile (where Tilt script is disabled) */
+      @media (max-width: 768px) {
+          .project-card:active { 
+              transform: scale(0.98); 
+              border-color: var(--accent-color); 
+          }
+      }
+
+      /* Faster Icon Animation via CSS */
+      .card-icon-wrapper {
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy spring effect */
+          transform: translateZ(20px); /* Lift icon off card in 3D */
+      }
+      
+      .project-card:hover .card-icon-wrapper {
+          transform: rotate(15deg) scale(1.1) translateZ(30px);
+      }
+      
+      .card-icon {
+          opacity: 0.1;
+          transition: opacity 0.2s ease;
+      }
+      
+      .project-card:hover .card-icon {
+          opacity: 0.3;
+      }
+      
+      .scroll-down-arrow { animation: bounce 2s infinite; }
+      @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+      
+      /* Animation Initial States */
+      .hero-title-char { opacity: 0; display: inline-block; }
+      .hero-badge { opacity: 0; transform: translateY(-20px); }
+      .hero-box { 
+          opacity: 0; 
+          transform: scaleX(0); 
+          transform-origin: center; 
+      }
+      .hero-box-text { opacity: 0; transform: translateY(10px); }
+      
+      .anim-up { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+      .anim-up.visible { opacity: 1; transform: translateY(0); }
+
+      /* --- TOGGLE SWITCH ANIMATION FIX --- */
+      #cursor-toggle {
+          top: 2px;
+          left: 2px;
+          transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      }
+      
+      #cursor-toggle:checked {
+          transform: translateX(100%); /* Smooth slide using transform */
+          border-color: #6366f1;
+      }
+      
+      /* Label background color change */
+      #cursor-toggle:checked + .toggle-label {
+          background-color: #6366f1;
+          border-color: #6366f1;
+      }
+
+      /* --- OPTIMIZED PROFILE ANIMATION (CSS ONLY) --- */
+      #profile-frame {
+        /* Smooth return (Hover Out) */
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform, border-radius;
+      }
+      #profile-container:hover #profile-frame {
+        /* Bouncy effect (Hover In) */
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-radius 0.6s ease;
+        transform: scale(0.95) rotate(3deg);
+        border-radius: 30%;
+      }
+      #profile-img {
+        /* Smooth return (Hover Out) */
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+      }
+      #profile-container:hover #profile-img {
+        /* Bouncy effect (Hover In) */
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+  <body class="antialiased selection:bg-indigo-500 selection:text-white custom-cursor-active">
+    
+    <!-- Custom Cursor (Static Diamond) -->
+    <div class="cursor-dot"></div>
+
+    <!-- Cursor Toggle Switch (Bottom Right) -->
+    <div class="fixed bottom-6 right-6 z-50 hidden md:flex items-center gap-3 glass-panel p-2 rounded-full">
+        <span class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider pl-2">Cursor System</span>
+        <div class="relative inline-block w-10 h-6 align-middle select-none">
+            <!-- Adjusted layout for proper toggle animation -->
+            <input type="checkbox" name="toggle" id="cursor-toggle" class="absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer z-10" checked/>
+            <label for="cursor-toggle" class="toggle-label block overflow-hidden h-full rounded-full bg-zinc-700 cursor-pointer border border-zinc-600 transition-colors duration-300"></label>
+        </div>
+    </div>
+
+    <!-- Intro Overlay -->
+    <div id="powered-intro">
+        <div id="powered-text"></div>
+        
+        <!-- Progress Bar (Bigger) -->
+        <div class="progress-container">
+            <div class="progress-bar" id="intro-progress"></div>
+        </div>
+
+        <p id="viewing-message">
+            [ ! ] FOR OPTIMAL EXPERIENCE, PLEASE USE A DESKTOP BROWSER
+        </p>
+    </div>
+
+    <!-- HERO SECTION (Updated Height for Mobile) -->
+    <!-- h-[100dvh] ensures it fits the actual visible screen on mobile -->
+    <section id="landing" class="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden">
+        
+        <!-- 3D Animation Background -->
+        <div class="animation-wrapper">
+            <div class="stagger-visualizer"></div>
+        </div>
+
+        <!-- Background Watermark -->
+        <div class="watermark-container">
+            <h1 class="watermark-text">ARANAG</h1>
+        </div>
+        
+        <!-- Main Content Overlay -->
+        <!-- Reduced gap on mobile (gap-2) to save vertical space -->
+        <div class="relative z-10 text-center px-4 flex flex-col items-center gap-2 md:gap-6 w-full max-w-4xl mx-auto">
+            
+            <!-- Status Badge -->
+            <div class="hero-badge">
+                <span class="text-indigo-400 font-mono text-xs md:text-sm tracking-[0.3em] uppercase border border-indigo-500/30 px-4 py-1 rounded-full bg-indigo-500/10">
+                    System Online
+                </span>
+            </div>
+            
+            <!-- Main Name (Title) - Responsive Sizes for Mobile Fix -->
+            <div class="relative overflow-hidden">
+                <!-- Added 'hacker-effect' class and data-value for JS -->
+                <!-- Opacity 0 initially so it doesn't show static text before animation -->
+                <h1 id="hero-name" data-value="AMIT DUTTA" class="hacker-effect text-5xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter text-white drop-shadow-2xl opacity-0">
+                    <!-- Text will be filled by JS -->
+                </h1>
+            </div>
+
+            <!-- Role / Description Box -->
+            <div class="hero-box glass-panel px-4 md:px-6 py-4 rounded-xl backdrop-blur-md overflow-hidden max-w-[90vw] md:max-w-none">
+                <p class="hero-box-text text-gray-300 font-mono text-[10px] md:text-sm tracking-wide">
+                    CS UNDERGRAD <span class="text-indigo-500 mx-2">//</span> FULL STACK DEV <span class="text-indigo-500 mx-2">//</span> AI ENTHUSIAST
+                </p>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator - Perfectly Centered & Positioned for Mobile -->
+        <!-- Adjusted bottom position to bottom-4 on mobile for better visibility -->
+        <div class="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 text-center z-20 w-full pointer-events-none">
+            <div class="anim-up delay-1000 inline-block">
+                <p class="text-[10px] text-gray-500 font-mono mb-2 tracking-[0.2em] uppercase">Scroll to Explore</p>
+                <svg class="w-6 h-6 text-indigo-500 mx-auto scroll-down-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about" class="relative py-24 px-6 md:px-12 bg-[#09090b]">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center gap-16">
+                <!-- Image with Magnetic/Glitch Hover -->
+                <div class="w-full md:w-1/3 flex justify-center anim-up">
+                    <div id="profile-container" class="relative w-64 h-64 md:w-80 md:h-80 group cursor-pointer">
+                        <div class="absolute inset-0 bg-indigo-500 rounded-full opacity-20 group-hover:opacity-40 blur-xl transition-all duration-500"></div>
+                        <div id="profile-frame" class="relative w-full h-full rounded-full border-2 border-zinc-800 overflow-hidden group-hover:border-indigo-500 transition-colors duration-300">
+                             <img 
+                              id="profile-img"
+                              src="https://aranag.site/mypic.png" 
+                              alt="Amit Dutta" 
+                              class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                              onerror="this.src='https://placehold.co/400x400/18181b/FFF?text=AD'"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text -->
+                <div class="w-full md:w-2/3 anim-up delay-100">
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="h-px w-12 bg-indigo-500"></span>
+                        <span class="text-indigo-400 font-mono text-sm">01. ABOUT ME</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                        Decoding the <span class="text-indigo-500">Matrix</span>, one line at a time.
+                    </h2>
+                    <div class="space-y-4 text-zinc-400 text-lg leading-relaxed">
+                        <p>
+                            Currently pursuing a B.Sc. (Hons) in Computer Science at <strong class="text-gray-200">Acharya Prafulla Chandra College</strong>.
+                        </p>
+                        <p>
+                            I don't just write code; I build tools. From the <a href="https://pypi.org/project/adpkg/" class="text-indigo-400 hover:text-indigo-300 underline decoration-indigo-500/30">ADPKG</a> Python library to custom AI models, I'm obsessed with optimization and automation.
+                        </p>
+                        <p>
+                            When I'm not debugging, I'm maintaining the <a href="https://github.com/notamitgamer/bsc" class="text-indigo-400 hover:text-indigo-300 underline decoration-indigo-500/30">WBSU Code Repository</a> to help fellow students navigate the curriculum.
+                        </p>
+                    </div>
+                    
+                    <div class="mt-8 grid grid-cols-2 gap-4 border-t border-zinc-800 pt-8">
+                        <div>
+                            <h4 class="text-zinc-500 text-xs font-mono mb-1">LOCATION</h4>
+                            <p class="text-white font-medium">Kolkata, IN</p>
+                        </div>
+                        <div>
+                            <h4 class="text-zinc-500 text-xs font-mono mb-1">STACK</h4>
+                            <p class="text-white font-medium">Python, C++, Web, AI</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section id="projects" class="py-24 px-6 md:px-12 bg-zinc-950/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 anim-up">
+                <div>
+                    <div class="flex items-center gap-4 mb-2">
+                        <span class="h-px w-12 bg-indigo-500"></span>
+                        <span class="text-indigo-400 font-mono text-sm">02. SELECTED WORKS</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white">Project Protocol</h2>
+                </div>
+                <a href="https://github.com/notamitgamer" class="hidden md:flex items-center gap-2 text-zinc-400 hover:text-indigo-400 transition-colors font-mono text-sm mt-4 md:mt-0">
+                    VIEW GITHUB <span class="text-lg">→</span>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Project 1: Calculator -->
+                <div class="card-container">
+                    <div class="glass-panel p-8 rounded-2xl project-card group relative overflow-hidden h-full">
+                        <!-- Icon: Mouse Pointer (Fixed Arrow) -->
+                        <div class="absolute -right-6 -top-6 p-4 transform rotate-12 card-icon-wrapper">
+                             <svg class="w-32 h-32 text-indigo-500 card-icon" fill="currentColor" viewBox="0 0 24 24">
+                                 <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+                             </svg>
+                        </div>
+                        <span class="text-indigo-500 font-mono text-xs mb-4 block">001</span>
+                        <h3 class="text-xl font-bold text-white mb-3">Interactive Calculator</h3>
+                        <p class="text-zinc-400 text-sm mb-6 h-20">A responsive number system converter handling Binary, Decimal, Octal, and Hexadecimal operations.</p>
+                        <a href="/codenct" class="inline-flex items-center text-sm font-bold text-white hover:text-indigo-400 transition-colors">
+                            INITIATE <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 2: ADPKG -->
+                <div class="card-container anim-up delay-100">
+                    <div class="glass-panel p-8 rounded-2xl project-card group relative overflow-hidden h-full">
+                        <!-- Icon: Math/Package -->
+                        <div class="absolute -right-6 -top-6 p-4 transform rotate-12 card-icon-wrapper">
+                            <svg class="w-32 h-32 text-indigo-500 card-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M7 2h10l3.5 6H3.5L7 2zm13.5 8H3.5L2 22h20l-1.5-12zM5 20l1-8h12l1 8H5z"/></svg>
+                        </div>
+                        <span class="text-indigo-500 font-mono text-xs mb-4 block">002</span>
+                        <h3 class="text-xl font-bold text-white mb-3">ADPKG Library</h3>
+                        <p class="text-zinc-400 text-sm mb-6 h-20">Python toolkit for complex math: compound interest, number theory, matrices, and stats.</p>
+                        <a href="https://pypi.org/project/adpkg/" class="inline-flex items-center text-sm font-bold text-white hover:text-indigo-400 transition-colors">
+                            PIP INSTALL <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 3: AI Compiler -->
+                <div class="card-container anim-up delay-200">
+                    <div class="glass-panel p-8 rounded-2xl project-card group relative overflow-hidden h-full">
+                        <!-- Icon: Chip/Code -->
+                        <div class="absolute -right-6 -top-6 p-4 transform rotate-12 card-icon-wrapper">
+                             <svg class="w-32 h-32 text-indigo-500 card-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm4 4h6v2H9V9zm0 4h6v2H9v-2z"/></svg>
+                        </div>
+                        <span class="text-indigo-500 font-mono text-xs mb-4 block">003</span>
+                        <h3 class="text-xl font-bold text-white mb-3">AI Compiler</h3>
+                        <p class="text-zinc-400 text-sm mb-6 h-20">Online compiler powered by Gemini 2.5. Supports C, C++, and Python with smart error analysis.</p>
+                        <a href="https://compiler.aranag.site" class="inline-flex items-center text-sm font-bold text-white hover:text-indigo-400 transition-colors">
+                            COMPILE <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+                
+                 <!-- Project 4: WBSU -->
+                <div class="card-container anim-up">
+                    <div class="glass-panel p-8 rounded-2xl project-card group relative overflow-hidden h-full">
+                        <!-- Icon: Book/Repo -->
+                        <div class="absolute -right-6 -top-6 p-4 transform rotate-12 card-icon-wrapper">
+                            <svg class="w-32 h-32 text-indigo-500 card-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H5V4h14v16zm-7-2h5v-2h-5v2zm0-4h5v-2h-5v2zm0-4h5V8h-5v2zM7 8h4v12H7V8z"/></svg>
+                        </div>
+                        <span class="text-indigo-500 font-mono text-xs mb-4 block">004</span>
+                        <h3 class="text-xl font-bold text-white mb-3">WBSU Repository</h3>
+                        <p class="text-zinc-400 text-sm mb-6 h-20">Complete collection of B.Sc. Hons Computer Science practical codes and assignments.</p>
+                        <div class="flex gap-4">
+                            <a href="https://aranag.site/bsc" class="inline-flex items-center text-sm font-bold text-white hover:text-indigo-400 transition-colors">VISIT</a>
+                            <a href="https://github.com/notamitgamer/bsc" class="inline-flex items-center text-sm font-bold text-zinc-500 hover:text-white transition-colors">GITHUB</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 5: ADA -->
+                <div class="card-container anim-up delay-100">
+                    <div class="glass-panel p-8 rounded-2xl project-card group relative overflow-hidden h-full">
+                         <!-- Icon: Brain/AI -->
+                         <div class="absolute -right-6 -top-6 p-4 transform rotate-12 card-icon-wrapper">
+                            <svg class="w-32 h-32 text-indigo-500 card-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                         </div>
+                         <span class="text-indigo-500 font-mono text-xs mb-4 block">005</span>
+                        <h3 class="text-xl font-bold text-white mb-3">Project ADA</h3>
+                        <p class="text-zinc-400 text-sm mb-6 h-20">Custom trained deep learning model optimized for high accuracy performance.</p>
+                        <a href="https://ada.aranag.site" class="inline-flex items-center text-sm font-bold text-white hover:text-indigo-400 transition-colors">
+                            DEMO <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- License -->
+                <div class="card-container anim-up delay-200">
+                    <div class="glass-panel p-8 rounded-2xl project-card group relative overflow-hidden h-full border-indigo-500/20">
+                         <!-- Icon: Shield/Lock -->
+                         <div class="absolute -right-6 -top-6 p-4 transform rotate-12 card-icon-wrapper">
+                            <svg class="w-32 h-32 text-indigo-500 card-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                         </div>
+                         <span class="text-indigo-500 font-mono text-xs mb-4 block">006</span>
+                        <h3 class="text-xl font-bold text-white mb-3">ESAL-1.0 License</h3>
+                        <p class="text-zinc-400 text-sm mb-6 h-20">Educational Source-Available License. Strict Non-Submission & Anti-Plagiarism Clause.</p>
+                        <a href="https://aranag.site/license" class="inline-flex items-center text-sm font-bold text-white hover:text-indigo-400 transition-colors">
+                            READ DOCS <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="py-24 px-6 md:px-12 bg-[#09090b] relative overflow-hidden">
+        <!-- Subtle grid background for footer -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#6366f1 1px, transparent 1px); background-size: 20px 20px;"></div>
+        
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tighter">
+                Ready to <span class="text-indigo-500">Connect?</span>
+            </h2>
+            <p class="text-xl text-zinc-400 mb-12 font-mono">Available for collaborations, coffee, or just loafing around.</p>
+            
+            <div class="flex flex-wrap justify-center gap-4 md:gap-8">
+                <a href="https://github.com/notamitgamer" class="text-zinc-400 hover:text-white hover:scale-110 transition-all duration-300">GitHub</a>
+                <a href="https://linkedin.com/in/notamitgamer" class="text-zinc-400 hover:text-white hover:scale-110 transition-all duration-300">LinkedIn</a>
+                <a href="https://twitter.com/notamitgamer" class="text-zinc-400 hover:text-white hover:scale-110 transition-all duration-300">X / Twitter</a>
+                <a href="mailto:amitdutta4255@gmail.com" class="text-zinc-400 hover:text-white hover:scale-110 transition-all duration-300">Email</a>
+                <a href="https://wa.me/917278779512?text=hi" class="text-zinc-400 hover:text-white hover:scale-110 transition-all duration-300">WhatsApp</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-black py-8 border-t border-zinc-900 text-center">
+        <p class="text-xs text-zinc-600 font-mono tracking-wider">
+            &copy; 2025 AMIT DUTTA <span class="text-indigo-900 mx-2">///</span> SYSTEM STATUS: NORMAL
+        </p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. START GRID IMMEDIATELY (Before intro finishes)
+            startGridAnimation();
+
+            // 2. HACKER TEXT EFFECT LOGIC
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            let interval = null;
+
+            const handleHackerEffect = (target) => {
+                let iteration = 0;
+                clearInterval(interval);
+                
+                const originalText = target.dataset.value;
+                
+                interval = setInterval(() => {
+                    target.innerText = originalText
+                        .split("")
+                        .map((letter, index) => {
+                            if(index < iteration) {
+                                return originalText[index];
+                            }
+                            return letters[Math.floor(Math.random() * 26)]
+                        })
+                        .join("");
+                    
+                    if(iteration >= originalText.length){ 
+                        clearInterval(interval);
+                    }
+                    
+                    iteration += 1 / 3;
+                }, 30);
+            }
+
+            // 3. INTRO LOGIC
+            const introText = "INITIALIZING...";
+            const container = document.getElementById('powered-text');
+            const introOverlay = document.getElementById('powered-intro');
+            const viewingMessage = document.getElementById('viewing-message');
+            
+            // Setup Intro Text
+            introText.split('').forEach(char => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'typing-char';
+                container.appendChild(span);
+            });
+
+            // Ensure hero name is empty initially for hacker effect
+            const heroName = document.getElementById('hero-name');
+            if(heroName) heroName.innerText = "";
+
+            // --- INTRO SEQUENCE ---
+            const tl = anime.timeline({
+                easing: 'easeOutExpo',
+            });
+
+            tl
+            // Type "INITIALIZING..."
+            .add({
+                targets: '.typing-char',
+                opacity: [0, 1],
+                translateY: [20, 0],
+                delay: anime.stagger(50), 
+                duration: 500
+            })
+            // Fill Progress Bar
+            .add({
+                targets: '#intro-progress',
+                width: ['0%', '100%'],
+                duration: 1200,
+                easing: 'easeInOutQuad'
+            }, '-=200')
+            // Show "View on Desktop" message
+            .add({
+                targets: viewingMessage,
+                opacity: [0, 1],
+                duration: 500,
+            }, '-=800')
+            // Fade Out Overlay
+            .add({
+                targets: introOverlay,
+                opacity: 0,
+                duration: 800,
+                easing: 'easeInOutQuad',
+                complete: () => {
+                    introOverlay.style.display = 'none';
+                    // Trigger Scroll Observer
+                    document.querySelectorAll('.anim-up').forEach(el => observer.observe(el));
+                }
+            })
+            
+            // --- LANDER REVEAL SEQUENCE ---
+            .add({
+                targets: '.hero-badge',
+                opacity: [0, 1],
+                translateY: [-20, 0],
+                duration: 600,
+                easing: 'easeOutCubic'
+            }, '-=400')
+            .add({
+                targets: '#hero-name',
+                opacity: [0, 1],
+                duration: 100,
+                easing: 'linear',
+                begin: () => {
+                    if(heroName) handleHackerEffect(heroName);
+                }
+            })
+            .add({
+                targets: '.hero-box',
+                opacity: [0, 1],
+                scaleX: [0, 1],
+                duration: 600,
+                easing: 'easeInOutQuart'
+            }, '-=400')
+            .add({
+                targets: '.hero-box-text',
+                opacity: [0, 1],
+                translateY: [10, 0],
+                duration: 500,
+                easing: 'easeOutQuad'
+            });
+
+            // 4. CURSOR TOGGLE LOGIC
+            const cursorToggle = document.getElementById('cursor-toggle');
+            const body = document.body;
+
+            cursorToggle.addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    body.classList.add('custom-cursor-active');
+                } else {
+                    body.classList.remove('custom-cursor-active');
+                }
+            });
+
+            // 5. REMOVED JS HOVER EFFECTS FOR PROFILE
+            // Now handled entirely by CSS in the <style> block for performance
+            
+            // 6. 3D TILT EFFECT (Desktop Only)
+            const isMobile = window.innerWidth < 768;
+            if (!isMobile) {
+                const cards = document.querySelectorAll('.project-card');
+                
+                cards.forEach(card => {
+                    const container = card.closest('.card-container');
+                    
+                    container.addEventListener('mousemove', (e) => {
+                        const rect = container.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        
+                        // Calculate rotation based on mouse position
+                        // Center of card is (0,0)
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        
+                        const rotateX = ((y - centerY) / centerY) * -10; // Max 10 deg rotation
+                        const rotateY = ((x - centerX) / centerX) * 10;
+                        
+                        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                    });
+                    
+                    container.addEventListener('mouseleave', () => {
+                        card.style.transform = `rotateX(0) rotateY(0) scale(1)`;
+                    });
+                });
+            }
+        });
+
+        // --- MOBILE OPTIMIZED 3D GRID ---
+        function startGridAnimation() {
+            const visualizer = document.querySelector('.stagger-visualizer');
+            const fragment = document.createDocumentFragment();
+            
+            // --- DETECT MOBILE ---
+            const isMobile = window.innerWidth < 768;
+            
+            // --- REDUCE GRID SIZE ON MOBILE ---
+            // Desktop: 16x16 (256 items) | Mobile: 10x10 (100 items)
+            const gridCols = isMobile ? 10 : 16; 
+            const gridRows = isMobile ? 10 : 16;
+            const numberOfElements = gridCols * gridRows;
+
+            // Apply grid column count
+            visualizer.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+            visualizer.innerHTML = ''; // Clear previous if any
+
+            for (let i = 0; i < numberOfElements; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                fragment.appendChild(dot);
+            }
+            visualizer.appendChild(fragment);
+
+            const animation = anime.timeline({
+                targets: '.stagger-visualizer .dot',
+                easing: 'easeInOutSine',
+                delay: anime.stagger(50), 
+                loop: true,
+                autoplay: false 
+            });
+
+            animation
+            .add({
+                translateX: [
+                    {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) },
+                    {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) }
+                ],
+                translateY: [
+                    {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) },
+                    {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) }
+                ],
+                duration: 1000,
+                scale: .5,
+                delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+            })
+            .add({
+                translateX: () => anime.random(-10, 10),
+                translateY: () => anime.random(-10, 10),
+                delay: anime.stagger(8, {from: 'last'}),
+                scale: 1, 
+                backgroundColor: '#6366f1', 
+                duration: 1000,
+            })
+            .add({
+                translateX: 0,
+                translateY: 0,
+                scale: 1,
+                backgroundColor: '#27272a', 
+                duration: 1000,
+                delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+            });
+
+            animation.play();
+        }
+
+        // --- CUSTOM CURSOR ---
+        const cursorDot = document.querySelector(".cursor-dot");
+        // Removed cursorOutline logic
+
+        window.addEventListener("mousemove", (e) => {
+            if (!document.body.classList.contains('custom-cursor-active')) return;
+            const posX = e.clientX;
+            const posY = e.clientY;
+            
+            // Only updating left/top, CSS handles transform rotate
+            cursorDot.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+        });
+
+        // --- SCROLL ANIMATIONS ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px"
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARANAG - Amit Dutta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --accent-color: #00ff66; /* Neon green */
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #111;
+        color: #f5f5f5;
+        overflow-x: hidden;
+        scroll-snap-type: y mandatory;
+        cursor: none; /* Hide default cursor */
+      }
+      
+      /* --- CUSTOM CURSOR STYLES --- */
+      .cursor-dot,
+      .cursor-outline {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      .cursor-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--accent-color);
+      }
+
+      .cursor-outline {
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--accent-color);
+        transition: width 0.2s, height 0.2s, background-color 0.2s;
+      }
+      
+      /* Hover state for cursor */
+      body.hovering .cursor-outline {
+        width: 60px;
+        height: 60px;
+        background-color: rgba(0, 255, 102, 0.1);
+        border-color: transparent;
+      }
+
+      /* On the white landing page, invert cursor colors for visibility */
+      .cursor-dot, .cursor-outline {
+          mix-blend-mode: difference;
+      }
+
+      /* --- MOBILE CURSOR FIX --- */
+      @media (max-width: 768px), (hover: none) {
+        .cursor-dot, .cursor-outline {
+          display: none !important;
+        }
+        body {
+          cursor: auto !important;
+        }
+      }
+
+      .section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        scroll-snap-align: start;
+        padding: 2rem;
+        position: relative;
+      }
+
+      /* --- NEW LANDER STYLES --- */
+      .dot-grid {
+        background-image: radial-gradient(#d4d4d4 1.5px, transparent 1.5px);
+        background-size: 24px 24px;
+        opacity: 0.8;
+      }
+
+      /* Floating Shapes for Background Depth */
+      .floating-shape {
+        position: absolute;
+        z-index: 1; /* Behind text but above grid */
+        pointer-events: none;
+      }
+
+      .shape-square {
+        top: 15%;
+        left: 10%;
+        width: 120px;
+        height: 120px;
+        border: 2px solid var(--accent-color);
+        opacity: 0.2;
+        transform: rotate(15deg);
+      }
+
+      .shape-circle {
+        bottom: 20%;
+        right: 10%;
+        width: 180px;
+        height: 180px;
+        border: 2px dashed #9ca3af; /* Gray-400 */
+        border-radius: 50%;
+        opacity: 0.3;
+      }
+
+      .shape-cross {
+        top: 25%;
+        right: 25%;
+        color: var(--accent-color);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 4rem;
+        opacity: 0.4;
+      }
+      
+      .shape-dots {
+          bottom: 15%;
+          left: 15%;
+          width: 80px;
+          height: 80px;
+          background-image: radial-gradient(#000 2px, transparent 2px);
+          background-size: 10px 10px;
+          opacity: 0.1;
+      }
+
+      /* Corner Frames */
+      .corner-frame {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border-color: #000;
+        transition: all 0.3s ease;
+      }
+      
+      .corner-tl { top: -20px; left: -20px; border-top: 3px solid; border-left: 3px solid; }
+      .corner-tr { top: -20px; right: -20px; border-top: 3px solid; border-right: 3px solid; }
+      .corner-bl { bottom: -20px; left: -20px; border-bottom: 3px solid; border-left: 3px solid; }
+      .corner-br { bottom: -20px; right: -20px; border-bottom: 3px solid; border-right: 3px solid; }
+      
+      .content-frame:hover .corner-frame {
+        width: 40px;
+        height: 40px;
+        border-color: var(--accent-color);
+      }
+
+      /* Hero Text Animation */
+      .text-line {
+        display: inline-block;
+        opacity: 0;
+      }
+
+      /* Styles for the Intro Animation */
+      .powered-line {
+        display: inline-block;
+        opacity: 0;
+      }
+      #powered-intro {
+        position: fixed;
+        inset: 0;
+        background-color: black;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.25rem;
+        font-weight: 700;
+        z-index: 50;
+      }
+
+      #viewing-message {
+        position: absolute;
+        bottom: 2rem;
+        text-align: center;
+        width: 100%;
+        color: #d3d3d3;
+        font-size: 0.7rem;
+        font-family: "IBM Plex Mono", monospace;
+        letter-spacing: 0.05em;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+      }
+
+      /* Shared Animation Classes */
+      .anim-element {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      }
+      .anim-element.animate-in {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .project-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(0, 255, 102, 0.2);
+      }
+      .project-card h3 {
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      /* Profile Specifics */
+      .profile-img-container {
+        position: relative;
+        border-radius: 9999px; 
+        z-index: 1;
+      }
+      .profile-img-container::after {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 9999px;
+        border: 2px solid var(--accent-color);
+        z-index: -1;
+        opacity: 0.5;
+        transition: all 0.5s ease;
+      }
+      .profile-img-container:hover::after {
+        inset: -10px;
+        opacity: 0.8;
+        box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+        transform: rotate(180deg);
+      }
+      
+      .profile-img {
+         border-radius: 9999px;
+         transition: transform 0.5s ease;
+      }
+      .profile-img-container:hover .profile-img {
+         transform: scale(0.95);
+      }
+
+      .contact-link {
+        position: relative;
+        display: inline-block;
+        transition: color 0.3s ease;
+      }
+      .contact-link::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 100%;
+        height: 2px;
+        background-color: var(--accent-color);
+        transform: scaleX(0);
+        transform-origin: bottom right;
+        transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+      }
+      .contact-link:hover::after {
+        transform: scaleX(1);
+        transform-origin: bottom left;
+      }
+
+      /* --- GLITCH ANIMATION --- */
+
+      .parallax-wrapper {
+        position: absolute;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 0;
+        pointer-events: auto;
+      }
+
+      .aranag-text {
+        text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.05);
+        font-size: 15vw;
+        line-height: 1;
+        white-space: nowrap;
+        opacity: 0.6;
+        transition: opacity 0.5s ease-out;
+        cursor: pointer;
+        user-select: none;
+        animation: glitch-idle 1.5s infinite;
+      }
+
+      @media (min-width: 768px) {
+        .parallax-wrapper {
+          top: 25%;
+        }
+        .aranag-text {
+          font-size: 10rem;
+        }
+      }
+
+      @keyframes glitch-idle {
+        0% { text-shadow: 2px 2px 0px rgba(255,0,0,0.5), -2px -2px 0px rgba(0,0,255,0.5); transform: translate(-2px, 1px); }
+        5% { text-shadow: -2px -2px 0px rgba(255,0,0,0.5), 2px 2px 0px rgba(0,0,255,0.5); transform: translate(2px, -1px); }
+        10% { text-shadow: 2px -2px 0px rgba(255,0,0,0.5), -2px 2px 0px rgba(0,0,255,0.5); transform: translate(-1px, 2px); }
+        15% { text-shadow: -2px 2px 0px rgba(255,0,0,0.5), 2px -2px 0px rgba(0,0,255,0.5); transform: translate(1px, -2px); }
+        20% { text-shadow: 2px 0px 0px rgba(255,0,0,0.5), -2px 0px 0px rgba(0,0,255,0.5); transform: translate(-2px, 0); }
+        25% { text-shadow: -2px 0px 0px rgba(255,0,0,0.5), 2px 0px 0px rgba(0,0,255,0.5); transform: translate(2px, 0); }
+        33% { text-shadow: none; transform: translate(0); }
+        100% { text-shadow: none; transform: translate(0); }
+      }
+
+      .glitch-intense {
+        animation: glitch-crazy 0.5s infinite !important;
+        opacity: 1 !important;
+        color: #111; 
+      }
+
+      @keyframes glitch-crazy {
+        0% { text-shadow: 5px 5px 0px rgba(255,0,0,0.8), -5px -5px 0px rgba(0,0,255,0.8); transform: translate(-5px, 2px); }
+        25% { text-shadow: -5px -5px 0px rgba(255,0,0,0.8), 5px 5px 0px rgba(0,0,255,0.8); transform: translate(5px, -2px); }
+        50% { text-shadow: 2px -2px 0px rgba(255,0,0,0.8), -2px 2px 0px rgba(0,0,255,0.8); transform: translate(-2px, 5px); }
+        75% { text-shadow: -2px 2px 0px rgba(255,0,0,0.8), 2px -2px 0px rgba(0,0,255,0.8); transform: translate(2px, -5px); }
+        100% { text-shadow: none; transform: translate(0); }
+      }
+
+      .scroll-down {
+        position: absolute;
+        bottom: 5rem;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.6s ease-out;
+        animation: bounce 2s infinite;
+      }
+
+      .scroll-down.animate-in {
+        opacity: 1;
+      }
+
+      @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+      }
+    </style>
+  </head>
+  <body class="bg-black text-white">
+    <!-- Custom Cursor Elements -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Intro -->
+    <div
+      id="powered-intro"
+      class="fixed inset-0 bg-black flex flex-col items-center justify-center text-white text-4xl font-bold z-50"
+    >
+      <div id="powered-text">.....</div>
+      <p id="viewing-message" class="tracking-wider text-xs font-mono">
+        For optimal viewing and experience, please use a desktop browser.
+      </p>
+    </div>
+
+    <!-- Landing Section -->
+    <section
+      id="landing"
+      class="section bg-zinc-50 text-black flex flex-col items-center justify-center relative overflow-hidden"
+    >
+      <div class="absolute inset-0 dot-grid pointer-events-none"></div>
+      
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+          <div class="floating-shape shape-square"></div>
+          <div class="floating-shape shape-circle"></div>
+          <div class="floating-shape shape-cross">+</div>
+          <div class="floating-shape shape-dots"></div>
+      </div>
+
+      <div id="parallax-wrapper" class="parallax-wrapper">
+         <div
+           id="glitch-text"
+           class="font-black tracking-widest text-gray-300 aranag-text"
+         >
+           ARANAG
+         </div>
+      </div>
+
+      <div class="text-center relative z-10 content-frame p-8 pointer-events-none">
+        <div class="pointer-events-auto">
+            <div class="corner-frame corner-tl"></div>
+            <div class="corner-frame corner-tr"></div>
+            <div class="corner-frame corner-bl"></div>
+            <div class="corner-frame corner-br"></div>
+
+            <h1
+              id="my-name"
+              class="text-6xl md:text-8xl lg:text-[10rem] font-extrabold tracking-tighter"
+            ></h1>
+            <div
+              id="my-title"
+              class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mt-4"
+            ></div>
+            <p
+              id="welcome-message"
+              class="text-lg md:text-xl font-light tracking-wide mt-4"
+            ></p>
+        </div>
+      </div>
+
+      <div id="scroll-down" class="scroll-down pointer-events-auto">
+        <svg
+          class="w-8 h-8 mx-auto text-black"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 14l-7 7m0 0l-7-7m7 7V3"
+          ></path>
+        </svg>
+        <span class="font-mono text-sm tracking-widest">EXPLORE</span>
+      </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section id="profile" class="section bg-zinc-900">
+      <div class="max-w-6xl mx-auto w-full flex flex-col md:flex-row items-center gap-12 lg:gap-24 relative z-10">
+        <!-- Image Side -->
+        <div class="w-full md:w-1/3 flex justify-center anim-element">
+          <div class="profile-img-container w-64 h-64 md:w-80 md:h-80 shadow-2xl">
+            <img 
+              src="https://aranag.site/mypic.png" 
+              alt="Amit Dutta" 
+              class="profile-img w-full h-full object-cover grayscale hover:grayscale-0"
+              onerror="this.src='https://placehold.co/400x400/111/FFF?text=AD'"
+            >
+          </div>
+        </div>
+
+        <!-- Content Side -->
+        <div class="w-full md:w-2/3 text-left">
+          <div class="mb-6">
+             <span class="text-[#00ff66] font-mono text-lg block mb-2">00 // ABOUT ME</span>
+             <h2 class="text-3xl md:text-5xl font-bold tracking-tight">Student & Developer</h2>
+          </div>
+          
+          <div class="space-y-6 text-zinc-400 leading-relaxed">
+            <p>
+              I am currently pursuing my <strong>B.Sc. (Hons) in Computer Science</strong> at 
+              <span class="text-white">Acharya Prafulla Chandra College</span>, following my 
+              higher secondary and secondary education at <span class="text-white">NBCBHS</span>.
+            </p>
+            
+            <p>
+              My journey is defined by a curiosity for how things work under the hood. 
+              This drives me to build practical tools like the 
+              <a href="https://pypi.org/project/adpkg/" class="text-[#00ff66] hover:underline">ADPKG</a> 
+              Python library for complex mathematical operations and explore the frontiers of AI with custom 
+              deep learning models and <a href="https://compiler.aranag.site" class="text-[#00ff66] hover:underline">smart compilers</a>.
+            </p>
+
+            <p>
+              Whether it's maintaining educational resources like the 
+              <a href="https://github.com/notamitgamer/bsc" class="text-[#00ff66] hover:underline">WBSU Code Repository</a> or crafting efficient algorithms, 
+              I am always looking for the next challenge to solve.
+            </p>
+          </div>
+
+          <div class="mt-8 pt-8 border-t border-zinc-800 flex gap-4 anim-element">
+            <div class="flex flex-col">
+              <span class="text-xs font-mono text-[#00ff66] mb-1">LOCATION</span>
+              <span class="font-bold">Kolkata, India</span>
+            </div>
+            <div class="flex flex-col border-l border-zinc-800 pl-4">
+              <span class="text-xs font-mono text-[#00ff66] mb-1">FOCUS</span>
+              <span class="font-bold">AI, Python, Web</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section bg-zinc-950">
+      <div class="max-w-7xl mx-auto w-full pt-12">
+        <h2 class="text-4xl md:text-6xl font-bold mb-16 text-center tracking-tight anim-element">
+          <span class="text-[#00ff66]">/</span>SELECTED WORKS
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="project-card anim-element bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl">
+            <div class="text-[#00ff66] font-mono text-xs mb-4">01</div>
+            <h3 class="text-xl font-bold mb-3 text-white">Interactive Web Calculator</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">A responsive number system converter handling Binary, Decimal, Octal, and Hexadecimal operations with real-time conversion.</p>
+            <a href="/codenct" class="text-white text-sm font-mono hover:text-[#00ff66] transition-colors flex items-center gap-2">View Project &rarr;</a>
+          </div>
+
+          <div class="project-card anim-element bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl" style="transition-delay: 0.1s">
+            <div class="text-[#00ff66] font-mono text-xs mb-4">02</div>
+            <h3 class="text-xl font-bold mb-3 text-white">ADPKG - Python Package</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">Comprehensive toolkit for compound interest, number theory, matrices, and statistical analysis. Open source on PyPI.</p>
+            <a href="https://pypi.org/project/adpkg/" class="text-white text-sm font-mono hover:text-[#00ff66] transition-colors flex items-center gap-2">View Package &rarr;</a>
+          </div>
+
+          <div class="project-card anim-element bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl" style="transition-delay: 0.2s">
+            <div class="text-[#00ff66] font-mono text-xs mb-4">03</div>
+            <h3 class="text-xl font-bold mb-3 text-white">AI Model Project</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">Custom trained deep learning model optimized for high accuracy performance on specific datasets.</p>
+            <a href="https://ada.aranag.site" class="text-white text-sm font-mono hover:text-[#00ff66] transition-colors flex items-center gap-2">View Demo &rarr;</a>
+          </div>
+
+          <div class="project-card anim-element bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl" style="transition-delay: 0.3s">
+            <div class="text-[#00ff66] font-mono text-xs mb-4">04</div>
+            <h3 class="text-xl font-bold mb-3 text-white">WBSU Code Repository</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">Complete collection of B.Sc. Hons Computer Science practical codes and assignments for WBSU students.</p>
+            <div class="flex gap-4">
+                <a href="https://aranag.site/bsc" class="text-white text-sm font-mono hover:text-[#00ff66] transition-colors">View Code &rarr;</a>
+                <a href="https://github.com/notamitgamer/bsc" class="text-white text-sm font-mono hover:text-[#00ff66] transition-colors">GitHub &rarr;</a>
+            </div>
+          </div>
+
+          <div class="project-card anim-element bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl" style="transition-delay: 0.4s">
+            <div class="text-[#00ff66] font-mono text-xs mb-4">05</div>
+            <h3 class="text-xl font-bold mb-3 text-white">AI Powered Compiler</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">Online compiler powered by Gemini 2.5 Flash. Supports C, C++, and Python with intelligent error explanation.</p>
+            <a href="https://compiler.aranag.site" class="text-white text-sm font-mono hover:text-[#00ff66] transition-colors flex items-center gap-2">Check Out &rarr;</a>
+          </div>
+
+          <div class="project-card anim-element bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl" style="transition-delay: 0.4s">
+            <div class="text-[#00ff66] font-mono text-xs mb-4">06</div>
+            <h3 class="text-xl font-bold mb-3 text-white">EDUCATIONAL SOURCE-AVAILABLE LICENSE (ESAL-1.0)</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">Strict Non-Submission & Anti-Plagiarism Clause</p>
+            <a href="https://aranag.site/license" class="text-white text-sm font-mono hover:text-[#00ff66] transition-colors flex items-center gap-2">View License &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section bg-zinc-900">
+      <div class="text-center max-w-xl mx-auto">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">Get in Touch</h2>
+        <p class="text-xl text-zinc-400 mb-8 font-mono">Available for just loafing around...</p>
+        <div class="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0 items-center justify-center">
+          <a href="https://facebook.com/notamitgamer" class="text-white contact-link">Facebook</a>
+          <a href="https://instagram.com/notamitgamer" class="text-white contact-link">Instagram</a>
+          <a href="https://twitter.com/notamitgamer" class="text-white contact-link">X</a>
+          <a href="https://discord.com/users/notamitgamer" class="text-white contact-link">Discord</a>
+          <a href="https://linkedin.com/in/notamitgamer" class="text-white contact-link">LinkedIn</a>
+          <a href="https://github.com/notamitgamer" class="text-white contact-link">GitHub</a>
+          <a href="https://www.reddit.com/user/notamitgamer/" class="text-white contact-link">Reddit</a>
+    <a href="https://steamcommunity.com/id/notamitgamer" class="text-white contact-link">Steam</a>
+          <a href="https://my.play/notamitgamer" class="text-white contact-link">Google Play</a>
+          <a href="https://wa.me/917278779512?text=hi" class="text-white contact-link">WhatsApp</a>
+          <a href="https://aranag.site" target="_blank" class="text-white contact-link">aranag.site</a>
+          <a href="mailto:amitdutta4255@gmail.com" class="text-white contact-link">Email</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="bg-black py-8 text-center border-t border-zinc-900">
+      <p class="text-xs text-zinc-600 font-mono">&copy; 2025 Amit Dutta. Built with ☕ and Code.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const poweredIntro = document.getElementById("powered-intro");
+        const poweredText = document.getElementById("powered-text");
+        const viewingMessage = document.getElementById("viewing-message");
+        const landingSection = document.getElementById("landing");
+        const parallaxWrapper = document.getElementById("parallax-wrapper");
+        const glitchText = document.getElementById("glitch-text");
+
+        // --- CUSTOM CURSOR LOGIC ---
+        const cursorDot = document.querySelector(".cursor-dot");
+        const cursorOutline = document.querySelector(".cursor-outline");
+        
+        window.addEventListener("mousemove", (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        document.querySelectorAll("a, .project-card, .profile-img-container, .scroll-down, .aranag-text").forEach(el => {
+            el.addEventListener("mouseenter", () => document.body.classList.add("hovering"));
+            el.addEventListener("mouseleave", () => document.body.classList.remove("hovering"));
+        });
+        
+        // --- GLITCH LOGIC ---
+        let glitchTimeout;
+        const triggerIntenseGlitch = () => {
+            glitchText.classList.remove("glitch-intense");
+            void glitchText.offsetWidth; 
+            glitchText.classList.add("glitch-intense");
+            clearTimeout(glitchTimeout);
+            glitchTimeout = setTimeout(() => {
+                glitchText.classList.remove("glitch-intense");
+            }, 500); 
+        };
+        glitchText.addEventListener("mouseenter", triggerIntenseGlitch);
+        glitchText.addEventListener("click", triggerIntenseGlitch);
+
+        // --- INTRO ANIMATION ---
+        const poweredString = ".....";
+        poweredText.innerHTML = "";
+        poweredString.split("").forEach((char) => {
+          const span = document.createElement("span");
+          span.textContent = char === " " ? "\u00A0" : char;
+          span.classList.add("powered-line");
+          poweredText.appendChild(span);
+        });
+        landingSection.style.display = "none";
+        const introTimeline = anime.timeline({
+          easing: "easeOutExpo",
+          duration: 1000,
+          complete: () => {
+            poweredIntro.style.display = "none";
+            landingSection.style.display = "flex";
+            animateFloatingShapes();
+          },
+        });
+        introTimeline
+          .add({ targets: ".powered-line", opacity: [0, 1], translateY: [20, 0], duration: 1000, delay: anime.stagger(50) })
+          .add({ targets: viewingMessage, opacity: [0, 1], duration: 0, easing: "linear" }, "-=200")
+          .add({ targets: ".powered-line", opacity: [1, 0], translateY: [0, -20], duration: 600, delay: anime.stagger(30) }, "+=1000")
+          .add({ targets: viewingMessage, opacity: [1, 0], duration: 300, easing: "linear" }, "-=600");
+
+        // --- TEXT ANIMATION HELPERS ---
+        const createAnimatedText = (text, container, className) => {
+          text.split("").forEach((char) => {
+            const span = document.createElement("span");
+            span.textContent = char === " " ? "\u00A0" : char;
+            span.classList.add(className);
+            container.appendChild(span);
+          });
+        };
+        const nameContainer = document.getElementById("my-name");
+        const titleContainer = document.getElementById("my-title");
+        const welcomeContainer = document.getElementById("welcome-message");
+        const scrollDown = document.getElementById("scroll-down");
+        createAnimatedText("AMIT", nameContainer, "text-line");
+        createAnimatedText("DUTTA", titleContainer, "text-line");
+        createAnimatedText("COMPUTER SCIENCE UNDERGRADUATE | DEVELOPER", welcomeContainer, "text-line");
+
+        landingSection.addEventListener("mousemove", (e) => {
+           if (!parallaxWrapper) return;
+           const x = (window.innerWidth - e.pageX * 2) / 50;
+           const y = (window.innerHeight - e.pageY * 2) / 50;
+           parallaxWrapper.style.transform = `translate(${x}px, ${y}px) translateX(-50%)`;
+        });
+        landingSection.addEventListener("mouseleave", () => {
+            if (!parallaxWrapper) return;
+            parallaxWrapper.style.transform = `translateX(-50%)`;
+        });
+
+        const animateElements = () => {
+          if (typeof anime === "undefined") {
+            document.querySelectorAll(".text-line").forEach((el) => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; });
+            scrollDown.style.opacity = "1";
+            return;
+          }
+          anime.timeline({ loop: false })
+            .add({ targets: `#my-name .text-line`, opacity: [0, 1], translateY: [20, 0], duration: 800, delay: anime.stagger(50), easing: "easeOutExpo" })
+            .add({ targets: `#my-title .text-line`, opacity: [0, 1], translateY: [20, 0], duration: 600, delay: anime.stagger(30), easing: "easeOutExpo" }, "-=500")
+            .add({ targets: `#welcome-message .text-line`, opacity: [0, 1], translateY: [10, 0], duration: 500, delay: anime.stagger(10), easing: "easeOutExpo" }, "-=400")
+            .add({ targets: `#scroll-down`, opacity: [0, 1], translateY: [20, 0], duration: 800, easing: "easeOutExpo" }, "-=300");
+        };
+
+        const animateFloatingShapes = () => {
+           if (typeof anime === "undefined") return;
+           anime({ targets: '.shape-square', translateY: [0, -30], rotate: [15, 45], duration: 6000, direction: 'alternate', loop: true, easing: 'easeInOutSine' });
+           anime({ targets: '.shape-circle', scale: [1, 1.1], opacity: [0.3, 0.4], duration: 4000, direction: 'alternate', loop: true, easing: 'easeInOutQuad' });
+           anime({ targets: '.shape-cross', rotate: [0, 360], duration: 20000, loop: true, easing: 'linear' });
+        };
+        
+        // --- OBSERVERS ---
+        const landingObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) animateElements();
+              else {
+                if (typeof anime !== "undefined") anime.remove("#my-name .text-line, #my-title .text-line, #welcome-message .text-line, #scroll-down");
+                document.querySelectorAll(".text-line").forEach((el) => { el.style.opacity = "0"; el.style.transform = "translateY(20px)"; });
+                scrollDown.style.opacity = "0";
+              }
+            });
+        }, { rootMargin: "0px", threshold: 0.5 });
+
+        const scrollAnimObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("animate-in");
+                observer.unobserve(entry.target);
+              }
+            });
+        }, { rootMargin: "0px", threshold: 0.15 });
+
+        landingObserver.observe(document.getElementById("landing"));
+        document.querySelectorAll(".project-card, .anim-element").forEach((el) => scrollAnimObserver.observe(el));
+      });
+    </script>
+  </body>
+</html>
