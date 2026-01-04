@@ -267,6 +267,19 @@
       #back-to-top.visible { opacity: 1; transform: translateY(0); }
       #back-to-top:hover { border-color: var(--accent); transform: scale(1.1); }
 
+      /* --- SITE WATERMARK --- */
+      #site-watermark {
+          position: fixed;
+          top: 1.5rem;
+          right: 1.5rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.75rem;
+          color: rgba(255, 255, 255, 0.3);
+          z-index: 40;
+          pointer-events: none;
+          letter-spacing: 0.1em;
+      }
+
     </style>
   </head>
   <body class="antialiased selection:bg-lime-300 selection:text-black custom-cursor-active">
@@ -279,6 +292,9 @@
 
     <!-- PARTICLE CANVAS BACKGROUND -->
     <canvas id="particle-canvas"></canvas>
+
+    <!-- SITE WATERMARK -->
+    <div id="site-watermark" align = "right">amit.is-a.dev<br>aranag.site</div>
 
     <!-- Scroll Progress Bar -->
     <div id="scroll-progress"></div>
@@ -326,7 +342,7 @@
                 <!-- Logs injected via JS -->
             </div>
             <div class="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-lime-300 w-0"></div>
+                <div id="progress-bar" class="h-full bg-lime-300 w-0 transition-all duration-300 ease-out"></div>
             </div>
             <div class="flex justify-between mt-2 text-xs font-mono text-neutral-500 uppercase">
                 <span>System Boot</span>
@@ -381,7 +397,7 @@
                     <h2 class="reveal-text text-2xl md:text-4xl lg:text-5xl font-light text-neutral-400 tracking-tight">
                         Full Stack Developer & AI Enthusiast
                         <span class="block text-xl md:text-2xl mt-2 text-lime-300/80 font-mono">
-                            // CS Undergrad
+                            // CS Undergrad (Acharya Prafulla Chandra College, Kolkata, IN)
                         </span>
                     </h2>
                 </div>
@@ -410,7 +426,7 @@
                         Building digital architecture with <span class="text-neutral-500">precision</span> and <span class="text-neutral-500">purpose</span>.
                     </h3>
                     <div class="space-y-4 text-neutral-400 text-lg font-light leading-relaxed">
-                        <p>I am a Computer Science undergraduate at <strong class="text-white font-normal">Acharya Prafulla Chandra College</strong>, blurring the lines between web development and artificial intelligence.</p>
+                        <p>I am a Computer Science undergraduate at <strong class="text-white font-normal">Acharya Prafulla Chandra College, Kolkata, IN</strong>, blurring the lines between web development and artificial intelligence.</p>
                         <p>My work involves creating specialized tools like the <a href="#" class="text-lime-300 hover:underline">ADPKG</a> library and maintaining the WBSU Code Repository. I believe in clean code, efficiency, and brutalist aesthetics.</p>
                     </div>
                     
@@ -421,7 +437,26 @@
                         </div>
                         <div>
                             <span class="block text-white mb-1">STACK</span>
-                            Python, C++, Web
+                            Python, Web
+                        </div>
+                    </div>
+                    
+                    <!-- NEW TECH STACK SECTION -->
+                    <div class="mt-8 pt-8 border-t border-white/5">
+                        <div class="font-mono text-lime-300 text-xs mb-4 uppercase tracking-wider">01.1 / Tech Stack</div>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono text-neutral-400">
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Python</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">C</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">C++</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">HTML5</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">CSS3</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">JavaScript</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Java</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Kotlin</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Google Script</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Markdown</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Firebase</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Render</span>
                         </div>
                     </div>
                 </div>
@@ -441,7 +476,7 @@
                         >
                         <!-- Tech Tag -->
                         <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-mono text-[10px] text-lime-300 bg-neutral-900/80 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 border border-lime-300/20">
-                            IMG_AMIT.RAW
+                            IMG_2025.RAW
                         </div>
                     </div>
                 </div>
@@ -531,7 +566,7 @@
                         </p>
                         <!-- Dual Buttons -->
                         <div class="flex gap-3 relative z-10">
-                            <a href="/bsc" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded">
+                            <a href="https://aranag.site/bsc" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded">
                                 LIVE SITE
                             </a>
                             <a href="https://github.com/notamitgamer/bsc" class="px-4 py-2 bg-neutral-800 hover:bg-white hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded">
@@ -572,7 +607,7 @@
                         </p>
                         <!-- Button -->
                         <div class="relative z-10">
-                            <a href="/license" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
+                            <a href="https://aranag.site/license" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
                                 READ DOCS
                             </a>
                         </div>
@@ -615,8 +650,7 @@
             
             // --- 1. UTILS ---
             const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            
-            // --- 2. INTRO SEQUENCE ---
+
             // Helper function for random string generation
             const randomString = (length) => {
                 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
@@ -627,12 +661,42 @@
                 return result;
             };
 
+            // Helper for system detection
+            function getSystemInfo() {
+                const ua = navigator.userAgent;
+                let os = "Unknown OS";
+                let browser = randomString(10);
+                let device = "Desktop"; // Default guess
+
+                // Detect OS
+                if (ua.indexOf("Win") !== -1) os = "Windows";
+                else if (ua.indexOf("Mac") !== -1) os = "macOS";
+                else if (ua.indexOf("Linux") !== -1) os = "Linux";
+                else if (ua.indexOf("Android") !== -1) os = "Android";
+                else if (ua.indexOf("like Mac") !== -1) os = "iOS";
+
+                // Detect Device Category (Simple logic)
+                if (/Mobi|Android/i.test(ua)) {
+                    device = "Mobile Device";
+                } else if (/Tablet|iPad/i.test(ua)) {
+                    device = "Tablet";
+                }
+
+                return { os, browser, device };
+            }
+            
+            const sysInfo = getSystemInfo();
+            
+            // --- 2. INTRO SEQUENCE ---
+
             const logs = [
                 "Initializing core modules...",
                 () => { // Special handling for loading assets typing
                     return { type: 'typing', text: 'Loading assets: [', end: ']' };
                 },
                 "Optimizing viewport...",
+                `DETECTED_SYSTEM: [ ${sysInfo.os} // ${sysInfo.device} ]`,
+                `BROWSER_ID: [ ${sysInfo.browser} ]`,
                 "Connection established.",
                 "Access Granted."
             ];
@@ -643,101 +707,82 @@
             const introOverlay = document.getElementById('intro-overlay');
             const mobileWarning = document.getElementById('mobile-warning');
             
-            let totalLogTime = 0;
-            const logDelayBase = 300;
-            const typingDuration = 1200; // Estimated time for the typing log
+            let stepIndex = 0;
+            const stepBaseDelay = 400; // Delay between normal logs
 
-            // Calculate total time first to sync progress bar
-            logs.forEach((logItem) => {
-                totalLogTime += (Math.random() * 300) + logDelayBase;
-                if (typeof logItem === 'function') totalLogTime += typingDuration;
-            });
-            
-            let currentLogTime = 0;
-            
-            // Print logs
-            logs.forEach((logItem, index) => {
-                const stepDelay = (Math.random() * 300) + logDelayBase + (typeof logItem === 'function' ? typingDuration : 0);
-                
-                setTimeout(() => {
-                    const p = document.createElement('div');
-                    p.className = 'log-line';
-                    
-                    let content;
-                    if (typeof logItem === 'function') {
-                        content = logItem();
-                    } else {
-                        content = logItem;
-                    }
+            function processNextLog() {
+                if (stepIndex >= logs.length) {
+                    setTimeout(finishIntro, 500);
+                    return;
+                }
 
-                    if (typeof content === 'object' && content.type === 'typing') {
-                        // Typing effect logic for "Loading assets"
+                const logItem = logs[stepIndex];
+                const p = document.createElement('div');
+                p.className = 'log-line';
+                logContainer.appendChild(p);
+
+                // Update Progress (Dynamic per step)
+                const percent = Math.round(((stepIndex + 1) / logs.length) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${percent}%`;
+
+                if (typeof logItem === 'function') {
+                     const content = logItem();
+                     if (content.type === 'typing') {
+                        // Logic for "Loading assets: [......]"
                         p.textContent = `> ${content.text}`;
-                        logContainer.appendChild(p);
                         requestAnimationFrame(() => { p.style.opacity = '1'; });
                         
-                        // Type random chars
-                        let currentText = content.text;
-                        const finalLength = 20; // Number of random chars
-                        let i = 0;
-                        const typeInterval = setInterval(() => {
-                            p.textContent = `> ${content.text}${randomString(i)}`;
-                            i++;
-                            if (i > finalLength) {
-                                clearInterval(typeInterval);
-                                p.textContent = `> ${content.text}${randomString(finalLength)}${content.end}`;
-                            }
-                            logContainer.scrollTop = logContainer.scrollHeight;
-                        }, 50); 
-
-                    } else {
-                        // Standard log line
-                        const text = content.startsWith('>') ? content : `> ${content}`;
-                        p.textContent = text;
-                        logContainer.appendChild(p);
-                        requestAnimationFrame(() => { p.style.opacity = '1'; });
-                        logContainer.scrollTop = logContainer.scrollHeight;
-                    }
+                        // Wait a bit then start typing random chars
+                        setTimeout(() => {
+                            let i = 0;
+                            const finalLength = 20;
+                            const typeInterval = setInterval(() => {
+                                p.textContent = `> ${content.text}${randomString(i)}`;
+                                i++;
+                                if (i > finalLength) {
+                                    clearInterval(typeInterval);
+                                    p.textContent = `> ${content.text}${randomString(finalLength)}${content.end}`;
+                                    stepIndex++;
+                                    setTimeout(processNextLog, stepBaseDelay); 
+                                }
+                                logContainer.scrollTop = logContainer.scrollHeight;
+                            }, 50);
+                        }, 200); 
+                     }
+                } else {
+                    // Standard Log
+                    const text = logItem.startsWith('>') ? logItem : `> ${logItem}`;
+                    p.textContent = text;
+                    requestAnimationFrame(() => { p.style.opacity = '1'; });
+                    logContainer.scrollTop = logContainer.scrollHeight;
                     
-                }, currentLogTime);
-                currentLogTime += stepDelay;
-            });
+                    stepIndex++;
+                    setTimeout(processNextLog, (Math.random() * 300) + stepBaseDelay);
+                }
+            }
 
-            // Animate Progress Bar - Synced to totalLogTime
-            // Add a little buffer to ensure bar finishes exactly when logs are done
-            const animationDuration = totalLogTime + 500; 
-            
-            setTimeout(() => {
-                progressBar.style.transition = `width ${animationDuration}ms ease-in-out`;
-                progressBar.style.width = '100%';
-                
-                let progress = 0;
-                const intervalTime = animationDuration / 50;
-                const interval = setInterval(() => {
-                    progress += 2;
-                    if(progress > 100) progress = 100;
-                    progressText.textContent = `${progress}%`;
-                    if(progress === 100) clearInterval(interval);
-                }, intervalTime);
-            }, 100);
+            // Start the sequence
+            setTimeout(processNextLog, 500);
 
-            // End Intro
-            setTimeout(() => {
-                introOverlay.style.transition = 'opacity 0.8s ease';
-                introOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    introOverlay.style.display = 'none';
-                    
-                    // Show Mobile Warning if applicable
-                    if (window.innerWidth < 768) {
-                        mobileWarning.classList.add('active');
-                    }
-                    
-                    revealHero();
-                    // Start Grid Animation after intro
-                    startGridAnimation();
-                }, 800);
-            }, animationDuration + 800); // Wait for logs + transition
+            function finishIntro() {
+                 setTimeout(() => {
+                    introOverlay.style.transition = 'opacity 0.8s ease';
+                    introOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        introOverlay.style.display = 'none';
+                        
+                        // Show Mobile Warning if applicable
+                        if (window.innerWidth < 768) {
+                            mobileWarning.classList.add('active');
+                        }
+                        
+                        revealHero();
+                        // Start Grid Animation after intro
+                        startGridAnimation();
+                    }, 800);
+                }, 500);
+            }
 
             // Mobile Warning Dismiss
             document.getElementById('dismiss-mobile').addEventListener('click', () => {
