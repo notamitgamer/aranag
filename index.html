@@ -337,7 +337,12 @@
 
     <!-- Intro Sequence -->
     <div id="intro-overlay">
-        <div class="max-w-md w-full mb-8">
+        <!-- Added Skip Hint (Hidden by default) -->
+        <div id="skip-hint" class="absolute top-8 left-0 w-full text-center text-neutral-500 font-mono text-xs uppercase hidden animate-pulse cursor-pointer">
+            Click anywhere to skip booting
+        </div>
+
+        <div class="max-w-md w-full mb-8 pointer-events-none">
             <div id="logs-container" class="mb-4 h-32 flex flex-col justify-end overflow-hidden">
                 <!-- Logs injected via JS -->
             </div>
@@ -706,13 +711,57 @@
             const progressText = document.getElementById('progress-text');
             const introOverlay = document.getElementById('intro-overlay');
             const mobileWarning = document.getElementById('mobile-warning');
+            const skipHint = document.getElementById('skip-hint');
             
             let stepIndex = 0;
             const stepBaseDelay = 400; // Delay between normal logs
+            
+            // Flags and Timers for Skipping
+            const hasVisited = localStorage.getItem('aranag_visited');
+            let isSkipping = false;
+            let currentLogTimeout = null;
+            let currentTypeInterval = null;
+
+            // Logic for Returning Visitors
+            if (hasVisited) {
+                // Show Skip Hint
+                skipHint.classList.remove('hidden');
+                
+                // Add Click Listener to Overlay
+                introOverlay.style.pointerEvents = "auto"; // Enable clicking on overlay
+                introOverlay.addEventListener('click', skipIntro);
+            }
+
+            function skipIntro() {
+                if (isSkipping) return;
+                isSkipping = true;
+
+                // Stop all timers instantly
+                if (currentLogTimeout) clearTimeout(currentLogTimeout);
+                if (currentTypeInterval) clearInterval(currentTypeInterval);
+
+                // Hide skip hint
+                skipHint.style.display = 'none';
+
+                // Add skip log
+                const p = document.createElement('div');
+                p.className = 'log-line text-lime-300';
+                p.textContent = "> Skipping booting...";
+                p.style.opacity = '1';
+                logContainer.appendChild(p);
+                logContainer.scrollTop = logContainer.scrollHeight;
+
+                // Max out progress
+                progressBar.style.width = '100%';
+                progressText.textContent = '100%';
+
+                // Short delay before finishing
+                setTimeout(finishIntro, 350);
+            }
 
             function processNextLog() {
-                if (stepIndex >= logs.length) {
-                    setTimeout(finishIntro, 500);
+                if (isSkipping || stepIndex >= logs.length) {
+                    if (!isSkipping) setTimeout(finishIntro, 500);
                     return;
                 }
 
@@ -734,20 +783,28 @@
                         requestAnimationFrame(() => { p.style.opacity = '1'; });
                         
                         // Wait a bit then start typing random chars
-                        setTimeout(() => {
+                        // We use a timeout to delay start, tracked by currentLogTimeout just in case
+                        currentLogTimeout = setTimeout(() => {
+                            if (isSkipping) return;
+                            
                             let i = 0;
                             const finalLength = 20;
-                            const typeInterval = setInterval(() => {
+                            
+                            // Typing Interval
+                            currentTypeInterval = setInterval(() => {
+                                if (isSkipping) return;
+
                                 p.textContent = `> ${content.text}${randomString(i)}`;
                                 i++;
                                 if (i > finalLength) {
-                                    clearInterval(typeInterval);
+                                    clearInterval(currentTypeInterval);
                                     p.textContent = `> ${content.text}${randomString(finalLength)}${content.end}`;
                                     stepIndex++;
-                                    setTimeout(processNextLog, stepBaseDelay); 
+                                    currentLogTimeout = setTimeout(processNextLog, stepBaseDelay); 
                                 }
                                 logContainer.scrollTop = logContainer.scrollHeight;
                             }, 50);
+
                         }, 200); 
                      }
                 } else {
@@ -758,14 +815,21 @@
                     logContainer.scrollTop = logContainer.scrollHeight;
                     
                     stepIndex++;
-                    setTimeout(processNextLog, (Math.random() * 300) + stepBaseDelay);
+                    currentLogTimeout = setTimeout(processNextLog, (Math.random() * 300) + stepBaseDelay);
                 }
             }
 
             // Start the sequence
-            setTimeout(processNextLog, 500);
+            // Store initial timeout in case they skip immediately upon load (unlikely but possible)
+            currentLogTimeout = setTimeout(processNextLog, 500);
 
             function finishIntro() {
+                 // Set visited flag on finish
+                 localStorage.setItem('aranag_visited', 'true');
+                 
+                 // Remove listener to prevent clicks during fade out
+                 introOverlay.removeEventListener('click', skipIntro);
+
                  setTimeout(() => {
                     introOverlay.style.transition = 'opacity 0.8s ease';
                     introOverlay.style.opacity = '0';
