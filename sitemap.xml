@@ -4,37 +4,36 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
-
 <url>
-  <loc>https://aranag.site/</loc>
-  <lastmod>2025-12-23T14:35:12+00:00</lastmod>
+  <loc>https://amit.is-a.dev/</loc>
+  <lastmod>2026-01-07T07:27:44+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://aranag.site/bsc</loc>
-  <lastmod>2025-12-23T14:35:12+00:00</lastmod>
-  <priority>0.90</priority>
-</url>
-<url>
-  <loc>https://aranag.site/codenct</loc>
-  <lastmod>2025-12-23T14:35:12+00:00</lastmod>
+  <loc>https://amit.is-a.dev/codenct</loc>
+  <lastmod>2026-01-07T07:27:44+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://aranag.site/license</loc>
-  <lastmod>2025-12-23T14:35:12+00:00</lastmod>
+  <loc>https://amit.is-a.dev/bsc</loc>
+  <lastmod>2026-01-07T07:27:44+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+
+<url>
+  <loc>https://ada.amit.is-a.dev/</loc>
+  <lastmod>2026-01-07T07:27:44+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://ada.aranag.site/</loc>
-  <lastmod>2025-12-23T14:35:12+00:00</lastmod>
+  <loc>https://compiler.amit.is-a.dev/</loc>
+  <lastmod>2026-01-07T07:27:44+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://compiler.aranag.site/</loc>
-  <lastmod>2025-12-23T14:35:12+00:00</lastmod>
+  <loc>https://esal.amit.is-a.dev/</loc>
+  <lastmod>2026-01-07T07:27:44+00:00</lastmod>
   <priority>0.80</priority>
 </url>
+
 </urlset>
