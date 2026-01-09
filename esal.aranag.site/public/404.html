@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | aranag.site</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
+
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #09090b;
+            --grid-color: #27272a;
+            --accent-color: #6366f1; /* Indigo */
+            --accent-glow: #818cf8;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        /* --- 3D Grid Container --- */
+        .animation-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+        .stagger-visualizer {
+            display: grid;
+            /* Grid columns will be set by JS now */
+            gap: 16px; 
+            width: 750px;
+            height: auto;
+            transform: rotateX(45deg) rotateZ(45deg);
+            transform-style: preserve-3d;
+        }
+
+        .stagger-visualizer .dot {
+            position: relative;
+            width: 100%; 
+            aspect-ratio: 1; 
+            background-color: var(--grid-color);
+            border-radius: 4px;
+            /* REMOVED BOX-SHADOW FOR PERFORMANCE */
+            /* box-shadow: -4px 4px 10px rgba(0,0,0,0.5); */ 
+            transition: background-color 0.2s;
+            /* GPU Acceleration Hint */
+            will-change: transform; 
+        }
+
+        /* --- UI Overlay --- */
+        .content-overlay {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .glitch-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -5px;
+            color: #fff;
+            margin-bottom: 1rem;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        p {
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+            max-width: 400px;
+            line-height: 1.5;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        .action-btn {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 32px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 5rem; }
+            .stagger-visualizer { 
+                width: 100vw; /* Use viewport width instead of fixed larger width */
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Animation Background -->
+    <div class="animation-wrapper">
+        <div class="stagger-visualizer"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-overlay">
+        <div class="glitch-container">
+            <h1 class="el-text">404</h1>
+        </div>
+        <h2 class="el-text">Page Not Found</h2>
+        <p class="el-text">The dimension you requested is currently unreachable.</p>
+        <a href="/" class="action-btn el-text">Warp Home</a>
+    </div>
+
+    <script>
+        const visualizer = document.querySelector('.stagger-visualizer');
+        const fragment = document.createDocumentFragment();
+        
+        // --- PERFORMANCE OPTIMIZATION ---
+        // Detect screen width to adjust grid size
+        const isMobile = window.innerWidth < 768;
+        
+        // Desktop: 16x16 (256 items) | Mobile: 9x9 (81 items)
+        // Drastically reducing items on mobile prevents the lag
+        const gridCols = isMobile ? 9 : 16; 
+        const gridRows = isMobile ? 9 : 16;
+        const numberOfElements = gridCols * gridRows;
+
+        // Apply dynamic grid template
+        visualizer.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+
+        // 1. Generate the Grid
+        for (let i = 0; i < numberOfElements; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            fragment.appendChild(dot);
+        }
+        visualizer.appendChild(fragment);
+
+        // 2. The Anime.js Animation Sequence
+        const animation = anime.timeline({
+            targets: '.stagger-visualizer .dot',
+            easing: 'easeInOutSine',
+            delay: anime.stagger(50), 
+            loop: true,
+            autoplay: false 
+        });
+
+        animation
+        .add({
+            translateX: [
+                {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) },
+                {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) }
+            ],
+            translateY: [
+                {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) },
+                {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) }
+            ],
+            duration: 1000,
+            scale: .5,
+            delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+        })
+        .add({
+            translateX: () => anime.random(-10, 10),
+            translateY: () => anime.random(-10, 10),
+            delay: anime.stagger(8, {from: 'last'}),
+            scale: 1, 
+            backgroundColor: '#6366f1', 
+            duration: 1000,
+        })
+        .add({
+            translateX: 0,
+            translateY: 0,
+            scale: 1,
+            backgroundColor: '#27272a', 
+            duration: 1000,
+            delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+        });
+
+        animation.play();
+
+        // 3. Intro Animation for Text
+        anime({
+            targets: '.el-text',
+            opacity: [0, 1],
+            translateY: [50, 0],
+            duration: 800,
+            easing: 'easeOutExpo',
+            delay: anime.stagger(100, {start: 500})
+        });
+
+    </script>
+</body>
+</html>
