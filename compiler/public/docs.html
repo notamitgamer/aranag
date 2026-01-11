@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation // Cloud Code Compiler</title>
+    <link rel="icon" type="image/x-icon" href="https://compiler.amit.is-a.dev/logo.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    
+    <style>
+        :root {
+            --bg-main: #050505;
+            --accent: #bef264; /* Lime 300 */
+            --text-muted: #737373;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-heading { font-family: 'Space Grotesk', sans-serif; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Doc Sections */
+        .doc-section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 6rem;
+        }
+
+        .code-block {
+            background: #0f1115;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: var(--text-muted);
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(190, 242, 100, 0.05);
+        }
+
+        /* Noise Overlay */
+        .bg-noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-lime-300 selection:text-black">
+
+    <div class="bg-noise"></div>
+
+    <!-- Layout Grid -->
+    <div class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-4 gap-12 relative z-10">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="hidden lg:block col-span-1 sticky top-12 h-[calc(100vh-6rem)] overflow-y-auto pr-4">
+            <div class="mb-8">
+                <a href="./index.html" class="flex items-center gap-2 group">
+                    <i class="fas fa-arrow-left text-neutral-500 group-hover:text-white transition-colors"></i>
+                    <span class="font-heading font-bold text-xl text-white">Back to Home</span>
+                </a>
+            </div>
+            
+            <nav class="space-y-1">
+                <p class="px-4 text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">Contents</p>
+                <a href="#architecture" class="nav-link font-mono text-sm">Architecture</a>
+                <a href="#communication" class="nav-link font-mono text-sm">WebSocket Protocol</a>
+                <a href="#python-engine" class="nav-link font-mono text-sm">Python Engine</a>
+                <a href="#cpp-engine" class="nav-link font-mono text-sm">C / C++ Engine</a>
+                <a href="#security" class="nav-link font-mono text-sm">Security & Sandbox</a>
+                <a href="#privacy" class="nav-link font-mono text-sm">Privacy & Data</a>
+                <a href="#disclaimer" class="nav-link font-mono text-sm">Legal & Disclaimer</a>
+            </nav>
+
+            <div class="mt-12 p-4 rounded-xl bg-white/5 border border-white/10">
+                <p class="text-xs text-neutral-400 mb-2">Powered by</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">aiohttp</span>
+                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">Python 3.10</span>
+                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">GCC 11</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-span-1 lg:col-span-3">
+            
+            <!-- Mobile Header -->
+            <div class="lg:hidden mb-12">
+                <a href="./index.html" class="flex items-center gap-2 text-neutral-400 hover:text-white mb-6">
+                    <i class="fas fa-arrow-left"></i> Return Home
+                </a>
+                <h1 class="text-4xl font-heading font-bold text-white">System Documentation</h1>
+            </div>
+
+            <!-- Intro -->
+            <div class="mb-16 border-b border-white/10 pb-12">
+                <h1 class="hidden lg:block text-5xl font-heading font-bold text-white mb-6">System Documentation</h1>
+                <p class="text-xl text-neutral-400 leading-relaxed max-w-3xl">
+                    A technical deep-dive into the Cloud Code Compiler. Learn how we achieve low-latency remote execution, handle real-time I/O streams, and manage dynamic dependency resolution.
+                </p>
+            </div>
+
+            <!-- Architecture -->
+            <section id="architecture" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3">01.</span> Architecture
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    The compiler uses a client-server model optimized for persistent connections. Unlike traditional stateless REST APIs which require polling for output, we utilize <strong>WebSockets</strong> to maintain a full-duplex communication channel between the browser's xterm.js terminal and the backend process.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+                        <h3 class="text-white font-bold mb-2"><i class="fas fa-desktop text-lime-300 mr-2"></i> Frontend</h3>
+                        <p class="text-sm text-neutral-400">Xterm.js renders a TTY-like interface. User keystrokes are captured and sent as binary/text frames.</p>
+                    </div>
+                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+                        <h3 class="text-white font-bold mb-2"><i class="fas fa-server text-lime-300 mr-2"></i> Backend</h3>
+                        <p class="text-sm text-neutral-400">Python <code>aiohttp</code> server running on Linux. Spawns <code>subprocess</code> threads for isolation.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- WebSocket Protocol -->
+            <section id="communication" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3">02.</span> WebSocket Protocol
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    Communication occurs via JSON payloads. The server handles two main event types: <strong>execution</strong> and <strong>input streaming</strong>.
+                </p>
+
+                <h3 class="text-lg font-bold text-white mt-6 mb-2">Client -> Server</h3>
+                <div class="code-block">
+                    <pre><code class="language-json">// 1. Initiate Execution
+{
+    "type": "run",
+    "language": "python", // or "c", "cpp"
+    "code": "print('Hello World')"
+}
+
+// 2. Send User Input (stdin)
+{
+    "type": "input",
+    "data": "user_input_string\n"
+}</code></pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-white mt-6 mb-2">Server -> Client</h3>
+                <div class="code-block">
+                    <pre><code class="language-json">// 1. Standard Output/Error Stream (sent character-by-character or chunked)
+{
+    "type": "stdout",
+    "data": "H" 
+}
+
+// 2. Status Updates
+{
+    "type": "status",
+    "msg": "Compiling..."
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- Python Engine -->
+            <section id="python-engine" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3">03.</span> Python Engine & Auto-Pip
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    The Python runner is equipped with a dynamic dependency resolver. Before execution, the backend statically analyzes the code imports using RegEx.
+                </p>
+                
+                <div class="p-6 rounded-xl border border-lime-300/20 bg-lime-300/5 mb-6">
+                    <h4 class="font-bold text-white mb-2">Feature: Dynamic Installation</h4>
+                    <p class="text-sm text-neutral-300">
+                        If a user imports a non-standard library (e.g., <code>import numpy</code>), the server automatically runs <code>pip install numpy</code> before executing the script. This allows for rich script execution without pre-configuration.
+                    </p>
+                </div>
+
+                <div class="code-block">
+                    <pre><code class="language-python"># Backend Logic Snippet
+def check_and_install_packages(code):
+    imports = re.findall(r'^\s*import\s+(\w+)', code, re.MULTILINE)
+    for pkg in imports:
+        if pkg not in standard_libs:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", pkg])</code></pre>
+                </div>
+            </section>
+
+            <!-- C / C++ Engine -->
+            <section id="cpp-engine" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3">04.</span> C / C++ Compilation
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    For compiled languages, the server performs a two-step process. Source code is written to a temporary file, compiled via GCC/G++, and then executed.
+                </p>
+                <ul class="list-disc list-inside text-neutral-400 space-y-2 mb-6 ml-4">
+                    <li><strong>C:</strong> <code>gcc temp.c -o a.out</code></li>
+                    <li><strong>C++:</strong> <code>g++ temp.cpp -o a.out</code></li>
+                </ul>
+                <p class="text-neutral-300">
+                    Standard Input buffer flushing is handled automatically to ensure prompts (like <code>cin >> var</code>) appear immediately in the terminal before blocking for input.
+                </p>
+            </section>
+
+            <!-- Security -->
+            <section id="security" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3">05.</span> Security & Limitations
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    The current implementation runs code directly on the host instance. While effective for a portfolio demonstration or trusted environment, this setup is <strong>not sandboxed</strong>.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 border border-red-500/30 bg-red-500/5 rounded-lg">
+                        <h4 class="text-red-400 font-bold mb-2">Current Limitations</h4>
+                        <ul class="text-xs text-neutral-400 space-y-1">
+                            <li>• No containerization (Docker)</li>
+                            <li>• No CPU/RAM usage quotas</li>
+                            <li>• File system access is unrestricted within user scope</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 border border-lime-300/30 bg-lime-300/5 rounded-lg">
+                        <h4 class="text-lime-300 font-bold mb-2">Future Roadmap</h4>
+                        <ul class="text-xs text-neutral-400 space-y-1">
+                            <li>• Docker container per session</li>
+                            <li>• Timeouts for infinite loops</li>
+                            <li>• Network access restrictions</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Privacy & Data Handling -->
+            <section id="privacy" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3">06.</span> Privacy & Data Handling
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    We believe in complete transparency regarding how your data is handled. As a demonstration platform, we prioritize privacy and ephemeral execution.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+                        <h3 class="text-white font-bold mb-2"><i class="fas fa-trash-alt text-lime-300 mr-2"></i> No Storage</h3>
+                        <p class="text-sm text-neutral-400">
+                            Your code is processed in volatile memory or temporary files that are <strong>immediately deleted</strong> after execution. We do not maintain a database of user code.
+                        </p>
+                    </div>
+                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+                        <h3 class="text-white font-bold mb-2"><i class="fas fa-user-secret text-lime-300 mr-2"></i> Anonymous</h3>
+                        <p class="text-sm text-neutral-400">
+                            No user accounts, cookies, or personal identifiers are required to use the compiler. Usage is completely anonymous.
+                        </p>
+                    </div>
+                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+                        <h3 class="text-white font-bold mb-2"><i class="fab fa-github text-lime-300 mr-2"></i> Open Source</h3>
+                        <p class="text-sm text-neutral-400">
+                            The entire backend infrastructure is open source. You can audit the code yourself on <a href="https://github.com/notamitgamer" target="_blank" class="text-lime-300 hover:underline">GitHub</a>.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Legal & Disclaimer -->
+            <section id="disclaimer" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3">07.</span> Legal & Disclaimer
+                </h2>
+                <div class="p-6 rounded-xl border border-red-500/20 bg-red-500/5">
+                    <p class="text-neutral-300 mb-4">
+                        This compiler infrastructure has been extensively refactored by <strong>Gemini 3 Pro</strong>. For bug reports or inquiries, please contact us via:
+                    </p>
+                    <ul class="text-lime-300 font-mono text-sm mb-6 space-y-1">
+                        <li><i class="fas fa-envelope mr-2"></i> <a href="mailto:amitdutta4255@gmail.com" class="hover:underline">amitdutta4255@gmail.com</a></li>
+                        <li><i class="fas fa-envelope mr-2"></i> <a href="mailto:mail@amit.is-a.dev" class="hover:underline">mail@amit.is-a.dev</a></li>
+                        <li><i class="fab fa-github mr-2"></i> <a href="https://github.com/notamitgamer" target="_blank" class="hover:underline">@notamitgamer</a></li>
+                    </ul>
+                    <div class="text-neutral-400 text-sm border-t border-white/10 pt-4 leading-relaxed">
+                        <p class="mb-2"><strong class="text-red-400">Disclaimer of Liability:</strong> Amit Dutta assumes no responsibility or liability for any consequences, errors, or data loss arising from the use of this compiler. This project is provided for demonstration purposes only.</p>
+                        <p class="italic opacity-80">"I explicitly disclaim any affiliation with or responsibility for the ongoing operation of this project. I reserve the absolute right to modify, suspend, or permanently delete this compiler and its associated services at any time, for any reason, without prior notice."</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        hljs.highlightAll();
+        
+        // Simple scroll spy for nav
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.doc-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

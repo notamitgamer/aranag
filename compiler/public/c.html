@@ -2,471 +2,526 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C Compiler</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Amit Dutta // C Compiler</title>
     <link rel="icon" type="image/x-icon" href="https://compiler.aranag.site/logo.png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Xterm.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+
     <style>
+        :root {
+            --bg-main: #050505;
+            --accent: #bef264; /* Lime 300 */
+            --text-muted: #737373;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0c0f16;
-            color: #c9d1d9;
-            background: radial-gradient(at 50% 120%, rgba(20, 30, 40, 0.5), transparent), #0c0f16;
-        }
-
-        /* Custom Scrollbar Styles for Webkit browsers */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1a202c; /* Dark gray for the track */
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: #4a5568; /* A lighter gray for the thumb */
-            border-radius: 10px;
-            border: 3px solid #1a202c; /* Spacing around the thumb */
-        }
-        
-        /* Apply to specific elements for Firefox compatibility */
-        #editor, #output, #input-box {
-            scrollbar-width: thin;
-            scrollbar-color: #4a5568 #1a202c;
-        }
-
-        .compiler-container {
-            min-height: calc(100vh - 4rem);
+            background-color: var(--bg-main);
+            color: #f5f5f5;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            padding: 2rem 1rem;
         }
 
-        .code-editor, .output-container, .input-container {
-            background: rgba(30, 41, 59, 0.3);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
+        /* Portfolio Aesthetic */
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-heading { font-family: 'Space Grotesk', sans-serif; }
+        
+        /* Noise Overlay */
+        .bg-noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* CRT Scanline */
+        .crt-scanline {
+            position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(190, 242, 100, 0.1); opacity: 0.5;
+            pointer-events: none; z-index: 50;
+            animation: scanline 8s linear infinite;
+        }
+        @keyframes scanline { 0% { top: -10vh; } 100% { top: 110vh; } }
+
+        /* Custom Editor Styles */
+        .editor-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: relative;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
         }
 
-        .editor-header, .output-header, .input-header {
-            background-color: rgba(30, 41, 59, 0.6);
-            padding: 0.75rem 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        #editor {
+        /* The actual textarea for typing */
+        #code-input {
+            position: absolute;
+            left: 0;
+            top: 0;
             width: 100%;
-            height: 400px;
-            background-color: transparent;
-            color: #c9d1d9;
-            font-family: monospace;
+            height: 100%;
             padding: 1rem;
+            border: none;
             outline: none;
-            resize: vertical;
-            min-height: 200px;
+            background: transparent;
+            color: #e2e8f0; /* Visible Text */
+            caret-color: #fff; /* Cursor visible */
+            z-index: 1;
+            resize: none;
+            white-space: pre;
+            overflow: auto;
         }
+
+        .xterm-viewport { overflow-y: auto !important; }
         
-        #output, #input-box {
-            width: 100%;
-            min-height: 150px;
-            background-color: transparent;
-            color: #fff;
-            padding: 1rem;
-            font-family: monospace;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            outline: none;
-            resize: vertical;
-        }
+        ::selection { background: var(--accent); color: black; }
 
-        .action-buttons button {
-            transition: all 0.3s ease;
-            background-color: #4a5568;
-            color: #e2e8f0;
-        }
-        
-        .action-buttons button:hover {
-            background-color: #2d3748;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #050505; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
-        .action-buttons button:active {
-            transform: translateY(0);
-        }
-
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #fff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .message-box {
+        /* Toast Notification */
+        .toast {
             position: fixed;
-            top: 50%;
+            bottom: 2rem;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(30, 41, 59, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
-            padding: 2rem;
-            color: #fff;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a1a;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
             z-index: 100;
-            text-align: center;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease-out;
         }
-        .message-content {
-            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        
+        /* Connection Dot Pulse */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+            animation: pulse-white 2s infinite;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .pulse-dot.connected {
+            background-color: #bef264; /* Lime */
+            box-shadow: 0 0 0 0 rgba(190, 242, 100, 0.7);
+            animation: pulse-lime 2s infinite;
         }
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .pulse-dot.disconnected {
+            background-color: #ef4444; /* Red */
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse-red 2s infinite;
         }
         
-        #ai-response-container {
-            max-height: 400px;
-            overflow-y: auto;
+        @keyframes pulse-lime {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(190, 242, 100, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(190, 242, 100, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(190, 242, 100, 0); }
         }
-
-        /* Terminal-like output styling */
-        .terminal-output {
-            background-color: #1e1e1e;
-            color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 1rem;
-            border-radius: 8px;
-            min-height: 150px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            position: relative;
-        }
-        .terminal-output.error {
-            color: #ff6347; /* Tomato red for errors */
-        }
-        .terminal-prompt {
-            color: #3cb371; /* Medium sea green */
-            font-weight: bold;
-        }
-        .blinking-cursor {
-            animation: blink-caret .75s step-end infinite;
-        }
-        @keyframes blink-caret {
-            from, to { border-color: transparent; }
-            50% { border-color: currentColor; }
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
     </style>
 </head>
-<body class="antialiased">
-    <div class="compiler-container max-w-7xl mx-auto">
-        <header class="flex flex-col sm:flex-row justify-between items-center mb-6">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4 sm:mb-0">C Compiler</h1>
-            <nav>
-                <a href="./index.html" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors">
-                    Back to Compilers
-                </a>
-            </nav>
-        </header>
+<body class="antialiased selection:bg-lime-300 selection:text-black">
 
-        <!-- Disclaimer Note -->
-        <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 text-yellow-200 text-sm p-4 rounded-xl mb-6">
-            <strong class="font-bold">Important Note:</strong> This compiler uses an AI model, not a traditional C++ compiler. It provides an educated guess of the output. For definitive results, please use a dedicated online compiler like <a href="https://www.programiz.com/cpp-programming/online-compiler/" target="_blank" class="underline hover:text-white transition-colors">Programiz</a>.
+    <div class="bg-noise"></div>
+    <div class="crt-scanline"></div>
+    <div id="toast" class="toast">Link Copied to Clipboard!</div>
+
+    <!-- Header (Responsive) -->
+    <header class="h-auto md:h-16 flex flex-col md:flex-row items-center justify-between px-4 py-3 md:px-6 shrink-0 border-b border-white/10 z-20 bg-neutral-900/50 backdrop-blur-md gap-3 md:gap-4">
+        
+        <!-- Top Row: Title & Status -->
+        <div class="flex items-center justify-between w-full md:w-auto">
+            <h1 class="text-lg md:text-xl font-heading font-bold text-white tracking-tight flex items-center">
+                <span class="text-lime-300 mr-2">//</span>C.COMPILER
+                <span id="conn-dot" class="pulse-dot disconnected ml-3" title="Disconnected"></span>
+            </h1>
+            
+            <!-- Mobile Only: Exit Link -->
+            <a href="./index.html" class="md:hidden font-mono text-[10px] text-neutral-500 hover:text-white uppercase tracking-wider transition-colors">[ EXIT ]</a>
+        </div>
+        
+        <!-- Middle: Connection Text -->
+        <div class="hidden md:flex items-center gap-2 font-mono text-xs text-neutral-500">
+             <span id="connection-status">Connecting to server...</span>
         </div>
 
-        <!-- Code Editor Section -->
-        <div class="code-editor flex-1 flex flex-col">
-            <div class="editor-header">
-                <h2 class="text-lg font-bold">C Code</h2>
-                <div class="action-buttons space-x-2">
-                    <button id="run-btn" class="py-2 px-4 rounded-full">
-                        <i class="fas fa-play mr-2"></i>Run
-                    </button>
-                    <button id="ai-btn" class="py-2 px-4 rounded-full">
-                        <i class="fas fa-magic mr-2"></i>Ask AI
-                    </button>
-                </div>
+        <!-- Bottom/Right: Buttons -->
+        <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <a href="./index.html" class="hidden md:inline font-mono text-[10px] text-neutral-500 hover:text-white uppercase tracking-wider transition-colors mr-2">[ EXIT ]</a>
+            
+            <button id="reset-btn" class="bg-white/5 hover:bg-neutral-800 text-white border border-white/10 px-3 py-2 rounded font-mono text-[10px] font-bold uppercase tracking-wider flex items-center justify-center transition-all" title="Reset Terminal">
+                <i class="fas fa-rotate-left"></i>
+            </button>
+
+            <button id="share-btn" class="bg-white/5 hover:bg-neutral-800 text-white border border-white/10 px-3 py-2 rounded font-mono text-[10px] font-bold uppercase tracking-wider flex items-center justify-center transition-all" title="Share Code">
+                <i class="fas fa-share-alt"></i>
+            </button>
+
+            <button id="copy-btn" class="bg-white/5 hover:bg-neutral-800 text-white border border-white/10 px-3 py-2 rounded font-mono text-[10px] font-bold uppercase tracking-wider flex items-center justify-center transition-all" title="Copy Output">
+                <i class="fas fa-copy"></i>
+            </button>
+            
+            <button id="run-btn" disabled class="bg-white/5 hover:bg-lime-300 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/10 px-4 py-2 rounded font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all flex-1 md:flex-none justify-center shadow-lg shadow-black/50">
+                <i class="fas fa-play text-[10px]"></i> <span class="md:hidden lg:inline">EXECUTE</span><span class="hidden md:inline lg:hidden">RUN</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex flex-col md:flex-row min-h-0 z-10 relative">
+        
+        <!-- Code Editor -->
+        <div class="flex-1 flex flex-col h-[60%] md:h-auto min-h-0 border-b md:border-b-0 md:border-r border-white/10 relative group">
+            <div class="bg-black/20 px-4 py-2 text-[10px] font-mono text-lime-300 uppercase border-b border-white/10 flex justify-between items-center shrink-0">
+                <span>SRC // main.c</span>
+                <span class="text-neutral-600">GCC 11.2</span>
             </div>
-            <textarea id="editor" placeholder="Type your C code here..."></textarea>
-        </div>
+            
+            <!-- Custom Editor Area -->
+            <div class="editor-container relative bg-[#0c0f16]">
+                <textarea id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" class="custom-scrollbar">#include <stdio.h>
 
-        <!-- Input Section -->
-        <div class="input-container flex-1 flex flex-col mt-4">
-            <div class="input-header">
-                <h2 class="text-lg font-bold">Input</h2>
+int main() {
+    int n, i;
+    printf("Enter count: ");
+    // Manual flush required for buffered environments
+    fflush(stdout);
+    
+    if (scanf("%d", &n)) {
+        printf("Counting to %d:\n", n);
+        for(i=1; i<=n; i++) {
+            printf("%d ", i);
+        }
+        printf("\nDone.");
+    }
+    return 0;
+}</textarea>
             </div>
-            <textarea id="input-box" placeholder="Enter input for your program here..."></textarea>
+            
+            <!-- AI Fix Button -->
+            <button id="ai-fix-btn" class="hidden absolute bottom-4 right-4 bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg text-xs font-mono transition-all items-center gap-2 backdrop-blur-md z-20">
+                <i class="fas fa-magic"></i> Fix with AI
+            </button>
         </div>
 
-        <!-- Output Section -->
-        <div class="output-container flex-1 flex flex-col mt-4">
-            <div class="output-header">
-                <h2 class="text-lg font-bold">Output</h2>
+        <!-- Terminal -->
+        <div class="flex-1 flex flex-col h-[40%] md:h-auto min-h-0 bg-[#050505]">
+            <div class="bg-black/20 px-4 py-2 text-[10px] font-mono text-lime-300 uppercase border-b border-white/10 flex justify-between items-center shrink-0">
+                <span>OUT // TERMINAL</span>
+                <span class="text-neutral-600">XTERM.JS</span>
             </div>
-            <pre id="output" class="terminal-output"></pre>
-        </div>
-
-        <!-- AI Assistant Modal -->
-        <div id="ai-modal" class="message-box hidden">
-            <div class="message-content">
-                <h3 class="text-xl font-bold mb-4">AI Code Assistant</h3>
-                <textarea id="ai-prompt" class="w-full h-28 bg-gray-800 text-gray-200 p-4 rounded-xl border border-gray-700 focus:outline-none resize-none" placeholder="Ask a question about your C code..."></textarea>
-                <div class="flex justify-end mt-4 space-x-2">
-                    <button id="ai-cancel-btn" class="bg-gray-500 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded-full">Cancel</button>
-                    <button id="ai-submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-                        <span id="ai-submit-text">Submit</span>
-                        <div id="ai-loading" class="loading-spinner hidden"></div>
-                    </button>
-                </div>
-                <div id="ai-response-container" class="mt-4 w-full text-left bg-gray-900 p-4 rounded-xl border border-gray-700 hidden">
-                    <pre id="ai-response" class="whitespace-pre-wrap text-sm text-gray-300"></pre>
-                </div>
+            <div class="flex-1 relative">
+                <div id="terminal-container" class="absolute inset-0 w-full h-full p-2 overflow-hidden"></div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const editor = document.getElementById('editor');
-            const runBtn = document.getElementById('run-btn');
-            const outputEl = document.getElementById('output');
-            const inputEl = document.getElementById('input-box');
-            const aiBtn = document.getElementById('ai-btn');
-            const aiModal = document.getElementById('ai-modal');
-            const aiPrompt = document.getElementById('ai-prompt');
-            const aiSubmitBtn = document.getElementById('ai-submit-btn');
-            const aiCancelBtn = document.getElementById('ai-cancel-btn');
-            const aiSubmitText = document.getElementById('ai-submit-text');
-            const aiLoading = document.getElementById('ai-loading');
-            const aiResponseContainer = document.getElementById('ai-response-container');
-            const aiResponseEl = document.getElementById('ai-response');
+        // --- DOM Elements ---
+        const runBtn = document.getElementById('run-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const aiFixBtn = document.getElementById('ai-fix-btn');
+        const connDot = document.getElementById('conn-dot');
+        const connectionStatus = document.getElementById('connection-status');
+        const codeInput = document.getElementById('code-input');
+        const toast = document.getElementById('toast');
 
-            const defaultCode = `#include <stdio.h>
+        // --- State ---
+        let socket = null;
+        let currentLine = ""; 
+        let startTime = 0;
 
-int main() {
-    int number;
-    printf("Enter a number: ");
-    scanf("%d", &number);
-    printf("You entered: %d\\n", number);
-    return 0;
-}`;
+        // --- EDITOR LOGIC ---
+        codeInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.setRangeText('    ', start, end, 'end');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const value = this.value;
+                const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+                const currentLineText = value.substring(lineStart, start);
+                let match = currentLineText.match(/^(\s*)/);
+                let indent = match ? match[1] : "";
+                if (currentLineText.trim().endsWith('{')) indent += "    ";
+                this.setRangeText('\n' + indent, start, end, 'end');
+                this.blur(); this.focus(); 
+            } else if (e.key === '}') {
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const value = this.value;
+                const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+                const currentLineText = value.substring(lineStart, start);
+                if (/^\s+$/.test(currentLineText) && currentLineText.length >= 4) {
+                     const newIndent = currentLineText.substring(0, currentLineText.length - 4);
+                     this.setSelectionRange(lineStart, start);
+                     this.setRangeText(newIndent, this.selectionStart, this.selectionEnd, 'end');
+                }
+            }
+        });
 
-            editor.value = defaultCode;
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            const sharedCode = params.get('code');
+            if (sharedCode) {
+                try { codeInput.value = atob(sharedCode); } 
+                catch(e) {}
+            }
+            setTimeout(connect, 500); 
+        });
 
-            function showMessage(message, type = 'info') {
-                const messageBox = document.createElement('div');
-                messageBox.className = `message-box ${type} text-white`;
-                messageBox.innerHTML = `
-                    <div class="message-content">
-                        <p class="mb-4">${message}</p>
-                        <button onclick="this.closest('.message-box').remove()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">Close</button>
-                    </div>
-                `;
-                document.body.appendChild(messageBox);
+        // --- Terminal Setup ---
+        const term = new Terminal({
+            theme: {
+                background: '#050505',
+                foreground: '#f5f5f5',
+                cursor: '#bef264',
+                selectionBackground: 'rgba(190, 242, 100, 0.3)',
+                black: '#050505',
+                green: '#bef264', 
+                yellow: '#facc15',
+                red: '#ef4444',
+            },
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 12, 
+            cursorBlink: true,
+            convertEol: true
+        });
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal-container'));
+        fitAddon.fit();
+        window.addEventListener('resize', () => fitAddon.fit());
+
+        // Custom Key Handler for Ctrl+C Copy
+        term.attachCustomKeyEventHandler((arg) => {
+            if (arg.ctrlKey && arg.code === "KeyC" && arg.type === "keydown") {
+                const selection = term.getSelection();
+                if (selection) {
+                    fallbackCopyTextToClipboard(selection);
+                    return false; 
+                }
+            }
+            return true;
+        });
+
+        term.write('\x1b[38;2;115;115;115m> SYSTEM READY.\r\n> ATTEMPTING CONNECTION...\x1b[0m\r\n');
+
+        // --- WebSocket Logic ---
+        function connect() {
+            const url = "wss://compiler-z4x4.onrender.com"; 
+            try { socket = new WebSocket(url); } catch (e) {
+                term.write(`\r\n\x1b[31m> INVALID URL.\x1b[0m\r\n`);
+                return;
             }
 
-            // AI Integration for both compiler and code assistant
-            const apiKey = "AIzaSyAi1FdeIJ4PzihkCrOGztdVHIyJ7xIoVQ0";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            const runCode = async () => {
-                const code = editor.value;
-                const input = inputEl.value;
-
-                outputEl.textContent = 'Compiling and running...';
-                outputEl.classList.remove('error');
-                runBtn.disabled = true;
-
-                const runPrompt = `
-You are a C code compiler and executor. I will provide you with a C code snippet and user input. Your task is to simulate the execution of the code and provide the exact output that a real C compiler would produce.
-
-Follow these rules strictly:
-1.  Simulate the code's behavior, including loops, conditionals, and function calls.
-2.  Use the provided input for any 'scanf' operations. Each line of input corresponds to a single scanf call.
-3.  The output must be identical to what a command-line terminal would show.
-4.  If there is an error (e.g., a syntax error or a logic error), provide a clear and concise error message.
-5.  Do not include any extra commentary, explanations, or code. ONLY provide the final output.
-6.  The output should start with '> ./a.out' to simulate execution.
-7.  If the program has no output, just print the command prompt.
-
-Example:
-Code:
-\`\`\`c
-#include <stdio.h>
-int main() {
-    int x;
-    printf("Enter a number: ");
-    scanf("%d", &x);
-    printf("You entered: %d", x);
-    return 0;
-}
-\`\`\`
-Input:
-123
-Output:
-> ./a.out
-Enter a number: 123
-You entered: 123
-
-Now, here is the code and input you need to process:
-Code:
-\`\`\`c
-${code}
-\`\`\`
-Input:
-${input}
-`;
-
-                let retryCount = 0;
-                const maxRetries = 3;
-
-                const callApiWithRetry = async (prompt) => {
-                    try {
-                        const payload = {
-                            contents: [{ parts: [{ text: prompt }] }],
-                            systemInstruction: { parts: [{ text: `You are a C compiler and executor that strictly follows the instructions given.`}] },
-                        };
-
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`API error: ${response.statusText}`);
-                        }
-
-                        const result = await response.json();
-                        return result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response. Please try again.';
-                    } catch (error) {
-                        console.error('Error during API call:', error);
-                        if (retryCount < maxRetries) {
-                            retryCount++;
-                            const delay = Math.pow(2, retryCount) * 1000;
-                            await new Promise(res => setTimeout(res, delay));
-                            return callApiWithRetry(prompt);
-                        } else {
-                            return `An error occurred. Please try again later.`;
-                        }
-                    }
-                };
+            socket.onopen = () => {
+                connDot.className = "pulse-dot connected ml-3";
+                if(connectionStatus) connectionStatus.textContent = "Connected to Server";
+                if(connectionStatus) connectionStatus.className = "hidden md:flex items-center gap-2 font-mono text-xs text-lime-300";
                 
-                const output = await callApiWithRetry(runPrompt);
-                outputEl.textContent = output;
+                term.write(`\x1b[38;2;190;242;100m> CONNECTION ESTABLISHED.\x1b[0m\r\n> ./a.out\r\n`);
                 runBtn.disabled = false;
             };
 
-            runBtn.addEventListener('click', runCode);
-            
-            // AI Assistant Modal logic
-            aiBtn.addEventListener('click', () => {
-                aiModal.classList.remove('hidden');
-            });
-
-            aiCancelBtn.addEventListener('click', () => {
-                aiModal.classList.add('hidden');
-                aiPrompt.value = '';
-                aiResponseContainer.classList.add('hidden');
-                aiResponseEl.textContent = '';
-            });
-
-            aiSubmitBtn.addEventListener('click', async () => {
-                const prompt = aiPrompt.value.trim();
-                const code = editor.value;
-
-                if (!prompt) {
-                    showMessage('Please enter a question for the AI.');
-                    return;
-                }
+            socket.onclose = () => {
+                connDot.className = "pulse-dot disconnected ml-3";
+                if(connectionStatus) connectionStatus.textContent = "Disconnected";
+                if(connectionStatus) connectionStatus.className = "hidden md:flex items-center gap-2 font-mono text-xs text-red-500";
                 
-                aiSubmitBtn.disabled = true;
-                aiSubmitText.classList.add('hidden');
-                aiLoading.classList.remove('hidden');
-                aiResponseContainer.classList.remove('hidden');
-                aiResponseEl.textContent = 'Thinking...';
+                term.write(`\r\n\x1b[31m> CONNECTION LOST. RECONNECTING...\x1b[0m\r\n`);
+                runBtn.disabled = true;
+                setTimeout(connect, 3000); 
+                socket = null;
+            };
 
-                const systemPrompt = `You are a helpful and expert C programming assistant. The user wants to understand or get help with their C code. The user's current C code is:
-                \`\`\`c
-                ${code}
-                \`\`\`
-                
-                Based on the user's prompt, provide a clear and concise response. Provide well-commented code snippets and clear, concise explanations. Use markdown for code formatting. If the request is not about code, politely state that you can only assist with code-related queries.`;
-
-                let retryCount = 0;
-                const maxRetries = 3;
-
-                const callApiWithRetry = async () => {
-                    try {
-                        const payload = {
-                            contents: [{ parts: [{ text: prompt }] }],
-                            systemInstruction: { parts: [{ text: systemPrompt }] },
-                        };
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`API error: ${response.statusText}`);
-                        }
-
-                        const result = await response.json();
-                        const candidate = result?.candidates?.[0];
-                        if (candidate && candidate.content?.parts?.[0]?.text) {
-                            aiResponseEl.textContent = candidate.content.parts[0].text;
-                        } else {
-                            aiResponseEl.textContent = 'Sorry, I could not generate a response. Please try again.';
-                        }
-                    } catch (error) {
-                        console.error('Error during API call:', error);
-                        if (retryCount < maxRetries) {
-                            retryCount++;
-                            const delay = Math.pow(2, retryCount) * 1000;
-                            await new Promise(res => setTimeout(res, delay));
-                            await callApiWithRetry();
-                        } else {
-                            aiResponseEl.textContent = 'An error occurred. Please try again later.';
-                        }
-                    } finally {
-                        aiSubmitBtn.disabled = false;
-                        aiSubmitText.classList.remove('hidden');
-                        aiLoading.classList.add('hidden');
+            socket.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'stdout') {
+                    let text = msg.data;
+                    
+                    if (text.toLowerCase().includes("error:") || text.toLowerCase().includes("warning:")) {
+                        aiFixBtn.classList.remove('hidden');
                     }
-                };
 
-                await callApiWithRetry();
-            });
+                    if (!text.includes('\r')) {
+                         text = text.replace(/\n/g, '\r\n');
+                    }
+                    term.write(text);
+                } else if (msg.type === 'status') {
+                    // Detect "Program finished" signal from backend
+                    if (msg.msg.includes("Program finished")) {
+                        const duration = (Date.now() - startTime) / 1000;
+                        term.write(`\r\n\x1b[38;2;115;115;115m[Finished in ${duration.toFixed(3)}s]\x1b[0m\r\n`);
+                    }
+                }
+            };
+        }
+
+        // --- Run Logic ---
+        runBtn.addEventListener('click', () => {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
+            
+            document.activeElement.blur();
+            term.reset();
+            currentLine = ""; 
+            aiFixBtn.classList.add('hidden');
+            
+            let code = codeInput.value;
+            code = code.replace(/\u00A0/g, " ").replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+            
+            function injectAutoFlush(source) {
+                const mainRegex = /(int|void)\s+main\s*\([^)]*\)\s*\{/;
+                const match = source.match(mainRegex);
+                if (match) {
+                    const insertionPoint = match.index + match[0].length;
+                    return source.slice(0, insertionPoint) + "\n    setbuf(stdout, NULL);" + source.slice(insertionPoint);
+                }
+                return source;
+            }
+            code = injectAutoFlush(code);
+
+            startTime = Date.now();
+            term.write('\x1b[32m> ./a.out\x1b[0m\r\n');
+
+            socket.send(JSON.stringify({
+                type: 'run',
+                code: code,
+                language: 'c'
+            }));
+            
+            term.focus();
+        });
+
+        // --- Reset Logic ---
+        resetBtn.addEventListener('click', () => {
+            term.reset();
+            currentLine = "";
+            term.write(`\x1b[38;2;190;242;100m> CONNECTION ESTABLISHED.\x1b[0m\r\n> ./a.out\r\n`);
+        });
+
+        // --- Share Functionality with Native Share API ---
+        shareBtn.addEventListener('click', async () => {
+            const code = codeInput.value;
+            const encoded = btoa(code); 
+            const url = new URL(window.location.href);
+            url.searchParams.set('code', encoded);
+            const shareUrl = url.toString();
+
+            // Try native sharing first (Mobile/Supported Browsers)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: document.title,
+                        text: 'Check out my C code!',
+                        url: shareUrl
+                    });
+                } catch (err) {
+                    // Ignore cancellation or errors, no fallback needed if cancelled
+                }
+            } else {
+                // Fallback to clipboard copy
+                fallbackCopyTextToClipboard(shareUrl);
+            }
+        });
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // --- Smart Copy Function ---
+        copyBtn.addEventListener('click', () => {
+            const buffer = term.buffer.active;
+            let text = "";
+            for (let i = 0; i < buffer.length; i++) {
+                const line = buffer.getLine(i);
+                if (line) {
+                    let lineText = line.translateToString(true);
+                    if(lineText.trim().startsWith("> [") || lineText.trim().startsWith("> ./a.out") || lineText.includes("SYSTEM READY") || lineText.includes("ATTEMPTING") || lineText.includes("CONNECTION")) {
+                        continue;
+                    }
+                    text += lineText + "\n";
+                }
+            }
+            text = text.trim();
+            fallbackCopyTextToClipboard(text);
+        });
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.opacity = "0"; 
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Copied to Clipboard!");
+            } catch (err) {
+                showToast("Copy Failed");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        aiFixBtn.addEventListener('click', () => {
+            alert("AI Feature: Coming Soon via Backend Update");
+        });
+
+        // Terminal Input
+        term.onData((data) => {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
+
+            if (data === '\r') { 
+                term.write('\r\n'); 
+                socket.send(JSON.stringify({ type: 'input', data: currentLine + '\n' }));
+                currentLine = "";
+            } else if (data === '\x7f' || data === '\b') { 
+                if (currentLine.length > 0) {
+                    currentLine = currentLine.slice(0, -1);
+                    term.write('\b \b'); 
+                }
+            } else { 
+                currentLine += data;
+                term.write(data); 
+            }
         });
     </script>
 </body>
