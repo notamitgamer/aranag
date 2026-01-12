@@ -232,7 +232,42 @@ print("Done.")</textarea>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // --- Firebase Config ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8U49NgW7EtYBeKL0Sw08-QvM_Bl59zDw",
+            authDomain: "compiler-aranag-site.firebaseapp.com",
+            projectId: "compiler-aranag-site",
+            storageBucket: "compiler-aranag-site.firebasestorage.app",
+            messagingSenderId: "558890639400",
+            appId: "1:558890639400:web:125525d10ab51696a5951d",
+            measurementId: "G-KH9BGSRRGY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Attempt initial sign-in
+        signInAnonymously(auth).catch((error) => {
+            console.warn("Auto-Auth failed. App will try unauthenticated access.", error.code);
+        });
+
+        // --- Helper: Generate ID ---
+        function generateId(length = 7) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
         // --- DOM Elements ---
         const runBtn = document.getElementById('run-btn');
         const resetBtn = document.getElementById('reset-btn');
@@ -274,11 +309,49 @@ print("Done.")</textarea>
             }
         });
 
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             const params = new URLSearchParams(window.location.search);
-            const sharedCode = params.get('code');
-            if (sharedCode) {
-                try { codeInput.value = atob(sharedCode); } 
+            const shareId = params.get('share');
+            const sharedCodeOld = params.get('code');
+
+            if (shareId) {
+                // Fetch from Firebase
+                try {
+                    toast.textContent = "Loading shared code...";
+                    toast.classList.add('show');
+                    
+                    const docRef = doc(db, "shares", shareId);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        codeInput.value = data.code;
+                        
+                        // Restore Output if it exists
+                        if (data.output && term) {
+                            term.write('\r\n\x1b[38;2;115;115;115m> PREVIOUS OUTPUT:\x1b[0m\r\n');
+                            term.write(data.output.replace(/\n/g, '\r\n'));
+                            term.write('\r\n\x1b[38;2;115;115;115m> ----------------\x1b[0m\r\n');
+                        }
+
+                        toast.textContent = "Code loaded successfully";
+                    } else {
+                        toast.textContent = "Shared code not found";
+                    }
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                } catch (e) {
+                    console.error("Fetch error:", e);
+                     // More descriptive error for user
+                    if (e.code === 'permission-denied') {
+                         toast.textContent = "Error: Database Access Denied";
+                    } else {
+                         toast.textContent = "Error loading code";
+                    }
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                }
+            } else if (sharedCodeOld) {
+                // Fallback for Base64
+                try { codeInput.value = atob(sharedCodeOld); } 
                 catch(e) {}
             }
             setTimeout(connect, 500); 
@@ -306,6 +379,32 @@ print("Done.")</textarea>
         term.open(document.getElementById('terminal-container'));
         fitAddon.fit();
         window.addEventListener('resize', () => fitAddon.fit());
+
+        // Helper: Get Clean Terminal Output
+        function getTerminalContent() {
+            if (!term) return "";
+            const buffer = term.buffer.active;
+            let text = "";
+            for (let i = 0; i < buffer.length; i++) {
+                const line = buffer.getLine(i);
+                if (line) {
+                    let lineText = line.translateToString(true);
+                    // Filter system messages
+                    if(lineText.trim().startsWith("> [") || 
+                       lineText.trim().startsWith("> python") || 
+                       lineText.includes("SYSTEM READY") || 
+                       lineText.includes("ATTEMPTING") || 
+                       lineText.includes("CONNECTION") || 
+                       lineText.includes("PREVIOUS OUTPUT") || 
+                       lineText.includes("> ----------------")
+                       ) {
+                        continue;
+                    }
+                    text += lineText + "\n";
+                }
+            }
+            return text.trim();
+        }
 
         // Custom Key Handler for Ctrl+C Copy
         term.attachCustomKeyEventHandler((arg) => {
@@ -403,28 +502,65 @@ print("Done.")</textarea>
             term.write(`\x1b[38;2;190;242;100m> CONNECTION ESTABLISHED.\x1b[0m\r\n> python3 main.py\r\n`);
         });
 
-        // --- Share Functionality with Native Share API ---
+        // --- Share Functionality with Firebase ---
         shareBtn.addEventListener('click', async () => {
-            const code = codeInput.value;
-            const encoded = btoa(code); 
-            const url = new URL(window.location.href);
-            url.searchParams.set('code', encoded);
-            const shareUrl = url.toString();
+            // Original Share icon animation
+            const originalIcon = shareBtn.innerHTML;
+            shareBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            shareBtn.disabled = true;
 
-            // Try native sharing first (Mobile/Supported Browsers)
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: document.title,
-                        text: 'Check out my Python code!',
-                        url: shareUrl
-                    });
-                } catch (err) {
-                    // Ignore cancellation or errors
+            try {
+                // Robust Auth Check
+                if (!auth.currentUser) {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (authError) {
+                        console.warn("Anonymous auth failed (proceeding to unauthenticated write attempt):", authError.code);
+                    }
                 }
-            } else {
-                // Fallback to clipboard copy
-                fallbackCopyTextToClipboard(shareUrl);
+
+                const code = codeInput.value;
+                const output = getTerminalContent();
+                const shareId = generateId();
+                
+                // Save to Firestore
+                await setDoc(doc(db, "shares", shareId), {
+                    code: code,
+                    language: 'python',
+                    output: output,
+                    createdAt: new Date().toISOString()
+                });
+
+                // Generate URL
+                const url = new URL(window.location.href);
+                url.searchParams.delete('code'); // Remove legacy param
+                url.searchParams.set('share', shareId);
+                const shareUrl = url.toString();
+
+                // Share or Copy
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: document.title,
+                            text: 'Check out my Python code!',
+                            url: shareUrl
+                        });
+                    } catch (err) {
+                        fallbackCopyTextToClipboard(shareUrl);
+                    }
+                } else {
+                    fallbackCopyTextToClipboard(shareUrl);
+                }
+            } catch (error) {
+                console.error("Share failed:", error);
+                if (error.code === 'permission-denied') {
+                    showToast("Share Failed: Access Denied");
+                } else {
+                    showToast("Share Failed: " + error.message);
+                }
+            } finally {
+                shareBtn.innerHTML = originalIcon;
+                shareBtn.disabled = false;
             }
         });
 
@@ -436,19 +572,7 @@ print("Done.")</textarea>
 
         // --- Smart Copy Function ---
         copyBtn.addEventListener('click', () => {
-            const buffer = term.buffer.active;
-            let text = "";
-            for (let i = 0; i < buffer.length; i++) {
-                const line = buffer.getLine(i);
-                if (line) {
-                    let lineText = line.translateToString(true);
-                    if(lineText.trim().startsWith("> [") || lineText.trim().startsWith("> python") || lineText.includes("SYSTEM READY") || lineText.includes("ATTEMPTING") || lineText.includes("CONNECTION")) {
-                        continue;
-                    }
-                    text += lineText + "\n";
-                }
-            }
-            text = text.trim();
+            const text = getTerminalContent();
             fallbackCopyTextToClipboard(text);
         });
 

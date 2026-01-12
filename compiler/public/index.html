@@ -273,31 +273,6 @@
         </div>
     </section>
 
-    <!-- AI Generator Section -->
-    <section class="py-32 px-6 border-t border-white/5 z-10">
-        <div class="max-w-4xl mx-auto text-center" data-aos="fade-up">
-            <h2 class="text-3xl font-heading font-bold text-white mb-8">Generate Code Instantly</h2>
-            
-            <div class="compiler-card p-1 rounded-2xl bg-gradient-to-br from-white/10 to-transparent p-[1px]">
-                <div class="bg-[#0a0a0a] rounded-2xl p-8">
-                    <textarea id="ai-prompt-input" class="w-full h-32 bg-transparent text-white font-mono text-sm placeholder-neutral-600 focus:outline-none resize-none" placeholder="// Describe the function you need...&#10;e.g. Write a Python script to scrape a website using BeautifulSoup"></textarea>
-                    <div class="flex justify-between items-center mt-6 border-t border-white/10 pt-6">
-                        <span class="text-xs text-neutral-500 font-mono">POWERED BY GEMINI</span>
-                        <button id="ai-generate-btn" class="btn-primary py-2 px-6 rounded-lg text-sm uppercase tracking-wide">
-                            Generate <i class="fas fa-sparkles ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="ai-response-container" class="mt-8 hidden text-left">
-                <div class="compiler-card p-6 bg-[#0a0a0a]">
-                    <pre id="ai-response-text" class="text-sm font-mono text-neutral-300 whitespace-pre-wrap"></pre>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="py-12 border-t border-white/5 z-10 bg-black/40">
         <div class="max-w-6xl mx-auto px-6 text-center">
@@ -377,46 +352,6 @@
             
             // Start typing after a short delay
             setTimeout(typeWriter, 500);
-
-            // AI Generator Logic
-            const generateBtn = document.getElementById('ai-generate-btn');
-            const promptInput = document.getElementById('ai-prompt-input');
-            const responseContainer = document.getElementById('ai-response-container');
-            const responseText = document.getElementById('ai-response-text');
-
-            generateBtn.addEventListener('click', async () => {
-                const userPrompt = promptInput.value.trim();
-                if (!userPrompt) return;
-                
-                generateBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
-                generateBtn.disabled = true;
-                responseContainer.classList.remove('hidden');
-                responseText.textContent = '// Thinking...';
-                
-                const systemPrompt = "You are an expert code assistant. Provide concise, clean, and well-commented code based on the user request. Use markdown format.";
-                const apiKey = "AIzaSyAi1FdeIJ4PzihkCrOGztdVHIyJ7xIoVQ0"; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: userPrompt }] }],
-                            systemInstruction: { parts: [{ text: systemPrompt }] }
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "// Error: No response generated.";
-                    responseText.textContent = text;
-                } catch (error) {
-                    responseText.textContent = `// Error: ${error.message}`;
-                } finally {
-                    generateBtn.innerHTML = 'Generate <i class="fas fa-sparkles ml-2"></i>';
-                    generateBtn.disabled = false;
-                }
-            });
         });
     </script>
 </body>
