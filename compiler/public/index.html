@@ -95,18 +95,17 @@
             background: rgba(190, 242, 100, 0.1);
         }
 
-        /* Buttons */
-        .btn-primary {
-            background-color: var(--accent);
-            color: #000;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            transition: all 0.3s ease;
+        /* Feature Card (Smaller) */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s;
         }
-        .btn-primary:hover {
-            background-color: #d9f99d; /* Lime 200 */
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(190, 242, 100, 0.3);
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(190, 242, 100, 0.3);
         }
 
         /* Animations */
@@ -139,18 +138,13 @@
 
         ::selection { background: var(--accent); color: black; }
         
-        .typewriter h1 {
-            border-right: none;
-        }
+        .typewriter h1 { border-right: none; }
         
-        /* Fade in animation for "Create." */
         .fade-in-create {
             animation: fadeIn 1s ease-in forwards;
             opacity: 0;
         }
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { to { opacity: 1; } }
     </style>
 </head>
 <body class="antialiased selection:bg-lime-300 selection:text-black">
@@ -171,16 +165,16 @@
         
         <header class="text-center mb-16" data-aos="fade-up">
             <div class="inline-block mb-4 px-4 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
-                <span class="text-xs font-mono text-lime-300 tracking-wider">/// REAL-TIME CLOUD COMPILER</span>
+                <span class="text-xs font-mono text-lime-300 tracking-wider">/// V2.0 SYSTEM ONLINE</span>
             </div>
             <div class="typewriter max-w-4xl mx-auto">
                 <h1 class="text-4xl sm:text-6xl md:text-7xl font-heading font-bold text-white mb-6 tracking-tight leading-tight">
                     <span id="type-text"></span><br />
-                    <span id="create-text" class="text-lime-300 fade-in-create hidden">Create.</span>
+                    <span id="create-text" class="text-lime-300 fade-in-create hidden">Execute.</span>
                 </h1>
             </div>
             <p class="sub-text-fade opacity-0 text-base sm:text-lg md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed mt-4 font-light">
-                Experience powerful, server-side code execution with low-latency WebSocket connections. No simulations, just pure performance.
+                Professional-grade remote execution. Now with AI debugging, local auto-save, and CodeMirror editor integration.
             </p>
         </header>
 
@@ -195,7 +189,7 @@
                     </div>
                     <h2 class="text-2xl font-heading font-bold text-white mb-2 group-hover:text-lime-300 transition-colors">Standard C</h2>
                     <p class="text-sm text-neutral-500 mb-6 leading-relaxed">
-                        Compile standard C programs on a remote server using GCC. Supports pointers and memory logic.
+                        Compile standard C programs on a remote Linux server using GCC. Supports pointers and low-level memory logic.
                     </p>
                     <div class="flex items-center text-xs font-mono text-lime-300 uppercase tracking-widest">
                         Launch <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
@@ -209,7 +203,7 @@
                     </div>
                     <h2 class="text-2xl font-heading font-bold text-white mb-2 group-hover:text-lime-300 transition-colors">Modern C++</h2>
                     <p class="text-sm text-neutral-500 mb-6 leading-relaxed">
-                        Execute C++ code via G++. Features standard input/output streaming and STL support.
+                        Execute C++ code via G++. Features standard input/output streaming, STL support, and modern syntax.
                     </p>
                     <div class="flex items-center text-xs font-mono text-lime-300 uppercase tracking-widest">
                         Launch <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
@@ -223,17 +217,13 @@
                     </div>
                     <h2 class="text-2xl font-heading font-bold text-white mb-2 group-hover:text-lime-300 transition-colors">Python 3</h2>
                     <p class="text-sm text-neutral-500 mb-6 leading-relaxed">
-                        Full Python 3 environment with automatic package installation (pip) and interactive shell.
+                        Full Python 3 environment with pip support. Includes enhanced indentation and real-time execution.
                     </p>
                     <div class="flex items-center text-xs font-mono text-lime-300 uppercase tracking-widest">
                         Launch <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </a>
 
-            </div>
-            
-            <div class="text-center mt-8">
-                <p class="text-[10px] font-mono text-neutral-600 uppercase tracking-widest">More languages loading...</p>
             </div>
         </main>
 
@@ -246,28 +236,54 @@
     <section id="features" class="py-32 px-6 border-t border-white/5 bg-black/20 z-10">
         <div class="max-w-6xl mx-auto">
             <div class="text-center mb-20" data-aos="fade-up">
-                <h2 class="text-3xl sm:text-4xl font-heading font-bold text-white mb-4">Engineered for <span class="text-lime-300">Performance</span></h2>
-                <p class="text-neutral-400 max-w-xl mx-auto">A robust platform designed for real development tasks.</p>
+                <h2 class="text-3xl sm:text-4xl font-heading font-bold text-white mb-4">Features & <span class="text-lime-300">Capabilities</span></h2>
+                <p class="text-neutral-400 max-w-xl mx-auto">Upgraded with developer-focused tools for a complete coding experience.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="compiler-card p-8" data-aos="fade-up" data-aos-delay="100">
-                    <i class="fas fa-server text-2xl text-lime-300 mb-6"></i>
-                    <h3 class="text-xl font-bold text-white mb-3">Real Backend</h3>
-                    <p class="text-sm text-neutral-500 leading-relaxed">Code is executed on a live Linux server instance, ensuring accurate runtime behavior.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature: Pro Editor -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-code text-lime-300 mb-4 text-xl"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Pro Code Editor</h3>
+                    <p class="text-sm text-neutral-500 leading-relaxed">Powered by CodeMirror with Dracula theme, syntax highlighting, bracket matching, and line numbers.</p>
                 </div>
-                <!-- Feature 2 -->
-                <div class="compiler-card p-8" data-aos="fade-up" data-aos-delay="200">
-                    <i class="fas fa-bolt text-2xl text-lime-300 mb-6"></i>
-                    <h3 class="text-xl font-bold text-white mb-3">Low Latency</h3>
-                    <p class="text-sm text-neutral-500 leading-relaxed">WebSockets provide a persistent connection for instant input/output streaming.</p>
+
+                <!-- Feature: AI Debug -->
+                <div class="feature-card border-lime-300/30" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex justify-between items-start">
+                        <i class="fas fa-robot text-lime-300 mb-4 text-xl"></i>
+                        <span class="text-[10px] bg-lime-300 text-black px-2 py-0.5 rounded font-bold uppercase">New</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">AI Auto-Debug</h3>
+                    <p class="text-sm text-neutral-500 leading-relaxed">Detects runtime errors and offers one-click code fixes powered by Gemini 2.5 Flash.</p>
                 </div>
-                <!-- Feature 3 -->
-                <div class="compiler-card p-8" data-aos="fade-up" data-aos-delay="300">
-                    <i class="fas fa-box-open text-2xl text-lime-300 mb-6"></i>
-                    <h3 class="text-xl font-bold text-white mb-3">Auto-Pip Install</h3>
-                    <p class="text-sm text-neutral-500 leading-relaxed">The server detects missing Python libraries and installs them on the fly.</p>
+
+                <!-- Feature: Persistence -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <i class="fas fa-save text-lime-300 mb-4 text-xl"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Auto-Save & Share</h3>
+                    <p class="text-sm text-neutral-500 leading-relaxed">Never lose work. Code is saved locally automatically and can be stored in the cloud via share links.</p>
+                </div>
+
+                <!-- Feature: Mobile -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <i class="fas fa-mobile-alt text-lime-300 mb-4 text-xl"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Mobile Optimized</h3>
+                    <p class="text-sm text-neutral-500 leading-relaxed">Includes a custom helper bar for quick access to symbols like <code>{ } [ ] ;</code> on touch devices.</p>
+                </div>
+
+                <!-- Feature: Backend -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <i class="fas fa-server text-lime-300 mb-4 text-xl"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Real Backend</h3>
+                    <p class="text-sm text-neutral-500 leading-relaxed">Code runs on a live Linux instance via WebSockets for authentic I/O streaming performance.</p>
+                </div>
+
+                <!-- Feature: Export -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                    <i class="fas fa-download text-lime-300 mb-4 text-xl"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">One-Click Export</h3>
+                    <p class="text-sm text-neutral-500 leading-relaxed">Download your source code directly as a <code>.py</code>, <code>.c</code>, or <code>.cpp</code> file.</p>
                 </div>
             </div>
         </div>
@@ -277,7 +293,6 @@
     <footer class="py-12 border-t border-white/5 z-10 bg-black/40">
         <div class="max-w-6xl mx-auto px-6 text-center">
             
-            <!-- Documentation Link Added Here -->
             <div class="mb-8">
                 <a href="./docs.html" class="inline-flex items-center gap-2 text-sm font-mono text-neutral-500 hover:text-lime-300 transition-colors uppercase tracking-widest border border-white/10 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10">
                     <i class="fas fa-book"></i> Read Documentation

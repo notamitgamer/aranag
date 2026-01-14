@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentation // Cloud Code Compiler</title>
-    <link rel="icon" type="image/x-icon" href="https://compiler.amit.is-a.dev/logo.png">
+    <link rel="icon" type="image/x-icon" href="https://compiler.aranag.site/logo.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,7 +45,10 @@
         .doc-section {
             margin-bottom: 4rem;
             scroll-margin-top: 6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 3rem;
         }
+        .doc-section:last-child { border-bottom: none; }
 
         .code-block {
             background: #0f1115;
@@ -54,6 +57,7 @@
             padding: 1rem;
             margin: 1.5rem 0;
             font-size: 0.9rem;
+            overflow-x: auto;
         }
 
         .nav-link {
@@ -94,23 +98,34 @@
             </div>
             
             <nav class="space-y-1">
-                <p class="px-4 text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">Contents</p>
-                <a href="#architecture" class="nav-link font-mono text-sm">Architecture</a>
-                <a href="#communication" class="nav-link font-mono text-sm">WebSocket Protocol</a>
-                <a href="#python-engine" class="nav-link font-mono text-sm">Python Engine</a>
-                <a href="#cpp-engine" class="nav-link font-mono text-sm">C / C++ Engine</a>
-                <a href="#sharing" class="nav-link font-mono text-sm">Sharing & Persistence</a>
-                <a href="#security" class="nav-link font-mono text-sm">Security & Sandbox</a>
-                <a href="#privacy" class="nav-link font-mono text-sm">Privacy & Data</a>
-                <a href="#disclaimer" class="nav-link font-mono text-sm">Legal & Disclaimer</a>
+                <p class="px-4 text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">Core System</p>
+                <a href="#architecture" class="nav-link font-mono text-sm">01. Architecture</a>
+                <a href="#editor" class="nav-link font-mono text-sm text-lime-300">02. Editor & Tools (NEW)</a>
+                <a href="#communication" class="nav-link font-mono text-sm">03. WebSocket I/O</a>
+                
+                <p class="px-4 text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2 mt-6">Engines</p>
+                <a href="#engines" class="nav-link font-mono text-sm">04. Execution Engines</a>
+                
+                <p class="px-4 text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2 mt-6">Intelligence</p>
+                <a href="#ai-debug" class="nav-link font-mono text-sm">05. AI Auto-Debug</a>
+                
+                <p class="px-4 text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2 mt-6">Data</p>
+                <a href="#persistence" class="nav-link font-mono text-sm">06. Sharing & Persistence</a>
+                <a href="#lifecycle" class="nav-link font-mono text-sm">07. Data Lifecycle</a>
+                <a href="#security" class="nav-link font-mono text-sm">08. Security</a>
+                
+                <p class="px-4 text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2 mt-6">Community</p>
+                <a href="#contribution" class="nav-link font-mono text-sm">09. Contribution</a>
+                <a href="#disclaimer" class="nav-link font-mono text-sm text-red-400">10. Disclaimer</a>
             </nav>
 
             <div class="mt-12 p-4 rounded-xl bg-white/5 border border-white/10">
-                <p class="text-xs text-neutral-400 mb-2">Powered by</p>
+                <p class="text-xs text-neutral-400 mb-2">Tech Stack</p>
                 <div class="flex flex-wrap gap-2">
-                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">aiohttp</span>
+                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">CodeMirror</span>
+                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">Gemini 2.5</span>
                     <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">Firebase</span>
-                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">GCC 11</span>
+                    <span class="text-xs px-2 py-1 rounded bg-black border border-white/10 text-lime-300 font-mono">aiohttp</span>
                 </div>
             </div>
         </aside>
@@ -130,226 +145,313 @@
             <div class="mb-16 border-b border-white/10 pb-12">
                 <h1 class="hidden lg:block text-5xl font-heading font-bold text-white mb-6">System Documentation</h1>
                 <p class="text-xl text-neutral-400 leading-relaxed max-w-3xl">
-                    A technical deep-dive into the Cloud Code Compiler. Learn how we achieve low-latency remote execution, handle real-time I/O streams, and manage dynamic dependency resolution.
+                    A comprehensive technical overview of the Cloud Code Compiler v2.0. This document covers the full stack, from the CodeMirror-enhanced frontend to the AI-powered debugging backend and real-time execution engines.
                 </p>
             </div>
 
-            <!-- Architecture -->
+            <!-- 01 Architecture -->
             <section id="architecture" class="doc-section">
                 <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">01.</span> Architecture
+                    <span class="mr-3 text-neutral-600">01.</span> Architecture
                 </h2>
                 <p class="text-neutral-300 mb-4">
-                    The compiler uses a client-server model optimized for persistent connections. Unlike traditional stateless REST APIs which require polling for output, we utilize <strong>WebSockets</strong> to maintain a full-duplex communication channel between the browser's xterm.js terminal and the backend process.
+                    The platform operates as a distributed system designed for low-latency feedback. It replaces traditional HTTP polling with persistent WebSocket connections, enabling interactive coding (REPL-like behavior) over the web.
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
                     <div class="p-6 rounded-xl bg-white/5 border border-white/10">
-                        <h3 class="text-white font-bold mb-2"><i class="fas fa-desktop text-lime-300 mr-2"></i> Frontend</h3>
-                        <p class="text-sm text-neutral-400">Xterm.js renders a TTY-like interface. User keystrokes are captured and sent as binary/text frames.</p>
+                        <h3 class="text-white font-bold mb-2"><i class="fas fa-laptop-code text-lime-300 mr-2"></i> Frontend (Client)</h3>
+                        <ul class="text-sm text-neutral-400 space-y-2">
+                            <li>• <strong>Editor:</strong> CodeMirror 5 (Dracula Theme)</li>
+                            <li>• <strong>Terminal:</strong> Xterm.js with FitAddon</li>
+                            <li>• <strong>State:</strong> Browser LocalStorage</li>
+                            <li>• <strong>Intelligence:</strong> Client-side Error Parsing</li>
+                        </ul>
                     </div>
                     <div class="p-6 rounded-xl bg-white/5 border border-white/10">
-                        <h3 class="text-white font-bold mb-2"><i class="fas fa-server text-lime-300 mr-2"></i> Backend</h3>
-                        <p class="text-sm text-neutral-400">Python <code>aiohttp</code> server running on Linux. Spawns <code>subprocess</code> threads for isolation.</p>
+                        <h3 class="text-white font-bold mb-2"><i class="fas fa-server text-lime-300 mr-2"></i> Backend (Server)</h3>
+                        <ul class="text-sm text-neutral-400 space-y-2">
+                            <li>• <strong>Server:</strong> Python <code>aiohttp</code> (AsyncIO)</li>
+                            <li>• <strong>Runtime:</strong> <code>subprocess</code> pipelines</li>
+                            <li>• <strong>AI Engine:</strong> Google Gemini 2.5 Flash</li>
+                            <li>• <strong>Database:</strong> Firebase Firestore (NoSQL)</li>
+                        </ul>
                     </div>
                 </div>
             </section>
 
-            <!-- WebSocket Protocol -->
+            <!-- 02 Editor -->
+            <section id="editor" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3 text-neutral-600">02.</span> Professional Editor Experience
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    Replaced the standard textarea with <strong>CodeMirror</strong> to provide an IDE-grade environment directly in the browser.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="p-4 border border-lime-300/20 bg-lime-300/5 rounded-lg">
+                        <h4 class="text-lime-300 font-bold mb-2">Visual & Editing</h4>
+                        <ul class="text-xs text-neutral-300 space-y-1">
+                            <li>• <strong>Syntax Highlighting:</strong> Dracula theme for easy reading.</li>
+                            <li>• <strong>Line Numbers:</strong> Essential for debugging.</li>
+                            <li>• <strong>Bracket Matching:</strong> Visual cues for matching parentheses.</li>
+                            <li>• <strong>Auto-Indent:</strong> Smart indentation for Python and C++.</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 border border-white/10 bg-white/5 rounded-lg">
+                        <h4 class="text-white font-bold mb-2">Developer Tools</h4>
+                        <ul class="text-xs text-neutral-300 space-y-1">
+                            <li>• <strong>Undo/Redo:</strong> <code>Ctrl+Z</code> / <code>Ctrl+Y</code> support with history stack.</li>
+                            <li>• <strong>Mobile Helper Bar:</strong> Sticky keys for <code>{ } [ ] ;</code> on touch devices.</li>
+                            <li>• <strong>Export:</strong> Download code as <code>.py</code>, <code>.c</code>, or <code>.cpp</code> files.</li>
+                            <li>• <strong>Clear Code:</strong> Quick reset with confirmation modal.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 03 Communication -->
             <section id="communication" class="doc-section">
                 <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">02.</span> WebSocket Protocol
+                    <span class="mr-3 text-neutral-600">03.</span> WebSocket I/O Protocol
                 </h2>
                 <p class="text-neutral-300 mb-4">
-                    Communication occurs via JSON payloads. The server handles two main event types: <strong>execution</strong> and <strong>input streaming</strong>.
+                    Real-time interaction handles input/output streams efficiently. The server streams <code>stdout</code> characters immediately, preventing "hanging" on long-running processes.
                 </p>
 
-                <h3 class="text-lg font-bold text-white mt-6 mb-2">Client -> Server</h3>
                 <div class="code-block">
-                    <pre><code class="language-json">// 1. Initiate Execution
-{
-    "type": "run",
-    "language": "python", // or "c", "cpp"
-    "code": "print('Hello World')"
-}
+                    <pre><code class="language-json">// 1. Run Command (Client -> Server)
+{ "type": "run", "language": "python", "code": "print('Hello')" }
 
-// 2. Send User Input (stdin)
-{
-    "type": "input",
-    "data": "user_input_string\n"
-}</code></pre>
-                </div>
+// 2. Output Stream (Server -> Client)
+// Streamed character-by-character or line-by-line
+{ "type": "stdout", "data": "H" }
+{ "type": "stdout", "data": "e" } ...
 
-                <h3 class="text-lg font-bold text-white mt-6 mb-2">Server -> Client</h3>
-                <div class="code-block">
-                    <pre><code class="language-json">// 1. Standard Output/Error Stream (sent character-by-character or chunked)
-{
-    "type": "stdout",
-    "data": "H" 
-}
-
-// 2. Status Updates
-{
-    "type": "status",
-    "msg": "Compiling..."
-}</code></pre>
+// 3. User Input (Client -> Server)
+// Sent when user types in terminal
+{ "type": "input", "data": "user_input\n" }</code></pre>
                 </div>
             </section>
 
-            <!-- Python Engine -->
-            <section id="python-engine" class="doc-section">
+            <!-- 04 Engines -->
+            <section id="engines" class="doc-section">
                 <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">03.</span> Python Engine & Auto-Pip
+                    <span class="mr-3 text-neutral-600">04.</span> Execution Engines
                 </h2>
-                <p class="text-neutral-300 mb-4">
-                    The Python runner is equipped with a dynamic dependency resolver. Before execution, the backend statically analyzes the code imports using RegEx.
+                <p class="text-neutral-300 mb-6">
+                    Each language runs in a specialized, isolated subprocess on the backend.
                 </p>
-                
-                <div class="p-6 rounded-xl border border-lime-300/20 bg-lime-300/5 mb-6">
-                    <h4 class="font-bold text-white mb-2">Feature: Dynamic Installation</h4>
-                    <p class="text-sm text-neutral-300">
-                        If a user imports a non-standard library (e.g., <code>import numpy</code>), the server automatically runs <code>pip install numpy</code> before executing the script. This allows for rich script execution without pre-configuration.
-                    </p>
-                </div>
 
-                <div class="code-block">
-                    <pre><code class="language-python"># Backend Logic Snippet
-def check_and_install_packages(code):
-    imports = re.findall(r'^\s*import\s+(\w+)', code, re.MULTILINE)
-    for pkg in imports:
-        if pkg not in standard_libs:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", pkg])</code></pre>
-                </div>
-            </section>
-
-            <!-- C / C++ Engine -->
-            <section id="cpp-engine" class="doc-section">
-                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">04.</span> C / C++ Compilation
-                </h2>
-                <p class="text-neutral-300 mb-4">
-                    For compiled languages, the server performs a two-step process. Source code is written to a temporary file, compiled via GCC/G++, and then executed.
-                </p>
-                <ul class="list-disc list-inside text-neutral-400 space-y-2 mb-6 ml-4">
-                    <li><strong>C:</strong> <code>gcc temp.c -o a.out</code></li>
-                    <li><strong>C++:</strong> <code>g++ temp.cpp -o a.out</code></li>
-                </ul>
-                <p class="text-neutral-300">
-                    Standard Input buffer flushing is handled automatically to ensure prompts (like <code>cin >> var</code>) appear immediately in the terminal before blocking for input.
-                </p>
-            </section>
-            
-            <!-- Sharing & Persistence -->
-            <section id="sharing" class="doc-section">
-                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">05.</span> Sharing & Persistence
-                </h2>
-                <p class="text-neutral-300 mb-4">
-                    The sharing functionality leverages <strong>Firebase Firestore</strong> to provide persistent access to code and execution results. This ensures that sharing a link not only loads the correct source code but also restores the exact terminal state seen at the moment of sharing.
-                </p>
-                
-                <h3 class="text-lg font-bold text-white mt-6 mb-2">How Sharing Works</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
-                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
-                        <h4 class="text-white font-bold mb-2">1. Snapshot Creation</h4>
-                        <p class="text-sm text-neutral-400 mb-2">
-                            When the "Share" button is clicked, the system captures:
+                <div class="space-y-6">
+                    <div class="p-6 bg-white/5 rounded-xl border border-white/10">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="fab fa-python text-2xl text-blue-400"></i>
+                            <h3 class="text-xl font-bold text-white">Python 3 Engine</h3>
+                        </div>
+                        <p class="text-sm text-neutral-400 mb-4">
+                            The Python environment runs on the latest stable <strong>Python 3</strong> release.
                         </p>
-                        <ul class="list-disc list-inside text-xs text-neutral-500 space-y-1">
-                            <li>The complete source code from the editor.</li>
-                            <li>The current terminal output (stripped of system messages).</li>
-                            <li>Metadata (language, timestamp).</li>
+                        <ul class="list-disc list-inside text-sm text-neutral-300 space-y-1">
+                            <li><strong>Execution:</strong> Code is written to a temporary file and executed via `python3 -u` (unbuffered) to ensure real-time output.</li>
+                            <li><strong>Pip Packages:</strong> The environment comes pre-configured with standard libraries. <code>pip</code> is available in the backend environment, allowing for pre-installed packages to be imported (e.g., math, time, random).</li>
+                            <li><strong>Indentation:</strong> The editor converts Tabs to 4 Spaces automatically to prevent <code>IndentationError</code>.</li>
                         </ul>
                     </div>
-                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
-                        <h4 class="text-white font-bold mb-2">2. Storage & Retrieval</h4>
-                        <p class="text-sm text-neutral-400 mb-2">
-                            This data is stored in a Firestore document under a unique 7-character ID.
+
+                    <div class="p-6 bg-white/5 rounded-xl border border-white/10">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="fas fa-microchip text-2xl text-blue-600"></i>
+                            <h3 class="text-xl font-bold text-white">C / C++ Compiler</h3>
+                        </div>
+                        <p class="text-sm text-neutral-400 mb-4">
+                            Powered by the <strong>GNU Compiler Collection (GCC)</strong>.
                         </p>
-                        <ul class="list-disc list-inside text-xs text-neutral-500 space-y-1">
-                            <li><strong>Write:</strong> Uses Anonymous Auth to securely write to the DB.</li>
-                            <li><strong>Read:</strong> The URL `?share=ID` fetches this document.</li>
-                            <li><strong>Restore:</strong> The editor fills with code, and the terminal replays the saved output.</li>
+                        <ul class="list-disc list-inside text-sm text-neutral-300 space-y-1">
+                            <li><strong>C Language:</strong> Compiles via `gcc source.c -o app`. Uses standard C11/C17 standards.</li>
+                            <li><strong>C++ Language:</strong> Compiles via `g++ source.cpp -o app`. Supports modern C++ standards.</li>
+                            <li><strong>Binary Execution:</strong> After compilation, the binary is immediately executed (`./app`), and output is piped to the WebSocket.</li>
+                            <li><strong>Error Handling:</strong> Compilation errors (stderr) are captured and displayed in red in the terminal.</li>
                         </ul>
                     </div>
                 </div>
+            </section>
 
-                <div class="code-block">
-                    <pre><code class="language-javascript">// Data Structure in Firestore
-{
-    "code": "#include <stdio.h>\n...",
-    "language": "c",
-    "output": "Enter count: 5\nCounting to 5:\n1 2 3 4 5 \nDone.",
-    "createdAt": "2023-10-27T10:00:00.000Z"
-}</code></pre>
+            <!-- 05 AI Auto-Debug -->
+            <section id="ai-debug" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3 text-neutral-600">05.</span> AI Auto-Debug System
+                </h2>
+                <p class="text-neutral-300 mb-4">
+                    The compiler monitors the output stream for common error patterns (e.g., <code>Traceback</code>, <code>Segmentation fault</code>, <code>error:</code>).
+                </p>
+                <div class="bg-black/30 p-4 rounded-lg border-l-2 border-lime-300">
+                    <h4 class="text-sm font-bold text-white mb-2">How it works:</h4>
+                    <ol class="list-decimal list-inside text-xs text-neutral-400 space-y-2">
+                        <li><strong>Capture:</strong> The client buffers the last 4KB of terminal output.</li>
+                        <li><strong>Trigger:</strong> If an error keyword is found, the "Ask AI" button appears.</li>
+                        <li><strong>Processing:</strong> Code + Error Log is sent to <strong>Gemini 2.5 Flash</strong>.</li>
+                        <li><strong>Response:</strong> The AI generates a JSON object containing a plain-English explanation and the corrected code block.</li>
+                        <li><strong>Patch:</strong> The user can review the fix in a modal and apply it to the editor instantly.</li>
+                    </ol>
                 </div>
             </section>
 
-            <!-- Security -->
+            <!-- 06 Persistence -->
+            <section id="persistence" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3 text-neutral-600">06.</span> Sharing & Persistence
+                </h2>
+                <p class="text-neutral-300 mb-6">
+                    Data storage is handled in two distinct layers to balance privacy and collaboration.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="border border-white/10 rounded-xl p-5">
+                        <div class="flex items-center gap-2 mb-3 text-lime-300">
+                            <i class="fas fa-hdd"></i>
+                            <h3 class="font-bold">Local Persistence</h3>
+                        </div>
+                        <p class="text-xs text-neutral-400 leading-relaxed">
+                            Every keystroke is saved to the browser's <code>localStorage</code>. This data never leaves your device until you execute or share it.
+                        </p>
+                    </div>
+
+                    <div class="border border-white/10 rounded-xl p-5">
+                        <div class="flex items-center gap-2 mb-3 text-lime-300">
+                            <i class="fas fa-share-alt"></i>
+                            <h3 class="font-bold">Cloud Sharing</h3>
+                        </div>
+                        <p class="text-xs text-neutral-400 leading-relaxed">
+                            Uploads a snapshot to <strong>Firebase</strong> generating a short 7-char ID (e.g., <code>?share=AbC123X</code>).
+                        </p>
+                    </div>
+
+                    <div class="border border-white/10 rounded-xl p-5">
+                        <div class="flex items-center gap-2 mb-3 text-lime-300">
+                            <i class="fas fa-link"></i>
+                            <h3 class="font-bold">Base64 / LZ Fallback</h3>
+                        </div>
+                        <p class="text-xs text-neutral-400 leading-relaxed">
+                            Code can be encoded directly into the URL (e.g., <code>?code=...</code>). 
+                            <br><span class="text-lime-300/80 mt-2 block">Pro Tip: Use <strong>LZ-String</strong> compression to reduce URL length by ~60% vs standard Base64.</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 07 Lifecycle -->
+            <section id="lifecycle" class="doc-section">
+                <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
+                    <span class="mr-3 text-neutral-600">07.</span> Data Lifecycle
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-neutral-400">
+                        <thead class="bg-white/5 text-white font-mono uppercase text-xs">
+                            <tr>
+                                <th class="p-3">Stage</th>
+                                <th class="p-3">Storage Location</th>
+                                <th class="p-3">Duration</th>
+                                <th class="p-3">Accessibility</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <tr>
+                                <td class="p-3 text-lime-300">Drafting</td>
+                                <td class="p-3">Browser LocalStorage</td>
+                                <td class="p-3">Persistent (User Control)</td>
+                                <td class="p-3">Private (Device Only)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 text-lime-300">Execution</td>
+                                <td class="p-3">Server RAM / Temp File</td>
+                                <td class="p-3">Ephemeral (Seconds)</td>
+                                <td class="p-3">System (Deleted after run)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 text-lime-300">Sharing</td>
+                                <td class="p-3">Firebase Firestore</td>
+                                <td class="p-3">Permanent</td>
+                                <td class="p-3">Public (Link Holders)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 08 Security -->
             <section id="security" class="doc-section">
                 <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">06.</span> Security & Limitations
+                    <span class="mr-3 text-neutral-600">08.</span> Security Implementation
                 </h2>
                 <p class="text-neutral-300 mb-4">
-                    The current implementation runs code directly on the host instance. While effective for a portfolio demonstration or trusted environment, this setup is <strong>not sandboxed</strong>.
+                    Security is enforced at the environment level to prevent abuse.
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="p-4 border border-red-500/30 bg-red-500/5 rounded-lg">
-                        <h4 class="text-red-400 font-bold mb-2">Current Limitations</h4>
-                        <ul class="text-xs text-neutral-400 space-y-1">
-                            <li>• No containerization (Docker)</li>
-                            <li>• No CPU/RAM usage quotas</li>
-                            <li>• File system access is unrestricted within user scope</li>
-                        </ul>
+                    <div class="p-4 border border-white/10 bg-white/5 rounded-lg">
+                        <h4 class="text-white font-bold mb-2">Sanitized Environment</h4>
+                        <p class="text-xs text-neutral-400">
+                            Subprocesses run with a stripped environment (`safe_env`). API keys, system paths, and sensitive variables are removed from the execution context.
+                        </p>
                     </div>
-                    <div class="p-4 border border-lime-300/30 bg-lime-300/5 rounded-lg">
-                        <h4 class="text-lime-300 font-bold mb-2">Future Roadmap</h4>
-                        <ul class="text-xs text-neutral-400 space-y-1">
-                            <li>• Docker container per session</li>
-                            <li>• Timeouts for infinite loops</li>
-                            <li>• Network access restrictions</li>
-                        </ul>
+                    <div class="p-4 border border-white/10 bg-white/5 rounded-lg">
+                        <h4 class="text-white font-bold mb-2">Ephemeral Filesystem</h4>
+                        <p class="text-xs text-neutral-400">
+                            Scripts are written to temporary files (e.g., `temp_script.py`) which are unlinked/deleted immediately after execution or upon connection closure.
+                        </p>
                     </div>
                 </div>
             </section>
 
-            <!-- Privacy & Data Handling -->
-            <section id="privacy" class="doc-section">
+            <!-- 09 Developer / Contribution -->
+            <section id="contribution" class="doc-section">
                 <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">07.</span> Privacy & Data Handling
+                    <span class="mr-3 text-neutral-600">09.</span> Developers & Contribution
                 </h2>
-                <p class="text-neutral-300 mb-4">
-                    We believe in complete transparency regarding how your data is handled. As a demonstration platform, we prioritize privacy and ephemeral execution.
+                <p class="text-neutral-300 mb-6">
+                    We welcome contributions from the community. Whether you've found a bug, want to suggest a feature, or add support for a new language, here is how you can get involved.
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
-                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
-                        <h3 class="text-white font-bold mb-2"><i class="fas fa-trash-alt text-lime-300 mr-2"></i> Ephemeral Execution</h3>
-                        <p class="text-sm text-neutral-400">
-                            By default, your code is processed in volatile memory and <strong>immediately deleted</strong> after execution. Code is stored in our database <strong>only</strong> when you explicitly click "Share".
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Open Source Card -->
+                    <div class="p-6 bg-white/5 rounded-xl border border-white/10 hover:border-lime-300/50 transition-colors group">
+                        <i class="fab fa-github text-3xl text-white group-hover:text-lime-300 mb-4 transition-colors"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">Open Source</h3>
+                        <p class="text-sm text-neutral-400 mb-6">
+                            The core infrastructure is open-source. Clone the repo, create a branch, and submit a Pull Request.
                         </p>
+                        <div class="flex gap-3">
+                            <a href="https://github.com/notamitgamer/cloud-compiler/issues" target="_blank" class="px-3 py-1.5 rounded bg-white/10 text-xs font-mono hover:bg-white/20 transition-colors border border-white/10">
+                                <i class="fas fa-bug mr-1"></i> Report Bug
+                            </a>
+                            <a href="https://github.com/notamitgamer/cloud-compiler" target="_blank" class="px-3 py-1.5 rounded bg-lime-300/10 text-lime-300 text-xs font-mono hover:bg-lime-300/20 transition-colors border border-lime-300/20">
+                                <i class="fas fa-code-branch mr-1"></i> Fork Repo
+                            </a>
+                        </div>
                     </div>
-                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
-                        <h3 class="text-white font-bold mb-2"><i class="fas fa-user-secret text-lime-300 mr-2"></i> Anonymous</h3>
-                        <p class="text-sm text-neutral-400">
-                            No user accounts, cookies, or personal identifiers are required to use the compiler. Usage is completely anonymous.
+
+                    <!-- Contact Card -->
+                    <div class="p-6 bg-white/5 rounded-xl border border-white/10">
+                        <i class="fas fa-envelope-open-text text-3xl text-white mb-4"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">Direct Contact</h3>
+                        <p class="text-sm text-neutral-400 mb-6">
+                            For security vulnerabilities, private feedback, or collaboration inquiries, please email directly.
                         </p>
-                    </div>
-                    <div class="p-6 rounded-xl bg-white/5 border border-white/10">
-                        <h3 class="text-white font-bold mb-2"><i class="fab fa-github text-lime-300 mr-2"></i> Open Source</h3>
-                        <p class="text-sm text-neutral-400">
-                            The entire backend infrastructure is open source. You can audit the code yourself on <a href="https://github.com/notamitgamer/cloud-compiler" target="_blank" class="text-lime-300 hover:underline">GitHub</a>.
-                        </p>
+                        <a href="mailto:amitdutta4255@gmail.com" class="text-lime-300 font-mono text-sm hover:underline flex items-center gap-2">
+                            <i class="fas fa-at"></i> amitdutta4255@gmail.com
+                        </a>
                     </div>
                 </div>
             </section>
 
-            <!-- Legal & Disclaimer -->
+            <!-- 10 Disclaimer -->
             <section id="disclaimer" class="doc-section">
                 <h2 class="text-2xl font-heading font-bold text-lime-300 mb-6 flex items-center">
-                    <span class="mr-3">08.</span> Legal & Disclaimer
+                    <span class="mr-3 text-neutral-600">10.</span> Legal & Disclaimer
                 </h2>
                 <div class="p-6 rounded-xl border border-red-500/20 bg-red-500/5">
                     <p class="text-neutral-300 mb-4">
-                        This compiler infrastructure has been extensively refactored by <strong>Gemini 3 Pro</strong>. For bug reports or inquiries, please contact us via:
+                        This compiler infrastructure utilizes Google's Generative AI services and Firebase for data storage.
                     </p>
                     <ul class="text-lime-300 font-mono text-sm mb-6 space-y-1">
                         <li><i class="fas fa-envelope mr-2"></i> <a href="mailto:amitdutta4255@gmail.com" class="hover:underline">amitdutta4255@gmail.com</a></li>
@@ -357,8 +459,11 @@ def check_and_install_packages(code):
                         <li><i class="fab fa-github mr-2"></i> <a href="https://github.com/notamitgamer" target="_blank" class="hover:underline">@notamitgamer</a></li>
                     </ul>
                     <div class="text-neutral-400 text-sm border-t border-white/10 pt-4 leading-relaxed">
-                        <p class="mb-2"><strong class="text-red-400">Disclaimer of Liability:</strong> Amit Dutta assumes no responsibility or liability for any consequences, errors, or data loss arising from the use of this compiler. This project is provided for demonstration purposes only.</p>
-                        <p class="italic opacity-80">"I explicitly disclaim any affiliation with or responsibility for the ongoing operation of this project. I reserve the absolute right to modify, suspend, or permanently delete this compiler and its associated services at any time, for any reason, without prior notice."</p>
+                        <p class="mb-4"><strong class="text-red-400 uppercase">Disclaimer of Liability:</strong> This tool is provided "as is". Amit Dutta assumes no responsibility or liability for any consequences, errors, or data loss arising from the use of this compiler. This project is provided for demonstration purposes only.</p>
+                        
+                        <p class="italic font-mono text-xs opacity-80 bg-black/20 p-3 border border-red-500/20 rounded">
+                            "I explicitly disclaim any affiliation with or responsibility for the ongoing operation of this project. I reserve the absolute right to modify, suspend, or permanently delete this compiler and its associated services at any time, for any reason, without prior notice."
+                        </p>
                     </div>
                 </div>
             </section>

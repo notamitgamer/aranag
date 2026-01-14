@@ -15,6 +15,15 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- CodeMirror 5 (Professional Editor) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+
     <!-- Xterm.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
@@ -59,43 +68,74 @@
         }
         @keyframes scanline { 0% { top: -10vh; } 100% { top: 110vh; } }
 
-        /* Custom Editor Styles */
-        .editor-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+        /* CodeMirror Customization */
+        .CodeMirror {
+            height: 100% !important;
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
-            line-height: 1.5;
+            background-color: #0c0f16 !important; /* Slightly lighter than pure black */
+            color: #f8f8f2;
+        }
+        .CodeMirror-gutters {
+            background-color: #0c0f16 !important;
+            border-right: 1px solid rgba(255,255,255,0.05) !important;
+        }
+        .CodeMirror-linenumber {
+            color: #555 !important;
+        }
+        .CodeMirror-cursor {
+            border-left: 2px solid var(--accent) !important;
+        }
+        .CodeMirror-selected {
+            background: rgba(190, 242, 100, 0.2) !important;
+        }
+        .cm-s-dracula .CodeMirror-activeline-background {
+            background: rgba(255, 255, 255, 0.03) !important;
         }
 
-        /* The actual textarea for typing */
-        #code-input {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            padding: 1rem;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: #e2e8f0; /* Visible Text */
-            caret-color: #fff; /* Cursor visible */
-            z-index: 1;
-            resize: none;
-            white-space: pre;
-            overflow: auto;
+        /* Scrollbar styling */
+        .CodeMirror-scroll::-webkit-scrollbar, 
+        .xterm-viewport::-webkit-scrollbar,
+        .custom-scrollbar::-webkit-scrollbar { 
+            width: 6px; height: 6px; 
+        }
+        .CodeMirror-scroll::-webkit-scrollbar-track, 
+        .xterm-viewport::-webkit-scrollbar-track,
+        .custom-scrollbar::-webkit-scrollbar-track { 
+            background: #050505; 
+        }
+        .CodeMirror-scroll::-webkit-scrollbar-thumb, 
+        .xterm-viewport::-webkit-scrollbar-thumb,
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
+            background: #333; border-radius: 3px; 
         }
 
-        .xterm-viewport { overflow-y: auto !important; }
-        
-        ::selection { background: var(--accent); color: black; }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #050505; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        /* Mobile Helper Bar */
+        #mobile-helper-bar {
+            display: none; /* Shown via JS on mobile */
+            background: #151515;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 768px) {
+            #mobile-helper-bar { display: flex; gap: 8px; }
+        }
+        .helper-key {
+            background: rgba(255,255,255,0.1);
+            color: var(--accent);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+        .helper-key:active { background: var(--accent); color: black; }
 
         /* Toast Notification */
         .toast {
@@ -145,6 +185,91 @@
             70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
+
+        /* AI Text Overlay */
+        .ai-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            z-index: 60;
+            display: none;
+            backdrop-filter: blur(4px);
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .ai-overlay.visible { display: flex; align-items: center; gap: 8px; }
+        
+        .ai-link {
+            color: #fff;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        .ai-link:hover { color: #bef264; text-decoration-style: solid; }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Modals (AI & Clear) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            z-index: 200; display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-content {
+            background: #0f0f0f;
+            border: 1px solid var(--accent);
+            width: 90%; max-width: 600px;
+            border-radius: 12px;
+            display: flex; flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Editor Toolbar Buttons */
+        .editor-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #737373;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .editor-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+        .editor-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: #ef4444;
+        }
     </style>
 </head>
 <body class="antialiased selection:bg-lime-300 selection:text-black">
@@ -153,18 +278,105 @@
     <div class="crt-scanline"></div>
     <div id="toast" class="toast">Link Copied to Clipboard!</div>
 
+    <!-- AI Overlay in Terminal -->
+    <div id="ai-suggestion" class="ai-overlay">
+        <i class="fas fa-exclamation-triangle text-red-500"></i>
+        <span>Error detected. <span id="ask-ai-link" class="ai-link">Ask AI</span> to fix it.</span>
+    </div>
+
+    <!-- Clear Confirmation Modal -->
+    <div id="clear-modal" class="modal-overlay">
+        <div class="modal-content max-w-[320px] p-0 border-red-500/50">
+            <div class="bg-red-500/10 px-6 py-4 border-b border-red-500/20">
+                <h3 class="font-heading font-bold text-lg text-red-500 flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i> CLEAR CODE
+                </h3>
+            </div>
+            <div class="p-6 text-center">
+                <p class="text-neutral-300 text-sm font-sans mb-6">Are you sure you want to clear the editor? This action will remove all current code.</p>
+                <div class="flex justify-center gap-3">
+                    <button id="cancel-clear-btn" class="px-4 py-2 rounded text-xs font-mono font-bold uppercase text-neutral-400 hover:text-white hover:bg-white/10 transition-all border border-transparent">Cancel</button>
+                    <button id="confirm-clear-btn" class="bg-red-500/10 hover:bg-red-500 hover:text-black text-red-500 border border-red-500/20 px-4 py-2 rounded text-xs font-mono font-bold uppercase transition-all flex items-center gap-2">
+                        <i class="fas fa-trash-alt"></i> Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Fix Modal -->
+    <div id="ai-modal" class="modal-overlay">
+        <div class="modal-content max-h-[80vh]">
+            <!-- Modal Header -->
+            <div class="bg-white/5 px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-heading font-bold text-lg text-lime-300 flex items-center gap-2">
+                    <i class="fas fa-robot"></i> AI Diagnosis
+                </h3>
+                <button id="close-modal" class="text-neutral-500 hover:text-white transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
+                <div id="ai-loading" class="hidden flex flex-col items-center justify-center py-8 gap-4">
+                    <div class="pulse-dot connected" style="width: 12px; height: 12px;"></div>
+                    <p class="font-mono text-neutral-400 text-sm animate-pulse">Analyzing compile error...</p>
+                </div>
+
+                <div id="ai-result" class="hidden space-y-4">
+                    <div>
+                        <h4 class="font-mono text-xs uppercase text-neutral-500 mb-2">Explanation</h4>
+                        <p id="ai-explanation" class="text-sm text-neutral-200 leading-relaxed font-sans"></p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-mono text-xs uppercase text-neutral-500 mb-2">Suggested Fix</h4>
+                        <div class="relative group">
+                            <pre id="ai-code-preview" class="bg-black/30 border border-white/10 p-3 rounded text-xs font-mono text-lime-100 overflow-x-auto custom-scrollbar"></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="ai-error-msg" class="hidden text-red-400 text-sm font-mono text-center py-4"></div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-white/5 px-6 py-4 border-t border-white/10 flex justify-end gap-3">
+                <button id="cancel-fix-btn" class="px-4 py-2 rounded text-xs font-mono font-bold uppercase text-neutral-400 hover:text-white hover:bg-white/10 transition-all">Dismiss</button>
+                <button id="apply-fix-btn" disabled class="bg-lime-300/10 hover:bg-lime-300 hover:text-black text-lime-300 border border-lime-300/20 px-4 py-2 rounded text-xs font-mono font-bold uppercase transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-check"></i> Apply Fix
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header (Responsive) -->
     <header class="h-auto md:h-16 flex flex-col md:flex-row items-center justify-between px-4 py-3 md:px-6 shrink-0 border-b border-white/10 z-20 bg-neutral-900/50 backdrop-blur-md gap-3 md:gap-4">
         
-        <!-- Top Row: Title & Status -->
-        <div class="flex items-center justify-between w-full md:w-auto">
+        <!-- Top Row: Title & Editor Tools -->
+        <div class="flex items-center justify-between w-full md:w-auto gap-6">
             <h1 class="text-lg md:text-xl font-heading font-bold text-white tracking-tight flex items-center">
                 <span class="text-lime-300 mr-2">//</span>CPP.COMPILER
                 <span id="conn-dot" class="pulse-dot disconnected ml-3" title="Disconnected"></span>
             </h1>
             
+            <!-- Editor Tools -->
+            <div class="flex items-center gap-2">
+                <button id="undo-btn" class="editor-btn" title="Undo (Ctrl+Z)">
+                    <i class="fas fa-undo text-xs"></i>
+                </button>
+                <button id="redo-btn" class="editor-btn" title="Redo (Ctrl+Y)">
+                    <i class="fas fa-redo text-xs"></i>
+                </button>
+                <div class="w-px h-4 bg-white/10 mx-1"></div>
+                <button id="clear-code-btn" class="editor-btn danger" title="Clear Code">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            
             <!-- Mobile Only: Exit Link -->
-            <a href="./index.html" class="md:hidden font-mono text-[10px] text-neutral-500 hover:text-white uppercase tracking-wider transition-colors">[ EXIT ]</a>
+            <a href="./index.html" class="md:hidden font-mono text-[10px] text-neutral-500 hover:text-white uppercase tracking-wider transition-colors ml-auto">[ EXIT ]</a>
         </div>
         
         <!-- Middle: Connection Text -->
@@ -176,16 +388,16 @@
         <div class="flex items-center gap-2 w-full md:w-auto justify-end">
             <a href="./index.html" class="hidden md:inline font-mono text-[10px] text-neutral-500 hover:text-white uppercase tracking-wider transition-colors mr-2">[ EXIT ]</a>
             
+            <button id="download-btn" class="bg-white/5 hover:bg-neutral-800 text-white border border-white/10 px-3 py-2 rounded font-mono text-[10px] font-bold uppercase tracking-wider flex items-center justify-center transition-all" title="Download .cpp">
+                <i class="fas fa-download"></i>
+            </button>
+            
             <button id="reset-btn" class="bg-white/5 hover:bg-neutral-800 text-white border border-white/10 px-3 py-2 rounded font-mono text-[10px] font-bold uppercase tracking-wider flex items-center justify-center transition-all" title="Reset Terminal">
                 <i class="fas fa-rotate-left"></i>
             </button>
 
             <button id="share-btn" class="bg-white/5 hover:bg-neutral-800 text-white border border-white/10 px-3 py-2 rounded font-mono text-[10px] font-bold uppercase tracking-wider flex items-center justify-center transition-all" title="Share Code">
                 <i class="fas fa-share-alt"></i>
-            </button>
-
-            <button id="copy-btn" class="bg-white/5 hover:bg-neutral-800 text-white border border-white/10 px-3 py-2 rounded font-mono text-[10px] font-bold uppercase tracking-wider flex items-center justify-center transition-all" title="Copy Output">
-                <i class="fas fa-copy"></i>
             </button>
             
             <button id="run-btn" disabled class="bg-white/5 hover:bg-lime-300 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed text-white border border-white/10 px-4 py-2 rounded font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all flex-1 md:flex-none justify-center shadow-lg shadow-black/50">
@@ -201,39 +413,44 @@
         <div class="flex-1 flex flex-col h-[60%] md:h-auto min-h-0 border-b md:border-b-0 md:border-r border-white/10 relative group">
             <div class="bg-black/20 px-4 py-2 text-[10px] font-mono text-lime-300 uppercase border-b border-white/10 flex justify-between items-center shrink-0">
                 <span>SRC // main.cpp</span>
-                <span class="text-neutral-600">G++ 11.2</span>
+                <span class="text-neutral-600">G++ 9.4.0</span>
             </div>
             
-            <!-- Custom Editor Area -->
-            <div class="editor-container relative bg-[#0c0f16]">
-                <textarea id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" class="custom-scrollbar">#include <iostream>
-#include <string>
+            <!-- CodeMirror Container -->
+            <div id="editor-container" class="relative bg-[#0c0f16] flex-1 overflow-hidden">
+                <textarea id="code-input" class="hidden">#include <iostream>
 
 int main() {
-    std::string name;
-    
-    std::cout << "Enter your name: ";
-    // Force flush ensures prompt appears immediately in buffered environments
-    std::cout.flush();
-    
-    std::cin >> name;
-    std::cout << "Hello, " << name << "!" << std::endl;
-    
+    std::cout << "Hello C++ Compiler!" << std::endl;
     return 0;
 }</textarea>
             </div>
             
-            <!-- AI Fix Button -->
-            <button id="ai-fix-btn" class="hidden absolute bottom-4 right-4 bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg text-xs font-mono transition-all items-center gap-2 backdrop-blur-md z-20">
-                <i class="fas fa-magic"></i> Fix with AI
-            </button>
+            <!-- Mobile Helper Bar -->
+            <div id="mobile-helper-bar">
+                <div class="helper-key" data-char="    ">Tab</div>
+                <div class="helper-key" data-char=";">;</div>
+                <div class="helper-key" data-char="=">=</div>
+                <div class="helper-key" data-char="()">()</div>
+                <div class="helper-key" data-char="[]">[]</div>
+                <div class="helper-key" data-char="{}">{}</div>
+                <div class="helper-key" data-char='""'>""</div>
+                <div class="helper-key" data-char="''">''</div>
+                <div class="helper-key" data-char="#">#</div>
+                <div class="helper-key" data-char="<<">&lt;&lt;</div>
+                <div class="helper-key" data-char=">>">&gt;&gt;</div>
+                <div class="helper-key" data-char="cout">cout</div>
+            </div>
         </div>
 
         <!-- Terminal -->
         <div class="flex-1 flex flex-col h-[40%] md:h-auto min-h-0 bg-[#050505]">
             <div class="bg-black/20 px-4 py-2 text-[10px] font-mono text-lime-300 uppercase border-b border-white/10 flex justify-between items-center shrink-0">
                 <span>OUT // TERMINAL</span>
-                <span class="text-neutral-600">XTERM.JS</span>
+                <div class="flex gap-2">
+                    <button id="copy-btn" class="text-neutral-500 hover:text-white transition-colors" title="Copy Output"><i class="fas fa-copy"></i></button>
+                    <span class="text-neutral-600">XTERM.JS</span>
+                </div>
             </div>
             <div class="flex-1 relative">
                 <div id="terminal-container" class="absolute inset-0 w-full h-full p-2 overflow-hidden"></div>
@@ -262,9 +479,9 @@ int main() {
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Attempt initial sign-in, but don't crash if it fails (restricted op)
+        // Attempt initial sign-in
         signInAnonymously(auth).catch((error) => {
-            console.warn("Auto-Auth failed (likely disabled in console). App will try unauthenticated access.", error.code);
+            console.warn("Auto-Auth failed. App will try unauthenticated access.", error.code);
         });
 
         // --- Helper: Generate ID ---
@@ -282,48 +499,152 @@ int main() {
         const resetBtn = document.getElementById('reset-btn');
         const shareBtn = document.getElementById('share-btn');
         const copyBtn = document.getElementById('copy-btn');
-        const aiFixBtn = document.getElementById('ai-fix-btn');
+        const downloadBtn = document.getElementById('download-btn');
         const connDot = document.getElementById('conn-dot');
         const connectionStatus = document.getElementById('connection-status');
-        const codeInput = document.getElementById('code-input');
         const toast = document.getElementById('toast');
+        
+        // Editor Tool Elements
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const clearCodeBtn = document.getElementById('clear-code-btn');
+        const clearModal = document.getElementById('clear-modal');
+        const cancelClearBtn = document.getElementById('cancel-clear-btn');
+        const confirmClearBtn = document.getElementById('confirm-clear-btn');
+
+        // AI Elements
+        const aiSuggestion = document.getElementById('ai-suggestion');
+        const askAiLink = document.getElementById('ask-ai-link');
+        const aiModal = document.getElementById('ai-modal');
+        const closeModal = document.getElementById('close-modal');
+        const cancelFixBtn = document.getElementById('cancel-fix-btn');
+        const applyFixBtn = document.getElementById('apply-fix-btn');
+        const aiLoading = document.getElementById('ai-loading');
+        const aiResult = document.getElementById('ai-result');
+        const aiExplanation = document.getElementById('ai-explanation');
+        const aiCodePreview = document.getElementById('ai-code-preview');
+        const aiErrorMsg = document.getElementById('ai-error-msg');
 
         // --- State ---
         let socket = null;
         let currentLine = ""; 
         let startTime = 0;
+        let lastSuggestedCode = "";
+        let outputBuffer = "";
 
-        // --- EDITOR LOGIC (Indentation) ---
-        codeInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                this.setRangeText('    ', start, end, 'end');
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                const value = this.value;
-                const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-                const currentLineText = value.substring(lineStart, start);
-                let match = currentLineText.match(/^(\s*)/);
-                let indent = match ? match[1] : "";
-                if (currentLineText.trim().endsWith('{')) indent += "    ";
-                this.setRangeText('\n' + indent, start, end, 'end');
-                this.blur(); this.focus(); 
-            } else if (e.key === '}') {
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                const value = this.value;
-                const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-                const currentLineText = value.substring(lineStart, start);
-                if (/^\s+$/.test(currentLineText) && currentLineText.length >= 4) {
-                     const newIndent = currentLineText.substring(0, currentLineText.length - 4);
-                     this.setSelectionRange(lineStart, start);
-                     this.setRangeText(newIndent, this.selectionStart, this.selectionEnd, 'end');
+        // --- CodeMirror Setup ---
+        const editor = CodeMirror.fromTextArea(document.getElementById("code-input"), {
+            mode: "text/x-c++src",
+            theme: "dracula",
+            lineNumbers: true,
+            indentUnit: 4,
+            matchBrackets: true,
+            autoCloseBrackets: true,
+            styleActiveLine: true,
+            inputStyle: "contenteditable",
+            viewportMargin: Infinity,
+            extraKeys: {
+                "Backspace": function(cm) {
+                    if (cm.somethingSelected()) {
+                        cm.execCommand("delCharBefore");
+                        return;
+                    }
+                    var cursor = cm.getCursor();
+                    var line = cm.getLine(cursor.line);
+                    // If cursor is not at start, and everything before it is whitespace
+                    if (cursor.ch > 0 && /^\s+$/.test(line.slice(0, cursor.ch))) {
+                        cm.execCommand("indentLess");
+                    } else {
+                        cm.execCommand("delCharBefore");
+                    }
                 }
-            }
+            },
+        });
+
+        // Fix resize issues
+        window.addEventListener('resize', () => editor.refresh());
+
+        // Local Auto-Save
+        const LOCAL_STORAGE_KEY = 'cpp_compiler_code_autosave';
+        editor.on('change', () => {
+            localStorage.setItem(LOCAL_STORAGE_KEY, editor.getValue());
+        });
+
+        // Load Auto-Save on Start (if not shared)
+        const savedCode = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedCode && !window.location.search.includes('share') && !window.location.search.includes('code')) {
+            editor.setValue(savedCode);
+        }
+
+        // --- Editor Toolbar Logic ---
+        undoBtn.addEventListener('click', () => { editor.undo(); editor.focus(); });
+        redoBtn.addEventListener('click', () => { editor.redo(); editor.focus(); });
+
+        clearCodeBtn.addEventListener('click', () => {
+            clearModal.classList.add('open');
+        });
+
+        cancelClearBtn.addEventListener('click', () => {
+            clearModal.classList.remove('open');
+        });
+
+        confirmClearBtn.addEventListener('click', () => {
+            editor.setValue('');
+            editor.clearHistory();
+            editor.focus();
+            clearModal.classList.remove('open');
+            showToast("Editor Cleared");
+        });
+
+        clearModal.addEventListener('click', (e) => {
+            if (e.target === clearModal) clearModal.classList.remove('open');
+        });
+
+        // --- Mobile Helper Bar ---
+        document.querySelectorAll('.helper-key').forEach(key => {
+            key.addEventListener('click', (e) => {
+                const char = key.getAttribute('data-char');
+                const doc = editor.getDoc();
+                const cursor = doc.getCursor();
+                
+                if (char === '()') {
+                    doc.replaceRange('()', cursor);
+                    doc.setCursor({line: cursor.line, ch: cursor.ch + 1});
+                } else if (char === '[]') {
+                    doc.replaceRange('[]', cursor);
+                    doc.setCursor({line: cursor.line, ch: cursor.ch + 1});
+                } else if (char === '{}') {
+                    doc.replaceRange('{}', cursor);
+                    doc.setCursor({line: cursor.line, ch: cursor.ch + 1});
+                } else if (char === '""') {
+                    doc.replaceRange('""', cursor);
+                    doc.setCursor({line: cursor.line, ch: cursor.ch + 1});
+                } else if (char === "''") {
+                    doc.replaceRange("''", cursor);
+                    doc.setCursor({line: cursor.line, ch: cursor.ch + 1});
+                } else if (char === "cout") {
+                    doc.replaceRange('cout << ', cursor);
+                    doc.setCursor({line: cursor.line, ch: cursor.ch + 8});
+                } else {
+                    doc.replaceRange(char, cursor);
+                }
+                editor.focus();
+            });
+        });
+
+        // --- Download Button ---
+        downloadBtn.addEventListener('click', () => {
+            const code = editor.getValue();
+            const blob = new Blob([code], { type: 'text/x-c++src' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'main.cpp';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showToast("Downloaded main.cpp");
         });
 
         window.addEventListener('load', async () => {
@@ -342,7 +663,7 @@ int main() {
 
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        codeInput.value = data.code;
+                        editor.setValue(data.code);
                         
                         // Restore Output if it exists
                         if (data.output && term) {
@@ -350,7 +671,7 @@ int main() {
                             term.write(data.output.replace(/\n/g, '\r\n'));
                             term.write('\r\n\x1b[38;2;115;115;115m> ----------------\x1b[0m\r\n');
                         }
-                        
+
                         toast.textContent = "Code loaded successfully";
                     } else {
                         toast.textContent = "Shared code not found";
@@ -358,7 +679,6 @@ int main() {
                     setTimeout(() => toast.classList.remove('show'), 3000);
                 } catch (e) {
                     console.error("Fetch error:", e);
-                    // More descriptive error for user
                     if (e.code === 'permission-denied') {
                          toast.textContent = "Error: Database Access Denied";
                     } else {
@@ -368,10 +688,9 @@ int main() {
                 }
             } else if (sharedCodeOld) {
                 // Fallback for Base64
-                try { codeInput.value = atob(sharedCodeOld); } 
+                try { editor.setValue(atob(sharedCodeOld)); } 
                 catch(e) {}
             }
-            
             setTimeout(connect, 500); 
         });
 
@@ -409,12 +728,12 @@ int main() {
                     let lineText = line.translateToString(true);
                     // Filter system messages
                     if(lineText.trim().startsWith("> [") || 
-                       lineText.trim().startsWith("> ./a.out") || 
                        lineText.includes("SYSTEM READY") || 
                        lineText.includes("ATTEMPTING") || 
                        lineText.includes("CONNECTION") || 
                        lineText.includes("PREVIOUS OUTPUT") || 
-                       lineText.includes("> ----------------")
+                       lineText.includes("> ----------------") ||
+                       lineText.includes("> ./a.out")
                        ) {
                         continue;
                     }
@@ -470,9 +789,11 @@ int main() {
                 const msg = JSON.parse(event.data);
                 if (msg.type === 'stdout') {
                     let text = msg.data;
-                    
-                    if (text.toLowerCase().includes("error:") || text.toLowerCase().includes("warning:")) {
-                        aiFixBtn.classList.remove('hidden');
+                    outputBuffer += text;
+
+                    // Trigger AI Overlay on Error
+                    if (outputBuffer.toLowerCase().includes("error") || outputBuffer.toLowerCase().includes("warning")) {
+                        aiSuggestion.classList.add('visible');
                     }
 
                     if (!text.includes('\r')) {
@@ -484,6 +805,10 @@ int main() {
                         const duration = (Date.now() - startTime) / 1000;
                         term.write(`\r\n\x1b[38;2;115;115;115m[Finished in ${duration.toFixed(3)}s]\x1b[0m\r\n`);
                     }
+                } else if (msg.type === 'ai_response') {
+                    handleAiResponse(msg.data);
+                } else if (msg.type === 'ai_error') {
+                    showAiError(msg.msg);
                 }
             };
         }
@@ -491,29 +816,18 @@ int main() {
         // --- Run Logic ---
         runBtn.addEventListener('click', () => {
             if (!socket || socket.readyState !== WebSocket.OPEN) return;
+            if (document.activeElement) document.activeElement.blur();
             
-            document.activeElement.blur();
             term.reset();
             currentLine = ""; 
-            aiFixBtn.classList.add('hidden');
+            outputBuffer = ""; 
+            aiSuggestion.classList.remove('visible'); 
             
-            let code = codeInput.value;
+            let code = editor.getValue();
             code = code.replace(/\u00A0/g, " ").replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
             
-            // Auto-inject std::cout.setf(std::ios::unitbuf); for C++
-            function injectAutoFlush(source) {
-                const mainRegex = /(int|void)\s+main\s*\([^)]*\)\s*\{/;
-                const match = source.match(mainRegex);
-                if (match) {
-                    const insertionPoint = match.index + match[0].length;
-                    return source.slice(0, insertionPoint) + "\n    std::cout.setf(std::ios::unitbuf); // Auto-injected" + source.slice(insertionPoint);
-                }
-                return source;
-            }
-            code = injectAutoFlush(code);
-
             startTime = Date.now();
-            term.write('\x1b[32m> ./a.out\x1b[0m\r\n');
+            term.write('\x1b[32m> g++ main.cpp -o main && ./main\x1b[0m\r\n');
 
             socket.send(JSON.stringify({
                 type: 'run',
@@ -524,35 +838,86 @@ int main() {
             term.focus();
         });
 
+        // --- AI Feature Logic ---
+        askAiLink.addEventListener('click', () => {
+            const errorContext = getTerminalContent();
+            const currentCode = editor.getValue();
+            
+            aiModal.classList.add('open');
+            aiLoading.classList.remove('hidden');
+            aiResult.classList.add('hidden');
+            aiErrorMsg.classList.add('hidden');
+            applyFixBtn.disabled = true;
+
+            socket.send(JSON.stringify({
+                type: 'ai_fix',
+                code: currentCode,
+                error: errorContext,
+                language: 'cpp'
+            }));
+        });
+
+        function handleAiResponse(data) {
+            aiLoading.classList.add('hidden');
+            aiResult.classList.remove('hidden');
+            aiExplanation.textContent = data.explanation;
+            aiCodePreview.textContent = data.fixed_code;
+            lastSuggestedCode = data.fixed_code;
+            applyFixBtn.disabled = false;
+        }
+
+        function showAiError(msg) {
+            aiLoading.classList.add('hidden');
+            aiErrorMsg.textContent = msg;
+            aiErrorMsg.classList.remove('hidden');
+        }
+
+        applyFixBtn.addEventListener('click', () => {
+            if (lastSuggestedCode) {
+                editor.setValue(lastSuggestedCode);
+                closeAiModal();
+                showToast("Fix Applied Successfully!");
+                aiSuggestion.classList.remove('visible');
+            }
+        });
+
+        function closeAiModal() {
+            aiModal.classList.remove('open');
+        }
+        closeModal.addEventListener('click', closeAiModal);
+        cancelFixBtn.addEventListener('click', closeAiModal);
+        aiModal.addEventListener('click', (e) => {
+            if (e.target === aiModal) closeAiModal();
+        });
+
         // --- Reset Logic ---
         resetBtn.addEventListener('click', () => {
             term.reset();
             currentLine = "";
+            outputBuffer = ""; 
+            aiSuggestion.classList.remove('visible');
             term.write(`\x1b[38;2;190;242;100m> CONNECTION ESTABLISHED.\x1b[0m\r\n> ./a.out\r\n`);
         });
 
         // --- Share Functionality with Firebase ---
         shareBtn.addEventListener('click', async () => {
-             // Original Share icon animation
             const originalIcon = shareBtn.innerHTML;
             shareBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             shareBtn.disabled = true;
 
             try {
-                // Robust Auth Check
                 if (!auth.currentUser) {
                     try {
                         await signInAnonymously(auth);
                     } catch (authError) {
-                        console.warn("Anonymous auth failed (proceeding to unauthenticated write attempt):", authError.code);
+                        console.warn("Anonymous auth failed:", authError.code);
                     }
                 }
 
-                const code = codeInput.value;
+                const code = editor.getValue();
                 const output = getTerminalContent();
                 const shareId = generateId();
                 
-                // Save to Firestore
                 await setDoc(doc(db, "shares", shareId), {
                     code: code,
                     language: 'cpp',
@@ -560,13 +925,11 @@ int main() {
                     createdAt: new Date().toISOString()
                 });
 
-                // Generate URL
                 const url = new URL(window.location.href);
                 url.searchParams.delete('code');
                 url.searchParams.set('share', shareId);
                 const shareUrl = url.toString();
 
-                // Share or Copy
                 if (navigator.share) {
                     try {
                         await navigator.share({
@@ -623,10 +986,6 @@ int main() {
             }
             document.body.removeChild(textArea);
         }
-
-        aiFixBtn.addEventListener('click', () => {
-            showToast("AI Feature: Coming Soon via Backend Update");
-        });
 
         // Terminal Input
         term.onData((data) => {
