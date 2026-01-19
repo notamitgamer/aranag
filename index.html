@@ -6,7 +6,7 @@
 <meta name="google-site-verification" content="pwteHw44Ax3N2B1zkFzVJB7NIK0-xgQGRihK_vtZTF4" />
 <link rel="canonical" href="https://amit.is-a.dev/" />
 
-    <title>Amit Dutta</title>
+    <title>Amit Dutta // Core Module</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -160,6 +160,10 @@
       }
       @keyframes glitch-anim-1 { 0% { clip-path: inset(20% 0 80% 0); } 100% { clip-path: inset(30% 0 20% 0); } }
       @keyframes glitch-anim-2 { 0% { clip-path: inset(10% 0 60% 0); } 100% { clip-path: inset(0% 0 90% 0); } }
+      @keyframes loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
 
       /* --- INTRO OVERLAY --- */
       #intro-overlay {
@@ -584,8 +588,8 @@
                     </div>
 
                     <!-- Card 5 -->
+                    <!--
                     <div class="project-card block p-8 rounded relative group overflow-hidden">
-                        <!-- BG Icon -->
                         <div class="card-icon-wrapper">
                             <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
                          </div>
@@ -594,13 +598,13 @@
                         <p class="text-neutral-400 text-sm leading-relaxed mb-6">
                             Custom trained deep learning model optimized for high accuracy performance.
                         </p>
-                        <!-- Button -->
                         <div class="relative z-10">
                             <a href="https://ada.amit.is-a.dev" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
                                 DEMO
                             </a>
                         </div>
                     </div>
+                -->
 
                     <!-- Card 6 -->
                     <div class="project-card block p-8 rounded relative group overflow-hidden border-lime-900/30">
@@ -608,7 +612,7 @@
                         <div class="card-icon-wrapper">
                             <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
                          </div>
-                        <div class="font-mono text-neutral-600 text-xs mb-4">006</div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">005</div>
                         <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">ESAL-1.0 License</h3>
                         <p class="text-neutral-400 text-sm leading-relaxed mb-6">
                             Educational Source-Available License. Strict Non-Submission & Anti-Plagiarism Clause.
@@ -620,6 +624,35 @@
                             </a>
                         </div>
                     </div>
+                    <div class="project-card p-8 rounded opacity-60 grayscale border-dashed border-neutral-700">
+    <div class="project-card p-8 rounded border-dashed border-red-900/30 bg-red-950/5 relative overflow-hidden group">
+    <div class="absolute inset-0 opacity-10 bg-[red] mix-blend-overlay group-hover:animate-pulse pointer-events-none"></div>
+    
+    <div class="flex justify-between items-center mb-4 font-mono text-[10px] tracking-widest">
+        <span class="text-red-500 animate-pulse">● SYSTEM_ERROR</span>
+        <span class="text-neutral-600">ID: [ REDACTED ]</span>
+    </div>
+
+    <h3 class="text-xl text-neutral-400 font-bold mb-2 relative inline-block">
+        Project Ada
+        <span class="absolute inset-x-0 top-1/2 h-[2px] bg-red-600/50 -rotate-2"></span>
+    </h3>
+
+    <p class="text-neutral-500 text-sm leading-relaxed mb-6 font-mono">
+        This experimental module has been de-indexed due to unexpected
+        <span class="text-red-400/80">logical_errors</span> 
+        in the neural core.
+    </p>
+
+    <div class="flex items-center justify-between mt-auto">
+        <span class="text-[10px] font-mono text-red-500/70 uppercase tracking-tighter">
+            // STATUS: 404_NOT_FOUND
+        </span>
+        <div class="h-1 w-12 bg-red-900/30 overflow-hidden">
+            <div class="h-full bg-red-600 animate-[loading_2s_infinite]"></div>
+        </div>
+    </div>
+</div>
 
                 </div>
             </div>
@@ -629,7 +662,7 @@
         <section id="contact" data-loc="SECTOR 03: COMMS" class="py-32 px-6 md:px-12 lg:px-24 border-t border-white/5 bg-neutral-950">
             <div class="max-w-4xl mx-auto text-center">
                 <h2 class="text-5xl md:text-7xl font-heading font-bold text-white mb-8 tracking-tighter">
-                    Let's Build <span class="text-lime-300">Something.</span>
+                    Let's_Build_<span class="text-lime-300">Something.</span>
                 </h2>
                 <p class="text-neutral-400 text-lg mb-12 max-w-xl mx-auto">
                     Available for collaborations, coffee chats, or discussing the future of AI.
