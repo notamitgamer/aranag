@@ -2,9 +2,9 @@
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="google-site-verification" content="pwteHw44Ax3N2B1zkFzVJB7NIK0-xgQGRihK_vtZTF4" />
-<link rel="canonical" href="https://amit.is-a.dev/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="google-site-verification" content="pwteHw44Ax3N2B1zkFzVJB7NIK0-xgQGRihK_vtZTF4" />
+    <link rel="canonical" href="https://amit.is-a.dev/" />
 
     <title>Amit Dutta // Core Module</title>
     
@@ -68,7 +68,8 @@
       .stagger-visualizer {
         display: grid;
         gap: 16px;
-        width: 750px;
+        width: 100%;
+        max-width: 750px; /* Changed from width: 750px to allow shrinking */
         height: auto;
         transform: rotateX(45deg) rotateZ(45deg);
         transform-style: preserve-3d;
@@ -85,7 +86,10 @@
       }
 
       @media (max-width: 768px) {
-        .stagger-visualizer { width: 100vw; gap: 8px; }
+        .stagger-visualizer { 
+            gap: 8px; 
+            transform: rotateX(45deg) rotateZ(45deg) scale(0.8); /* Scale down slightly on mobile */
+        }
         .stagger-visualizer .dot { border-radius: 2px; }
       }
 
@@ -173,16 +177,6 @@
       .log-line {
         font-family: 'JetBrains Mono', monospace; color: var(--accent);
         font-size: 0.8rem; opacity: 0; margin-bottom: 0.25rem;
-      }
-
-      /* --- MOBILE WARNING OVERLAY --- */
-      #mobile-warning {
-        position: fixed; inset: 0; background-color: rgba(5, 5, 5, 0.95); z-index: 99;
-        display: none; flex-direction: column; align-items: center; justify-content: center;
-        padding: 2rem; text-align: center; backdrop-filter: blur(10px);
-      }
-      @media (max-width: 768px) {
-          #mobile-warning.active { display: flex; }
       }
 
       /* --- PROJECT CARD --- */
@@ -286,6 +280,9 @@
           pointer-events: none;
           letter-spacing: 0.1em;
       }
+      @media (max-width: 768px) {
+          #site-watermark { top: 1rem; right: 1rem; font-size: 0.65rem; }
+      }
 
     </style>
   </head>
@@ -363,27 +360,11 @@
         </div>
     </div>
 
-    <!-- Mobile Warning Overlay -->
-    <div id="mobile-warning">
-        <div class="max-w-xs border border-lime-300/30 bg-neutral-900/90 p-6 rounded-lg text-center backdrop-blur-md">
-            <div class="text-lime-300 mb-4">
-                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-            </div>
-            <h3 class="text-white font-heading font-bold text-xl mb-2">Desktop Recommended</h3>
-            <p class="text-neutral-400 text-sm mb-6 font-mono leading-relaxed">
-                This terminal experience is optimized for larger displays. For the full visual effect, please access via desktop.
-            </p>
-            <button id="dismiss-mobile" class="w-full py-3 bg-lime-300 text-black font-mono text-xs uppercase font-bold tracking-wider hover:bg-white transition-colors">
-                Proceed Anyway
-            </button>
-        </div>
-    </div>
-
     <!-- MAIN CONTENT -->
     <div id="main-content" class="relative">
         
         <!-- HERO SECTION -->
-        <section id="landing" data-loc="SECTOR 00: HOME" class="h-[100dvh] w-full flex flex-col justify-center px-6 md:px-12 lg:px-24 relative">
+        <section id="landing" data-loc="SECTOR 00: HOME" class="h-[100dvh] w-full flex flex-col justify-center px-6 md:px-12 lg:px-24 relative overflow-hidden">
             
             <!-- 3D Grid Animation (Restored Background) -->
             <div class="grid-wrapper">
@@ -399,16 +380,17 @@
                 
                 <div class="reveal-box">
                     <div class="glitch-wrapper">
-                        <h1 class="reveal-text glitch-text text-6xl md:text-8xl lg:text-[9rem] font-bold leading-[0.9] tracking-tighter text-white mb-2" data-text="AMIT DUTTA">
+                        <!-- Responsive Text Size Fix -->
+                        <h1 class="reveal-text glitch-text text-5xl sm:text-6xl md:text-8xl lg:text-[9rem] font-bold leading-[0.9] tracking-tighter text-white mb-2" data-text="AMIT DUTTA">
                             AMIT DUTTA
                         </h1>
                     </div>
                 </div>
                 
                 <div class="reveal-box mb-8">
-                    <h2 class="reveal-text text-2xl md:text-4xl lg:text-5xl font-light text-neutral-400 tracking-tight">
+                    <h2 class="reveal-text text-xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-neutral-400 tracking-tight">
                         Full Stack Developer & AI Enthusiast
-                        <span class="block text-xl md:text-2xl mt-2 text-lime-300/80 font-mono">
+                        <span class="block text-lg md:text-2xl mt-2 text-lime-300/80 font-mono">
                             // CS Undergrad (Acharya Prafulla Chandra College, Kolkata, IN)
                         </span>
                     </h2>
@@ -588,7 +570,7 @@
                     </div>
 
                     <!-- Card 5 -->
-                    <!--
+               
                     <div class="project-card block p-8 rounded relative group overflow-hidden">
                         <div class="card-icon-wrapper">
                             <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
@@ -604,7 +586,7 @@
                             </a>
                         </div>
                     </div>
-                -->
+                
 
                     <!-- Card 6 -->
                     <div class="project-card block p-8 rounded relative group overflow-hidden border-lime-900/30">
@@ -612,7 +594,7 @@
                         <div class="card-icon-wrapper">
                             <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
                          </div>
-                        <div class="font-mono text-neutral-600 text-xs mb-4">005</div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">006</div>
                         <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">ESAL-1.0 License</h3>
                         <p class="text-neutral-400 text-sm leading-relaxed mb-6">
                             Educational Source-Available License. Strict Non-Submission & Anti-Plagiarism Clause.
@@ -624,35 +606,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="project-card p-8 rounded opacity-60 grayscale border-dashed border-neutral-700">
-    <div class="project-card p-8 rounded border-dashed border-red-900/30 bg-red-950/5 relative overflow-hidden group">
-    <div class="absolute inset-0 opacity-10 bg-[red] mix-blend-overlay group-hover:animate-pulse pointer-events-none"></div>
-    
-    <div class="flex justify-between items-center mb-4 font-mono text-[10px] tracking-widest">
-        <span class="text-red-500 animate-pulse">● SYSTEM_ERROR</span>
-        <span class="text-neutral-600">ID: [ REDACTED ]</span>
-    </div>
-
-    <h3 class="text-xl text-neutral-400 font-bold mb-2 relative inline-block">
-        Project Ada
-        <span class="absolute inset-x-0 top-1/2 h-[2px] bg-red-600/50 -rotate-2"></span>
-    </h3>
-
-    <p class="text-neutral-500 text-sm leading-relaxed mb-6 font-mono">
-        This experimental module has been de-indexed due to unexpected
-        <span class="text-red-400/80">logical_errors</span> 
-        in the neural core.
-    </p>
-
-    <div class="flex items-center justify-between mt-auto">
-        <span class="text-[10px] font-mono text-red-500/70 uppercase tracking-tighter">
-            // STATUS: 404_NOT_FOUND
-        </span>
-        <div class="h-1 w-12 bg-red-900/30 overflow-hidden">
-            <div class="h-full bg-red-600 animate-[loading_2s_infinite]"></div>
-        </div>
-    </div>
-</div>
+                    
 
                 </div>
             </div>
@@ -746,7 +700,6 @@
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const introOverlay = document.getElementById('intro-overlay');
-            const mobileWarning = document.getElementById('mobile-warning');
             const skipHint = document.getElementById('skip-hint');
             
             let stepIndex = 0;
@@ -871,26 +824,12 @@
                     introOverlay.style.opacity = '0';
                     setTimeout(() => {
                         introOverlay.style.display = 'none';
-                        
-                        // Show Mobile Warning if applicable
-                        if (window.innerWidth < 768) {
-                            mobileWarning.classList.add('active');
-                        }
-                        
                         revealHero();
                         // Start Grid Animation after intro
                         startGridAnimation();
                     }, 800);
                 }, 500);
             }
-
-            // Mobile Warning Dismiss
-            document.getElementById('dismiss-mobile').addEventListener('click', () => {
-                mobileWarning.style.transition = 'opacity 0.5s ease';
-                mobileWarning.style.opacity = '0';
-                setTimeout(() => { mobileWarning.style.display = 'none'; }, 500);
-            });
-
 
             // --- 3. HERO REVEAL ANIMATION ---
             function revealHero() {
@@ -1147,9 +1086,9 @@
                 const isMobile = window.innerWidth < 768;
                 
                 // REDUCE GRID SIZE FOR MOBILE LAG FIX
-                // Desktop: 10x10 | Mobile: 10x10 (Consistent low resource usage as requested)
-                const gridCols = 10; 
-                const gridRows = 10;
+                // Desktop: 10x10 | Mobile: 5x5 for better fit and performance
+                const gridCols = isMobile ? 5 : 10; 
+                const gridRows = isMobile ? 5 : 10;
                 const numberOfElements = gridCols * gridRows;
 
                 visualizer.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
