@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="google-site-verification" content="pwteHw44Ax3N2B1zkFzVJB7NIK0-xgQGRihK_vtZTF4" />
+    <link rel="canonical" href="https://amit.is-a.dev/" />
+
+    <title>Amit Dutta // Core Module</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <style>
+      :root {
+        --bg-main: #050505;
+        --accent: #bef264; /* Lime 300 */
+        --accent-dim: rgba(190, 242, 100, 0.1);
+        --text-muted: #737373;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --grid-color: #27272a;
+      }
+
+      body {
+        background-color: var(--bg-main);
+        color: #f5f5f5;
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+      }
+
+      h1, h2, h3, .font-heading { font-family: 'Space Grotesk', sans-serif; }
+      .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+      /* --- NOISE TEXTURE --- */
+      .bg-noise {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none; z-index: 9998; opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      /* --- CANVAS BACKGROUND --- */
+      #particle-canvas {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1; opacity: 0.4; pointer-events: none;
+      }
+
+      /* --- 3D GRID ANIMATION --- */
+      .grid-wrapper {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: -2;
+        transform-style: preserve-3d;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .stagger-visualizer {
+        display: grid;
+        gap: 16px;
+        width: 100%;
+        max-width: 750px; /* Changed from width: 750px to allow shrinking */
+        height: auto;
+        transform: rotateX(45deg) rotateZ(45deg);
+        transform-style: preserve-3d;
+        opacity: 0.2;
+      }
+
+      .stagger-visualizer .dot {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1;
+        background-color: var(--grid-color);
+        border-radius: 4px;
+        will-change: transform;
+      }
+
+      @media (max-width: 768px) {
+        .stagger-visualizer { 
+            gap: 8px; 
+            transform: rotateX(45deg) rotateZ(45deg) scale(0.8); /* Scale down slightly on mobile */
+        }
+        .stagger-visualizer .dot { border-radius: 2px; }
+      }
+
+      /* --- SCROLL PROGRESS --- */
+      #scroll-progress {
+        position: fixed; top: 0; left: 0; height: 2px;
+        background: var(--accent); width: 0%; z-index: 1000;
+        transition: width 0.1s; box-shadow: 0 0 10px var(--accent);
+      }
+
+      /* --- CRT SCANLINE --- */
+      .crt-scanline {
+        position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+        background: rgba(190, 242, 100, 0.1); opacity: 0.5;
+        pointer-events: none; z-index: 9997;
+        animation: scanline 8s linear infinite;
+      }
+      @keyframes scanline { 0% { top: -10vh; } 100% { top: 110vh; } }
+
+      /* --- CURSOR --- */
+      body.custom-cursor-active, body.custom-cursor-active * { cursor: none !important; }
+      .cursor-dot {
+        position: fixed; top: 0; left: 0; width: 0; height: 0;
+        z-index: 9999; pointer-events: none; will-change: transform; display: none; 
+      }
+      body.custom-cursor-active .cursor-dot { display: block; }
+      .cursor-dot::after {
+        content: ""; display: block; width: 10px; height: 10px;
+        background-color: var(--accent);
+        transform: translate(-50%, -50%) rotate(45deg);
+        mix-blend-mode: difference;
+      }
+      .click-ripple {
+        position: fixed; border: 1px solid var(--accent); border-radius: 50%;
+        transform: translate(-50%, -50%); pointer-events: none; z-index: 9998;
+        animation: ripple 0.6s ease-out forwards;
+      }
+      @keyframes ripple {
+        0% { width: 0; height: 0; opacity: 1; }
+        100% { width: 50px; height: 50px; opacity: 0; }
+      }
+
+      @media (max-width: 768px), (hover: none) { 
+        .cursor-dot { display: none !important; } 
+        body.custom-cursor-active, body.custom-cursor-active * { cursor: auto !important; }
+      }
+
+      /* --- UTILITIES & REVEALS --- */
+      .reveal-box { overflow: hidden; display: block; }
+      .reveal-text {
+        display: block; transform: translateY(100%); opacity: 0;
+        transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+        will-change: transform;
+      }
+      .reveal-text.visible { transform: translateY(0); opacity: 1; }
+
+      /* --- GLITCH TITLE --- */
+      .glitch-wrapper { position: relative; display: inline-block; }
+      .glitch-text { position: relative; color: white; }
+      .glitch-wrapper:hover .glitch-text::before,
+      .glitch-wrapper:hover .glitch-text::after {
+        content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: var(--bg-main);
+      }
+      .glitch-wrapper:hover .glitch-text::before {
+        left: 2px; text-shadow: -1px 0 #ff00c1; clip-path: inset(44% 0 61% 0);
+        animation: glitch-anim-1 0.4s infinite linear alternate-reverse;
+      }
+      .glitch-wrapper:hover .glitch-text::after {
+        left: -2px; text-shadow: -1px 0 #00fff9; clip-path: inset(50% 0 30% 0);
+        animation: glitch-anim-2 0.4s infinite linear alternate-reverse;
+      }
+      @keyframes glitch-anim-1 { 0% { clip-path: inset(20% 0 80% 0); } 100% { clip-path: inset(30% 0 20% 0); } }
+      @keyframes glitch-anim-2 { 0% { clip-path: inset(10% 0 60% 0); } 100% { clip-path: inset(0% 0 90% 0); } }
+      @keyframes loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+      /* --- INTRO OVERLAY --- */
+      #intro-overlay {
+        position: fixed; inset: 0; background-color: #000; z-index: 100;
+        display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem;
+      }
+      .log-line {
+        font-family: 'JetBrains Mono', monospace; color: var(--accent);
+        font-size: 0.8rem; opacity: 0; margin-bottom: 0.25rem;
+      }
+
+      /* --- PROJECT CARD --- */
+      .project-card {
+        border: 1px solid var(--border-color);
+        background: rgba(255,255,255,0.02);
+        transition: border-color 0.3s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        position: relative; overflow: hidden; transform-style: preserve-3d;
+      }
+      .project-card.is-tilting { transition: border-color 0.3s ease, transform 0.05s linear; }
+      .project-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+      .project-card::after {
+        content: ""; position: absolute; top: -100%; left: 0; width: 100%; height: 50%;
+        background: linear-gradient(to bottom, transparent, rgba(190, 242, 100, 0.1), transparent);
+        transition: top 0.5s ease; pointer-events: none;
+      }
+      .project-card:hover::after { top: 150%; transition: top 0.8s ease-in-out; }
+      
+      /* Card Icons (SVG Decoration) - Now using Lime Green */
+      .card-icon-wrapper {
+          position: absolute; right: -1.5rem; top: -1.5rem; padding: 1rem;
+          transform: rotate(12deg); opacity: 0.1;
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+          pointer-events: none;
+          color: var(--accent); /* Force theme color */
+      }
+      .project-card:hover .card-icon-wrapper {
+          transform: rotate(15deg) scale(1.1) translateZ(30px);
+          opacity: 0.3;
+      }
+      
+      /* --- CIRCULAR PHOTO --- */
+      #photo-container { position: relative; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+      .data-ring {
+        position: absolute; inset: -15px; border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 50%; animation: spin 20s linear infinite; 
+        transition: border-color 0.5s ease, inset 0.5s ease;
+      }
+      #photo-container:hover .data-ring { border-color: var(--accent); inset: -25px; }
+      #photo-img {
+        border-radius: 50%; filter: grayscale(100%);
+        transition: filter 0.6s ease, transform 0.6s ease;
+      }
+      #photo-container:hover #photo-img { filter: grayscale(0%); transform: scale(1.05); }
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+      /* --- MAGNETIC BUTTONS --- */
+      .magnetic-btn {
+        transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.3s, color 0.3s;
+        will-change: transform;
+      }
+
+      /* --- TOGGLE SWITCH ANIMATION --- */
+      .toggle-checkbox {
+          transition: left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      /* When checked, move the knob (dot) to the right */
+      .toggle-checkbox:checked {
+          left: calc(100% - 18px) !important; /* Moves knob to the end minus width/padding */
+          border-color: var(--accent);
+      }
+      /* Change track background when active */
+      .toggle-checkbox:checked + .toggle-label {
+          background-color: var(--accent);
+          border-color: var(--accent);
+      }
+      
+      /* --- SIDEBAR NAV DOTS --- */
+      .nav-dots {
+        position: fixed; right: 2rem; top: 50%; transform: translateY(-50%);
+        display: flex; flex-direction: column; gap: 1rem; z-index: 50;
+      }
+      .nav-dot {
+        width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%;
+        transition: background 0.3s, transform 0.3s; cursor: pointer;
+      }
+      .nav-dot.active { background: var(--accent); transform: scale(1.5); }
+      @media (max-width: 1024px) { .nav-dots { display: none; } }
+
+      /* --- BACK TO TOP BUTTON --- */
+      #back-to-top {
+        position: fixed; bottom: 6rem; right: 1.5rem;
+        background: var(--bg-main); border: 1px solid var(--border-color);
+        color: var(--accent); width: 40px; height: 40px;
+        display: flex; justify-content: center; align-items: center;
+        border-radius: 50%; cursor: pointer; z-index: 40;
+        opacity: 0; transform: translateY(20px); transition: all 0.3s;
+      }
+      #back-to-top.visible { opacity: 1; transform: translateY(0); }
+      #back-to-top:hover { border-color: var(--accent); transform: scale(1.1); }
+
+      /* --- SITE WATERMARK --- */
+      #site-watermark {
+          position: fixed;
+          top: 1.5rem;
+          right: 1.5rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.75rem;
+          color: rgba(255, 255, 255, 0.3);
+          z-index: 40;
+          pointer-events: none;
+          letter-spacing: 0.1em;
+      }
+      @media (max-width: 768px) {
+          #site-watermark { top: 1rem; right: 1rem; font-size: 0.65rem; }
+      }
+
+    </style>
+  </head>
+  <body class="antialiased selection:bg-lime-300 selection:text-black custom-cursor-active">
+
+    <!-- NOISE OVERLAY -->
+    <div class="bg-noise"></div>
+    
+    <!-- CRT SCANLINE (Atmospheric) -->
+    <div class="crt-scanline"></div>
+
+    <!-- PARTICLE CANVAS BACKGROUND -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- SITE WATERMARK -->
+    <div id="site-watermark" align = "right">amit.is-a.dev</div>
+
+    <!-- Scroll Progress Bar -->
+    <div id="scroll-progress"></div>
+
+    <!-- Cursor & Click Effect -->
+    <div class="cursor-dot"></div>
+
+    <!-- SYSTEM HUD -->
+    <!-- z-index increased to 60 to stay above scroll indicator if overlap occurs, though positioning prevents it mostly -->
+    <div id="sys-hud" class="fixed bottom-6 left-6 z-[60] hidden md:flex items-center gap-4 font-mono text-[10px] text-lime-300 bg-neutral-900/80 backdrop-blur border border-white/10 px-4 py-2 rounded-full uppercase tracking-wider">
+        <div class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-lime-300 rounded-full animate-pulse"></span>
+            <span id="sys-loc">SYS.LOC // [ INITIALIZING ]</span>
+        </div>
+        <div class="h-3 w-px bg-white/20"></div>
+        <div id="sys-time">00:00:00 UTC</div>
+    </div>
+
+    <!-- Toggle Switch -->
+    <div class="fixed bottom-6 right-6 z-50 hidden md:flex items-center gap-3 bg-neutral-900/80 backdrop-blur border border-white/10 p-2 rounded-full">
+        <span class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider pl-2">Cursor</span>
+        <div class="relative inline-block w-10 h-5 align-middle select-none">
+            <input type="checkbox" name="toggle" id="cursor-toggle" class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-2 border-neutral-300 appearance-none cursor-pointer z-10" style="top: 2px; left: 2px;" checked/>
+            <label for="cursor-toggle" class="toggle-label block overflow-hidden h-full rounded-full bg-neutral-700 cursor-pointer border border-neutral-600 transition-colors duration-300"></label>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigation Dots -->
+    <div class="nav-dots">
+        <a href="#landing" class="nav-dot active" data-target="landing"></a>
+        <a href="#about" class="nav-dot" data-target="about"></a>
+        <a href="#projects" class="nav-dot" data-target="projects"></a>
+        <a href="#contact" class="nav-dot" data-target="contact"></a>
+    </div>
+
+    <!-- Back To Top -->
+    <button id="back-to-top" class="magnetic-btn" aria-label="Back to Top">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+    </button>
+
+    <!-- Intro Sequence -->
+    <div id="intro-overlay">
+        <!-- Added Skip Hint (Hidden by default) -->
+        <div id="skip-hint" class="absolute top-8 left-0 w-full text-center text-neutral-500 font-mono text-xs uppercase hidden animate-pulse cursor-pointer">
+            Click anywhere to skip booting
+        </div>
+
+        <div class="max-w-md w-full mb-8 pointer-events-none">
+            <div id="logs-container" class="mb-4 h-32 flex flex-col justify-end overflow-hidden">
+                <!-- Logs injected via JS -->
+            </div>
+            <div class="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-lime-300 w-0 transition-all duration-300 ease-out"></div>
+            </div>
+            <div class="flex justify-between mt-2 text-xs font-mono text-neutral-500 uppercase">
+                <span>System Boot</span>
+                <span id="progress-text">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main-content" class="relative">
+        
+        <!-- HERO SECTION -->
+        <section id="landing" data-loc="SECTOR 00: HOME" class="h-[100dvh] w-full flex flex-col justify-center px-6 md:px-12 lg:px-24 relative overflow-hidden">
+            
+            <!-- 3D Grid Animation (Restored Background) -->
+            <div class="grid-wrapper">
+                <div class="stagger-visualizer"></div>
+            </div>
+
+            <div class="max-w-5xl z-10">
+                <div class="reveal-box mb-4">
+                    <p class="reveal-text font-mono text-lime-300 text-sm md:text-base tracking-widest uppercase">
+                        // System Online
+                    </p>
+                </div>
+                
+                <div class="reveal-box">
+                    <div class="glitch-wrapper">
+                        <!-- Responsive Text Size Fix -->
+                        <h1 class="reveal-text glitch-text text-5xl sm:text-6xl md:text-8xl lg:text-[9rem] font-bold leading-[0.9] tracking-tighter text-white mb-2" data-text="AMIT DUTTA">
+                            AMIT DUTTA
+                        </h1>
+                    </div>
+                </div>
+                
+                <div class="reveal-box mb-8">
+                    <h2 class="reveal-text text-xl sm:text-2xl md:text-4xl lg:text-5xl font-light text-neutral-400 tracking-tight">
+                        Full Stack Developer & AI Enthusiast
+                        <span class="block text-lg md:text-2xl mt-2 text-lime-300/80 font-mono">
+                            // CS Undergrad (Acharya Prafulla Chandra College, Kolkata, IN)
+                        </span>
+                    </h2>
+                </div>
+
+                <div class="reveal-box mt-8">
+                    <div class="reveal-text h-px w-24 bg-lime-300"></div>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <!-- Adjusted bottom on desktop to avoid HUD overlap -->
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 md:left-12 md:bottom-24 md:translate-x-0 flex items-center gap-4 text-neutral-500 font-mono text-xs uppercase animate-pulse z-10">
+                <span>Scroll to Explore</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </div>
+        </section>
+
+        <!-- ABOUT SECTION -->
+        <section id="about" data-loc="SECTOR 01: PROFILE" class="py-24 px-6 md:px-12 lg:px-24 border-t border-white/5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center max-w-6xl">
+                
+                <!-- Text -->
+                <div class="order-2 md:order-1">
+                    <div class="font-mono text-lime-300 text-xs mb-6 uppercase tracking-wider decrypt-text" data-value="01 / Profile">01 / Profile</div>
+                    <h3 class="text-3xl md:text-4xl font-heading font-bold mb-6 text-white leading-tight">
+                        Building digital architecture with <span class="text-neutral-500">precision</span> and <span class="text-neutral-500">purpose</span>.
+                    </h3>
+                    <div class="space-y-4 text-neutral-400 text-lg font-light leading-relaxed">
+                        <p>I am a Computer Science undergraduate at <strong class="text-white font-normal">Acharya Prafulla Chandra College, Kolkata, IN</strong>, blurring the lines between web development and artificial intelligence.</p>
+                        <p>My work involves creating specialized tools like the <a href="#" class="text-lime-300 hover:underline">ADPKG</a> library and maintaining the WBSU Code Repository. I believe in clean code, efficiency, and brutalist aesthetics.</p>
+                    </div>
+                    
+                    <div class="mt-8 flex gap-8 font-mono text-xs text-neutral-500">
+                        <div>
+                            <span class="block text-white mb-1">LOCATION</span>
+                            Kolkata, IN
+                        </div>
+                        <div>
+                            <span class="block text-white mb-1">STACK</span>
+                            Python, Web
+                        </div>
+                    </div>
+                    
+                    <!-- NEW TECH STACK SECTION -->
+                    <div class="mt-8 pt-8 border-t border-white/5">
+                        <div class="font-mono text-lime-300 text-xs mb-4 uppercase tracking-wider">01.1 / Tech Stack</div>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono text-neutral-400">
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Python</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">C</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">C++</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">HTML5</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">CSS3</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">JavaScript</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Java</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Kotlin</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Google Script</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Markdown</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Firebase</span>
+                            <span class="px-2 py-1 border border-neutral-800 rounded bg-neutral-900/50 hover:border-lime-300 hover:text-lime-300 transition-colors cursor-default">Render</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Circular Photo -->
+                <div class="order-1 md:order-2 flex justify-center md:justify-end">
+                    <div id="photo-container" class="w-64 h-64 md:w-80 md:h-80 cursor-pointer group">
+                        <!-- Rotating Ring -->
+                        <div class="data-ring"></div>
+                        <!-- Image -->
+                        <img 
+                            id="photo-img"
+                            src="https://aranag.site/mypic.png" 
+                            alt="Amit Dutta" 
+                            class="w-full h-full object-cover relative z-10 border-2 border-transparent group-hover:border-lime-300/50 transition-colors duration-300"
+                            onerror="this.src='https://placehold.co/400x400/111/FFF?text=AD'"
+                        >
+                        <!-- Tech Tag -->
+                        <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-mono text-[10px] text-lime-300 bg-neutral-900/80 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 border border-lime-300/20">
+                            IMG_AMIT.RAW
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS SECTION -->
+        <section id="projects" data-loc="SECTOR 02: WORKS" class="py-24 px-6 md:px-12 lg:px-24 bg-neutral-900/30 border-t border-white/5">
+            <div class="max-w-6xl">
+                <div class="flex items-end justify-between mb-16">
+                    <div>
+                        <div class="font-mono text-lime-300 text-xs mb-2 uppercase tracking-wider decrypt-text" data-value="02 / Selected Works">02 / Selected Works</div>
+                        <h2 class="text-4xl md:text-5xl font-heading font-bold text-white">Project Protocol</h2>
+                    </div>
+                    <a href="https://github.com/notamitgamer" class="hidden md:block font-mono text-xs text-neutral-500 hover:text-white transition-colors uppercase">[ View Github ]</a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Card 1 -->
+                    <div class="project-card block p-8 rounded relative group overflow-hidden">
+                        <!-- BG Icon -->
+                        <div class="card-icon-wrapper">
+                             <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+                        </div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">001</div>
+                        <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">Interactive Calculator</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed mb-6">
+                            A responsive number system converter handling Binary, Decimal, Octal, and Hex operations.
+                        </p>
+                        <!-- Button -->
+                        <div class="relative z-10">
+                            <a href="/codenct" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
+                                INITIATE
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="project-card block p-8 rounded relative group overflow-hidden">
+                        <!-- BG Icon -->
+                        <div class="card-icon-wrapper">
+                            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M7 2h10l3.5 6H3.5L7 2zm13.5 8H3.5L2 22h20l-1.5-12zM5 20l1-8h12l1 8H5z"/></svg>
+                        </div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">002</div>
+                        <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">ADPKG Library</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed mb-6">
+                            Python toolkit for complex math: compound interest, number theory, matrices, and stats.
+                        </p>
+                        <!-- Button -->
+                        <div class="relative z-10">
+                            <a href="https://pypi.org/project/adpkg/" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
+                                PIP INSTALL
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="project-card block p-8 rounded relative group overflow-hidden">
+                        <!-- BG Icon -->
+                        <div class="card-icon-wrapper">
+                             <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm4 4h6v2H9V9zm0 4h6v2H9v-2z"/></svg>
+                        </div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">003</div>
+                        <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">Compiler</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed mb-6">
+                            Online compiler powered by Render Backend. Supports C, C++, and Python. Fully rewritten by Gemini 3.
+                        </p>
+                        <!-- Button -->
+                        <div class="relative z-10">
+                            <a href="https://compiler.amit.is-a.dev" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
+                                COMPILE
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 (Two Links Version) -->
+                    <div class="project-card block p-8 rounded relative group overflow-hidden">
+                        <!-- BG Icon -->
+                        <div class="card-icon-wrapper">
+                            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H5V4h14v16zm-7-2h5v-2h-5v2zm0-4h5v-2h-5v2zm0-4h5V8h-5v2zM7 8h4v12H7V8z"/></svg>
+                        </div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">004</div>
+                        <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">WBSU Repository</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed mb-6">
+                            Complete collection of B.Sc. Hons Computer Science practical codes and assignments.
+                        </p>
+                        <!-- Dual Buttons -->
+                        <div class="flex gap-3 relative z-10">
+                            <a href="https://amit.is-a.dev/bsc" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded">
+                                LIVE SITE
+                            </a>
+                            <a href="https://github.com/notamitgamer/bsc" class="px-4 py-2 bg-neutral-800 hover:bg-white hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded">
+                                GITHUB
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 5 -->
+               
+                    <div class="project-card block p-8 rounded relative group overflow-hidden">
+                        <div class="card-icon-wrapper">
+                            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                         </div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">005</div>
+                        <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">Project ADA</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed mb-6">
+                            Custom trained deep learning model optimized for high accuracy performance.
+                        </p>
+                        <div class="relative z-10">
+                            <a href="https://ada.amit.is-a.dev" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
+                                DEMO
+                            </a>
+                        </div>
+                    </div>
+                
+
+                    <!-- Card 6 -->
+                    <div class="project-card block p-8 rounded relative group overflow-hidden border-lime-900/30">
+                        <!-- BG Icon -->
+                        <div class="card-icon-wrapper">
+                            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                         </div>
+                        <div class="font-mono text-neutral-600 text-xs mb-4">006</div>
+                        <h3 class="text-xl text-white font-bold mb-2 group-hover:text-lime-300 transition-colors">ESAL-1.0 License</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed mb-6">
+                            Educational Source-Available License. Strict Non-Submission & Anti-Plagiarism Clause.
+                        </p>
+                        <!-- Button -->
+                        <div class="relative z-10">
+                            <a href="https://esal.amit.is-a.dev" class="px-4 py-2 bg-neutral-800 hover:bg-lime-300 hover:text-black text-xs font-mono border border-neutral-700 transition-colors uppercase rounded inline-block">
+                                READ DOCS
+                            </a>
+                        </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section id="contact" data-loc="SECTOR 03: COMMS" class="py-32 px-6 md:px-12 lg:px-24 border-t border-white/5 bg-neutral-950">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-5xl md:text-7xl font-heading font-bold text-white mb-8 tracking-tighter">
+                    Let's_<span class="text-lime-300">Talk.</span>
+                </h2>
+                <p class="text-neutral-400 text-lg mb-12 max-w-xl mx-auto">
+                    Available for collaborations, coffee chats, or discussing the future of AI.
+                </p>
+                
+                <div class="flex flex-wrap justify-center gap-6 font-mono text-sm">
+                    <a href="https://github.com/notamitgamer" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">GITHUB</a>
+                    <a href="https://linkedin.com/in/notamitgamer" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">LINKEDIN</a>
+                    <a href="mailto:amitdutta4255@gmail.com" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">EMAIL</a>
+                    <a href="https://wa.me/917278779512?text=hi" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">WHATSAPP</a>
+                    <a href="https://facebook.com/notamitgamer" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">FACEBOOK</a>
+                    <a href="https://instagram.com/notamitgamer" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">INSTAGRAM</a>
+                    <a href="https://twitter.com/notamitgamer" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">X (TWITTER)</a>
+                    <a href="https://reddit.com/user/notamitgamer" class="magnetic-btn px-6 py-3 border border-neutral-800 rounded-full hover:bg-lime-300 hover:text-black hover:border-lime-300 transition-all duration-300">REDDIT</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-8 text-center text-neutral-600 font-mono text-[10px] uppercase border-t border-white/5 flex flex-col items-center gap-4">
+            <div>&copy; 2025 - 2026 Amit Dutta // All Systems Normal</div>
+            
+            <!-- Powered By Section -->
+            <div class="flex items-center gap-4 transition-opacity duration-300">
+                <span class="tracking-widest">Powered By</span>
+                <div class="h-4 w-px bg-neutral-700"></div>
+                
+                <!-- Anime.js -->
+                <a href="https://animejs.com/" target="_blank" rel="noopener noreferrer" class="hover:brightness-125 transition-all">
+                    <img src="animejs-logo.svg" alt="Anime.js" class="h-6 w-auto"> 
+                </a>
+
+                <!-- Tailwind CSS -->
+                <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer" class="hover:brightness-125 transition-all">
+                    <img src="tailwind-logo-dark.svg" alt="Tailwind CSS" class="h-4 w-auto">
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. UTILS ---
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            // Helper function for random string generation
+            const randomString = (length) => {
+                const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            };
+
+            // Helper for system detection
+            function getSystemInfo() {
+                const ua = navigator.userAgent;
+                let os = "Unknown OS";
+                let browser = randomString(10);
+                let device = "Desktop"; // Default guess
+
+                // Detect OS
+                if (ua.indexOf("Win") !== -1) os = "Windows";
+                else if (ua.indexOf("Mac") !== -1) os = "macOS";
+                else if (ua.indexOf("Linux") !== -1) os = "Linux";
+                else if (ua.indexOf("Android") !== -1) os = "Android";
+                else if (ua.indexOf("like Mac") !== -1) os = "iOS";
+
+                // Detect Device Category (Simple logic)
+                if (/Mobi|Android/i.test(ua)) {
+                    device = "Mobile Device";
+                } else if (/Tablet|iPad/i.test(ua)) {
+                    device = "Tablet";
+                }
+
+                return { os, browser, device };
+            }
+            
+            const sysInfo = getSystemInfo();
+            
+            // --- 2. INTRO SEQUENCE ---
+
+            const logs = [
+                "Initializing core modules...",
+                () => { // Special handling for loading assets typing
+                    return { type: 'typing', text: 'Loading assets: [', end: ']' };
+                },
+                "Optimizing viewport...",
+                `DETECTED_SYSTEM: [ ${sysInfo.os} // ${sysInfo.device} ]`,
+                `BROWSER_ID: [ ${sysInfo.browser} ]`,
+                "Connection established.",
+                "Access Granted."
+            ];
+            
+            const logContainer = document.getElementById('logs-container');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const introOverlay = document.getElementById('intro-overlay');
+            const skipHint = document.getElementById('skip-hint');
+            
+            let stepIndex = 0;
+            const stepBaseDelay = 400; // Delay between normal logs
+            
+            // Flags and Timers for Skipping
+            const hasVisited = localStorage.getItem('aranag_visited');
+            let isSkipping = false;
+            let currentLogTimeout = null;
+            let currentTypeInterval = null;
+
+            // Logic for Returning Visitors
+            if (hasVisited) {
+                // Show Skip Hint
+                skipHint.classList.remove('hidden');
+                
+                // Add Click Listener to Overlay
+                introOverlay.style.pointerEvents = "auto"; // Enable clicking on overlay
+                introOverlay.addEventListener('click', skipIntro);
+            }
+
+            function skipIntro() {
+                if (isSkipping) return;
+                isSkipping = true;
+
+                // Stop all timers instantly
+                if (currentLogTimeout) clearTimeout(currentLogTimeout);
+                if (currentTypeInterval) clearInterval(currentTypeInterval);
+
+                // Hide skip hint
+                skipHint.style.display = 'none';
+
+                // Add skip log
+                const p = document.createElement('div');
+                p.className = 'log-line text-lime-300';
+                p.textContent = "> Skipping booting...";
+                p.style.opacity = '1';
+                logContainer.appendChild(p);
+                logContainer.scrollTop = logContainer.scrollHeight;
+
+                // Max out progress
+                progressBar.style.width = '100%';
+                progressText.textContent = '100%';
+
+                // Short delay before finishing
+                setTimeout(finishIntro, 350);
+            }
+
+            function processNextLog() {
+                if (isSkipping || stepIndex >= logs.length) {
+                    if (!isSkipping) setTimeout(finishIntro, 500);
+                    return;
+                }
+
+                const logItem = logs[stepIndex];
+                const p = document.createElement('div');
+                p.className = 'log-line';
+                logContainer.appendChild(p);
+
+                // Update Progress (Dynamic per step)
+                const percent = Math.round(((stepIndex + 1) / logs.length) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${percent}%`;
+
+                if (typeof logItem === 'function') {
+                     const content = logItem();
+                     if (content.type === 'typing') {
+                        // Logic for "Loading assets: [......]"
+                        p.textContent = `> ${content.text}`;
+                        requestAnimationFrame(() => { p.style.opacity = '1'; });
+                        
+                        // Wait a bit then start typing random chars
+                        // We use a timeout to delay start, tracked by currentLogTimeout just in case
+                        currentLogTimeout = setTimeout(() => {
+                            if (isSkipping) return;
+                            
+                            let i = 0;
+                            const finalLength = 20;
+                            
+                            // Typing Interval
+                            currentTypeInterval = setInterval(() => {
+                                if (isSkipping) return;
+
+                                p.textContent = `> ${content.text}${randomString(i)}`;
+                                i++;
+                                if (i > finalLength) {
+                                    clearInterval(currentTypeInterval);
+                                    p.textContent = `> ${content.text}${randomString(finalLength)}${content.end}`;
+                                    stepIndex++;
+                                    currentLogTimeout = setTimeout(processNextLog, stepBaseDelay); 
+                                }
+                                logContainer.scrollTop = logContainer.scrollHeight;
+                            }, 50);
+
+                        }, 200); 
+                     }
+                } else {
+                    // Standard Log
+                    const text = logItem.startsWith('>') ? logItem : `> ${logItem}`;
+                    p.textContent = text;
+                    requestAnimationFrame(() => { p.style.opacity = '1'; });
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                    
+                    stepIndex++;
+                    currentLogTimeout = setTimeout(processNextLog, (Math.random() * 300) + stepBaseDelay);
+                }
+            }
+
+            // Start the sequence
+            // Store initial timeout in case they skip immediately upon load (unlikely but possible)
+            currentLogTimeout = setTimeout(processNextLog, 500);
+
+            function finishIntro() {
+                 // Set visited flag on finish
+                 localStorage.setItem('aranag_visited', 'true');
+                 
+                 // Remove listener to prevent clicks during fade out
+                 introOverlay.removeEventListener('click', skipIntro);
+
+                 setTimeout(() => {
+                    introOverlay.style.transition = 'opacity 0.8s ease';
+                    introOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        introOverlay.style.display = 'none';
+                        revealHero();
+                        // Start Grid Animation after intro
+                        startGridAnimation();
+                    }, 800);
+                }, 500);
+            }
+
+            // --- 3. HERO REVEAL ANIMATION ---
+            function revealHero() {
+                const reveals = document.querySelectorAll('#landing .reveal-text');
+                reveals.forEach((el, index) => {
+                    setTimeout(() => {
+                        el.classList.add('visible');
+                    }, index * 150);
+                });
+            }
+
+            // --- 4. HACKER TEXT DECRYPT (Reusable) ---
+            const decryptText = (target) => {
+                let iteration = 0;
+                let interval = null;
+                const originalText = target.dataset.value;
+                
+                clearInterval(interval);
+                interval = setInterval(() => {
+                    target.innerText = originalText.split("").map((letter, index) => {
+                        if(index < iteration) return originalText[index];
+                        return letters[Math.floor(Math.random() * 26)];
+                    }).join("");
+                    
+                    if(iteration >= originalText.length) clearInterval(interval);
+                    iteration += 1/2; // Speed
+                }, 30);
+            };
+
+            // --- 5. SCROLL OBSERVER (Content Reveal & Decrypt) ---
+            const observerOptions = { threshold: 0.1 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        
+                        // Trigger Decrypt if element has class
+                        if(entry.target.classList.contains('decrypt-text')) {
+                            decryptText(entry.target);
+                        }
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.decrypt-text').forEach(el => observer.observe(el));
+
+
+            // --- 6. SCROLL PROGRESS BAR ---
+            const scrollProgress = document.getElementById('scroll-progress');
+            window.addEventListener('scroll', () => {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (scrollTop / scrollHeight) * 100;
+                scrollProgress.style.width = scrolled + "%";
+            });
+
+            // --- 7. SYSTEM HUD (Location & Time) ---
+            const sysLoc = document.getElementById('sys-loc');
+            const sysTime = document.getElementById('sys-time');
+            const navDots = document.querySelectorAll('.nav-dot');
+            const sections = document.querySelectorAll('section');
+            
+            // Update Time
+            setInterval(() => {
+                const now = new Date();
+                sysTime.innerText = now.toISOString().split('T')[1].split('.')[0] + " UTC";
+            }, 1000);
+
+            // Update Location
+            const locObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        const locName = entry.target.getAttribute('data-loc');
+                        const id = entry.target.id;
+                        
+                        if(locName) sysLoc.innerText = `SYS.LOC // [ ${locName} ]`;
+                        
+                        // Update Nav Dots
+                        navDots.forEach(dot => {
+                            dot.classList.remove('active');
+                            if(dot.dataset.target === id) dot.classList.add('active');
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            sections.forEach(sec => locObserver.observe(sec));
+
+
+            // --- 8. STATIC CURSOR & RIPPLE ---
+            const cursorDot = document.querySelector(".cursor-dot");
+            const cursorToggle = document.getElementById('cursor-toggle');
+            const body = document.body;
+
+            window.addEventListener("mousemove", (e) => {
+                if (!document.body.classList.contains('custom-cursor-active')) return;
+                const posX = e.clientX;
+                const posY = e.clientY;
+                cursorDot.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+            });
+            
+            // Click Ripple Effect
+            window.addEventListener("mousedown", (e) => {
+                if (!document.body.classList.contains('custom-cursor-active')) return;
+                const ripple = document.createElement("div");
+                ripple.className = "click-ripple";
+                ripple.style.left = `${e.clientX}px`;
+                ripple.style.top = `${e.clientY}px`;
+                document.body.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+
+            cursorToggle.addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    body.classList.add('custom-cursor-active');
+                } else {
+                    body.classList.remove('custom-cursor-active');
+                }
+            });
+            
+            // Toggle Animation Fix - handled via CSS, but JS ensures initial state matches
+            const toggleInput = document.getElementById('cursor-toggle');
+            // Logic handled by CSS .toggle-checkbox:checked 
+
+            // --- 9. MAGNETIC BUTTONS (Desktop Only) ---
+            if (window.innerWidth > 768) {
+                document.querySelectorAll('.magnetic-btn').forEach(btn => {
+                    btn.addEventListener('mousemove', (e) => {
+                        const rect = btn.getBoundingClientRect();
+                        const x = e.clientX - rect.left - rect.width / 2;
+                        const y = e.clientY - rect.top - rect.height / 2;
+                        btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+                    });
+                    btn.addEventListener('mouseleave', () => {
+                        btn.style.transform = 'translate(0, 0)';
+                    });
+                });
+            }
+
+            // --- 10. 3D TILT EFFECT (Desktop Only) ---
+            if (window.innerWidth > 768) {
+                const cards = document.querySelectorAll('.project-card');
+                
+                cards.forEach(card => {
+                    card.addEventListener('mouseenter', () => {
+                        card.classList.add('is-tilting'); 
+                    });
+                    
+                    card.addEventListener('mousemove', (e) => {
+                        const rect = card.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        
+                        const rotateX = ((y - centerY) / centerY) * -5; 
+                        const rotateY = ((x - centerX) / centerX) * 5;
+                        
+                        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) scale(1.02)`;
+                    });
+                    
+                    card.addEventListener('mouseleave', () => {
+                        card.classList.remove('is-tilting');
+                        card.style.transform = 'translateY(0) scale(1) rotateX(0) rotateY(0)';
+                    });
+                });
+            }
+            
+            // --- 11. BACK TO TOP BUTTON ---
+            const backToTopBtn = document.getElementById('back-to-top');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 500) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // --- 12. PARTICLE NETWORK BACKGROUND ---
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let width, height;
+
+            // Resize
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            window.addEventListener('resize', () => {
+                resize();
+                initParticles();
+            });
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5; // Slow velocity
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.size = Math.random() * 2;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if(this.x < 0) this.x = width;
+                    if(this.x > width) this.x = 0;
+                    if(this.y < 0) this.y = height;
+                    if(this.y > height) this.y = 0;
+                }
+                draw() {
+                    ctx.fillStyle = 'rgba(190, 242, 100, 0.3)'; // Lime tint
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                // Reduce count on mobile for performance
+                const count = window.innerWidth < 768 ? 30 : 80;
+                for(let i=0; i<count; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles();
+            animateParticles();
+
+            // --- 13. 3D GRID ANIMATION (Optimized) ---
+            function startGridAnimation() {
+                const visualizer = document.querySelector('.stagger-visualizer');
+                const fragment = document.createDocumentFragment();
+                
+                // DETECT MOBILE
+                const isMobile = window.innerWidth < 768;
+                
+                // REDUCE GRID SIZE FOR MOBILE LAG FIX
+                // Desktop: 10x10 | Mobile: 5x5 for better fit and performance
+                const gridCols = isMobile ? 5 : 10; 
+                const gridRows = isMobile ? 5 : 10;
+                const numberOfElements = gridCols * gridRows;
+
+                visualizer.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+                visualizer.innerHTML = ''; 
+
+                for (let i = 0; i < numberOfElements; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('dot');
+                    fragment.appendChild(dot);
+                }
+                visualizer.appendChild(fragment);
+
+                const animation = anime.timeline({
+                    targets: '.stagger-visualizer .dot',
+                    easing: 'easeInOutSine',
+                    delay: anime.stagger(50), 
+                    loop: true,
+                    autoplay: false 
+                });
+
+                animation
+                .add({
+                    translateX: [
+                        {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) },
+                        {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'x'}) }
+                    ],
+                    translateY: [
+                        {value: anime.stagger('-.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) },
+                        {value: anime.stagger('.5rem', {grid: [gridCols, gridRows], from: 'center', axis: 'y'}) }
+                    ],
+                    duration: 1000,
+                    scale: .5,
+                    delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+                })
+                .add({
+                    translateX: () => anime.random(-10, 10),
+                    translateY: () => anime.random(-10, 10),
+                    delay: anime.stagger(8, {from: 'last'}),
+                    scale: 1, 
+                    backgroundColor: '#bef264', 
+                    duration: 1000,
+                })
+                .add({
+                    translateX: 0,
+                    translateY: 0,
+                    scale: 1,
+                    backgroundColor: '#27272a', 
+                    duration: 1000,
+                    delay: anime.stagger(100, {grid: [gridCols, gridRows], from: 'center'})
+                });
+
+                animation.play();
+            }
+
+        });
+    </script>
+  </body>
+</html>
