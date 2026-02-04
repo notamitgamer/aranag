@@ -1,5 +1,4 @@
-
-# Source code and files for amit.is-a.dev and subs
+# Source code and files for amit.is-a.dev domain and subdomain
 
 ## Powered By
 <p align="center">
